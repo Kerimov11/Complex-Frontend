@@ -1,0 +1,216 @@
+import { ENDPOINTS } from './endpoints'
+
+const BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+).replace(/\/+$/, '')
+
+const AUTH_KEY = 'ha_auth'
+
+export class ApiError extends Error {
+  constructor(message, status = 0, data = null) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.data = data
+  }
+}
+
+function getToken() {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY)
+    if (!raw) return ''
+    const parsed = JSON.parse(raw)
+    return typeof parsed?.token === 'string' ? parsed.token : ''
+  } catch {
+    return ''
+  }
+}
+
+function extractMessage(data, status) {
+  if (typeof data === 'string' && data.trim()) return data.trim()
+
+  if (data && typeof data === 'object') {
+    if (typeof data.message === 'string' && data.message.trim()) {
+      return data.message.trim()
+    }
+    if (typeof data.error === 'string' && data.error.trim()) {
+      return data.error.trim()
+    }
+    if (data.errors && typeof data.errors === 'object') {
+      const first = Object.values(data.errors)[0]
+      if (first) return String(first)
+    }
+  }
+
+  if (status === 401 || status === 403) {
+    return 'İcazə yoxdur. Zəhmət olmasa yenidən daxil olun.'
+  }
+  if (status === 404) return 'Məlumat tapılmadı.'
+  if (status >= 500) {
+    return 'Server xətası baş verdi. Bir az sonra yenidən cəhd edin.'
+  }
+  return `Sorğu uğursuz oldu (${status}).`
+}
+
+async function request(path, options = {}) {
+  const {
+    method = 'GET',
+    body,
+    auth = true,
+    signal,
+  } = options
+
+  const headers = {}
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+
+  const token = auth ? getToken() : ''
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  // Şəbəkə cavab verməzsə sorğunu 15 saniyədən sonra dayandırırıq.
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15000)
+  const onAbort = () => controller.abort()
+  if (signal) {
+    if (signal.aborted) controller.abort()
+    else signal.addEventListener('abort', onAbort, { once: true })
+  }
+
+  let res
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: controller.signal,
+    })
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      if (signal?.aborted) throw error
+      throw new ApiError(
+        'Server cavab vermədi. Bir az sonra yenidən cəhd edin.',
+        0,
+        null
+      )
+    }
+    throw new ApiError(
+      'Backend ilə əlaqə yoxdur. Serverin işlədiyini yoxlayın.',
+      0,
+      null
+    )
+  } finally {
+    clearTimeout(timeoutId)
+    if (signal) signal.removeEventListener('abort', onAbort)
+  }
+
+  const contentType = res.headers.get('content-type') || ''
+  let data = null
+  if (contentType.includes('application/json')) {
+    data = await res.json().catch(() => null)
+  } else {
+    const text = await res.text().catch(() => '')
+    data = text || null
+  }
+
+  if (!res.ok) {
+    throw new ApiError(extractMessage(data, res.status), res.status, data)
+  }
+
+  return data
+}
+
+export const api = {
+  login: (username, password) =>
+    request(ENDPOINTS.login, {
+      method: 'POST',
+      body: { username, password },
+      auth: false,
+    }),
+
+  register: (payload) =>
+    request(ENDPOINTS.register, {
+      method: 'POST',
+      body: payload,
+      auth: false,
+    }),
+
+  getLive: () => request(ENDPOINTS.live, { auth: false }),
+
+  getSessionsByDate: (date) =>
+    request(ENDPOINTS.sessionsByDate(date), { auth: false }),
+
+  getSessionAvailability: (sessionId, params) =>
+    request(ENDPOINTS.sessionAvailability(sessionId, params), { auth: false }),
+
+  getSkates: () => request(ENDPOINTS.skates, { auth: false }),
+
+  getSkatesBySession: (sessionId) =>
+    request(ENDPOINTS.skatesBySession(sessionId), { auth: false }),
+
+  getActiveDiscounts: () =>
+    request(ENDPOINTS.discountsActive, { auth: false }),
+
+  calculateDiscount: (payload) =>
+    request(ENDPOINTS.discountsApply, {
+      method: 'POST',
+      body: payload,
+      auth: false,
+    }),
+
+  createReservation: (payload) =>
+    request(ENDPOINTS.createReservation(payload), { method: 'POST' }),
+
+  getReservation: (id) => request(ENDPOINTS.reservation(id)),
+
+  extendReservation: (id) =>
+    request(ENDPOINTS.extendReservation(id), { method: 'POST' }),
+
+  cancelReservation: (id) =>
+    request(ENDPOINTS.cancelReservation(id), { method: 'POST' }),
+
+  getMyTickets: () => request(ENDPOINTS.myTickets),
+
+  activateTicket: (ticketCode) =>
+    request(ENDPOINTS.activateTicket(ticketCode), { method: 'POST' }),
+
+  createPayment: (payload) =>
+    request(ENDPOINTS.createPayment, {
+      method: 'POST',
+      body: payload,
+    }),
+
+  payPayment: (transactionId) =>
+    request(ENDPOINTS.payPayment(transactionId), { method: 'POST' }),
+
+  failPayment: (transactionId) =>
+    request(ENDPOINTS.failPayment(transactionId), { method: 'POST' }),
+
+  getPayment: (transactionId) => request(ENDPOINTS.payment(transactionId)),
+
+  getPayments: (status) => request(ENDPOINTS.payments(status)),
+
+  processPayment: (transactionId, status) =>
+    request(ENDPOINTS.processPayment(transactionId, status), {
+      method: 'POST',
+    }),
+}
+
+/**
+ * Backend `/api/live` cavabını UI modelinə çevirir.
+ * Backend əlçatmazsa saxta rəqəm göstərmirik — dürüst offline vəziyyəti qaytarırıq.
+ */
+export async function getLiveStatus() {
+  try {
+    const data = await api.getLive()
+    return {
+      count: Number(data?.onIce) || 0,
+      open: Boolean(data?.iceActive),
+      updatedAt: data?.updatedAt || null,
+      source: data?.source || null,
+      offline: false,
+    }
+  } catch {
+    return { count: 0, open: false, offline: true }
+  }
+}
+
+export { request, BASE_URL }

@@ -1,0 +1,316 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import QrCode from '../../components/booking/QrCode'
+import SectionTitle from '../../components/SectionTitle'
+import { api } from '../../api/client'
+import { formatDateAZ, pad, secondsToClock } from '../../utils/datetime'
+
+const STATUS_STYLE = {
+  ACTIVE: 'border-emerald-300/30 bg-emerald-400/10 text-emerald-100',
+  USED: 'border-sky-300/25 bg-sky-400/10 text-sky-100',
+  EXPIRED: 'border-white/10 bg-white/5 text-frost/55',
+  CANCELLED: 'border-red-300/30 bg-red-400/10 text-red-100',
+  PENDING: 'border-amber-300/30 bg-amber-400/10 text-amber-100',
+}
+
+function timeLabel(value) {
+  return value ? String(value).slice(0, 5) : '—'
+}
+
+function dateTimeLabel(value) {
+  if (!value) return '—'
+  const d = new Date(value)
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`
+}
+
+function ticketSecondsLeft(ticket, now) {
+  if (!ticket?.timerExpiresAt) return 0
+  const end = new Date(ticket.timerExpiresAt).getTime()
+  if (!Number.isFinite(end)) return 0
+  return Math.max(0, Math.floor((end - now) / 1000))
+}
+
+export default function MyTicketsPage() {
+  const [tickets, setTickets] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [busyCode, setBusyCode] = useState(null)
+  const [filter, setFilter] = useState('active')
+  const [now, setNow] = useState(() => Date.now())
+
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
+    setError('')
+    try {
+      const list = await api.getMyTickets()
+      setTickets(Array.isArray(list) ? list : [])
+    } catch (err) {
+      setError(err?.message || 'Bilet tarixçəsi yüklənmədi.')
+    } finally {
+      if (!silent) setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  useEffect(() => {
+    const tick = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(tick)
+  }, [])
+
+  const hasActiveTimer = tickets.some((ticket) => ticket.reservationActive)
+  useEffect(() => {
+    if (!hasActiveTimer) return undefined
+    const timer = setInterval(() => load(true), 15000)
+    return () => clearInterval(timer)
+  }, [hasActiveTimer, load])
+
+  useEffect(() => {
+    if (!hasActiveTimer) return undefined
+    const finished = tickets.some(
+      (ticket) => ticket.reservationActive && ticketSecondsLeft(ticket, now) <= 0
+    )
+    if (!finished) return undefined
+    const timer = setTimeout(() => load(true), 2500)
+    return () => clearTimeout(timer)
+  }, [now, tickets, hasActiveTimer, load])
+
+  const shown = useMemo(() => {
+    if (filter === 'all') return tickets
+    if (filter === 'past') {
+      return tickets.filter((ticket) =>
+        ['USED', 'EXPIRED', 'CANCELLED'].includes(ticket.status)
+      )
+    }
+    return tickets.filter((ticket) => ['ACTIVE', 'PENDING'].includes(ticket.status))
+  }, [tickets, filter])
+
+  async function activate(ticket) {
+    if (busyCode) return
+    setBusyCode(ticket.ticketCode)
+    setError('')
+    setSuccess('')
+    try {
+      const updated = await api.activateTicket(ticket.ticketCode)
+      setTickets((prev) =>
+        prev.map((item) =>
+          item.ticketCode === ticket.ticketCode ? { ...item, ...updated } : item
+        )
+      )
+      setSuccess(
+        'Konki rezervasiyası aktivləşdirildi. Könüllü heyəti konkilərinizi hazırlayacaq.'
+      )
+      await load(true)
+    } catch (err) {
+      setError(err?.message || 'Rezervasiya aktivləşdirilə bilmədi.')
+    } finally {
+      setBusyCode(null)
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 pb-16 pt-28 sm:px-6">
+      <SectionTitle
+        eyebrow="Müştəri paneli"
+        title="Biletlərim"
+        description="Keçmiş və aktiv biletləriniz, QR kodlarınız və konki rezervasiyasının əl ilə aktivləşdirilməsi."
+      />
+
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          {[
+            { key: 'active', label: 'Aktiv biletlər' },
+            { key: 'past', label: 'Keçmiş biletlər' },
+            { key: 'all', label: 'Hamısı' },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setFilter(tab.key)}
+              className={`rounded-full px-4 py-2 text-sm font-bold transition-colors ${
+                filter === tab.key
+                  ? 'bg-gradient-to-br from-ice-300 to-ice-600 text-night-900'
+                  : 'glass text-frost/65 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => load()} className="btn-ghost !py-2.5">
+            Yenilə
+          </button>
+          <Link to="/bilet" className="btn-primary !py-2.5">
+            Yeni bilet al
+          </Link>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-5 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mt-5 rounded-2xl border border-emerald-300/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+          {success}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="glass mt-6 rounded-3xl p-8 text-center text-sm text-frost/60">
+          Biletlər yüklənir…
+        </div>
+      ) : shown.length === 0 ? (
+        <div className="glass-strong mt-6 rounded-3xl p-10 text-center">
+          <p className="font-display text-xl font-extrabold text-white">
+            Bu bölmədə bilet yoxdur
+          </p>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-frost/60">
+            Yeni bilet aldıqdan sonra o, avtomatik olaraq burada görünəcək.
+          </p>
+          <Link to="/bilet" className="btn-primary mt-5 inline-flex">
+            Bilet al
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          {shown.map((ticket) => {
+            const secondsLeft = ticketSecondsLeft(ticket, now)
+            const activeTimer = Boolean(ticket.reservationActive) && secondsLeft > 0
+            const attemptsLeft =
+              ticket.remainingActivations ??
+              Math.max(0, (ticket.maxActivations || 2) - (ticket.activationCount || 0))
+            const canActivate = Boolean(ticket.canActivate) && attemptsLeft > 0
+            const statusStyle = STATUS_STYLE[ticket.status] || STATUS_STYLE.EXPIRED
+            const isBooking = ticket.source === 'BOOKING'
+
+            return (
+              <article
+                key={`${ticket.source}-${ticket.ticketCode}`}
+                className="glass-strong overflow-hidden rounded-3xl"
+              >
+                <div className="flex items-start justify-between gap-4 border-b border-dashed border-white/20 px-5 py-4">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ice-300">
+                      {isBooking ? 'Onlayn bilet' : 'Kassa bileti'}
+                    </p>
+                    <p className="mt-1 truncate font-display text-lg font-black tracking-wider text-white">
+                      {ticket.ticketCode}
+                    </p>
+                    <p className="mt-1 text-[11px] text-frost/50">
+                      Alınma: {dateTimeLabel(ticket.purchaseDate)}
+                    </p>
+                  </div>
+                  <span className={`chip shrink-0 border ${statusStyle}`}>
+                    {ticket.statusLabel || ticket.status}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-5 p-5 sm:flex-row">
+                  <div className="grid shrink-0 place-items-center self-start rounded-2xl border border-white/10 bg-white p-3 text-night-900">
+                    <QrCode seed={ticket.qrCode || ticket.ticketCode} className="h-24 w-24" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-3 text-sm">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-frost/45">
+                        Sessiya
+                      </p>
+                      <p className="mt-0.5 font-semibold text-white">
+                        {ticket.sessionDate ? formatDateAZ(ticket.sessionDate) : '—'}
+                      </p>
+                      <p className="text-xs text-frost/60">
+                        {timeLabel(ticket.sessionStartTime)} – {timeLabel(ticket.sessionEndTime)}
+                        {ticket.durationMinutes ? ` · ${ticket.durationMinutes} dəq` : ''}
+                      </p>
+                    </div>
+
+                    {isBooking && (
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="rounded-xl bg-white/[0.04] px-3 py-2">
+                          <span className="text-frost/45">İştirakçı</span>
+                          <p className="font-bold text-white">{ticket.participantCount || 1}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/[0.04] px-3 py-2">
+                          <span className="text-frost/45">Konki razmeri</span>
+                          <p className="font-bold text-white">
+                            {(ticket.skateSizes || []).join(', ') || '—'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {isBooking && (
+                      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3 text-xs">
+                          <span className="text-frost/55">Aktivləşdirmə cəhdi</span>
+                          <b className="text-white">
+                            {ticket.activationCount || 0} / {ticket.maxActivations || 2}
+                          </b>
+                        </div>
+                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-ice-300 to-ice-600"
+                            style={{
+                              width: `${
+                                ((ticket.activationCount || 0) /
+                                  (ticket.maxActivations || 2)) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTimer ? (
+                      <div className="rounded-xl border border-emerald-300/30 bg-emerald-400/10 px-3 py-3">
+                        <p className="text-xs font-bold uppercase tracking-wider text-emerald-100">
+                          Konki rezervasiyası aktivdir
+                        </p>
+                        <p className="mt-1 font-display text-2xl font-black text-white">
+                          {secondsToClock(secondsLeft)}
+                        </p>
+                        <p className="text-[11px] text-emerald-100/70">
+                          Könüllü heyəti konkilərinizi hazırlayır. Taymer bitərsə stok
+                          avtomatik geri qaytarılır.
+                        </p>
+                      </div>
+                    ) : isBooking && ticket.skateHandedOut ? (
+                      <p className="rounded-xl border border-emerald-300/25 bg-emerald-400/10 px-3 py-2.5 text-xs text-emerald-100">
+                        Konki təhvil verilib. Bu bilet üçün aktivləşdirmə artıq bağlıdır.
+                      </p>
+                    ) : canActivate ? (
+                      <button
+                        type="button"
+                        disabled={busyCode === ticket.ticketCode}
+                        onClick={() => activate(ticket)}
+                        className="btn-primary w-full !py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {busyCode === ticket.ticketCode
+                          ? 'Aktivləşdirilir…'
+                          : `Konki rezervasiyasını aktivləşdir (${attemptsLeft} cəhd qalıb)`}
+                      </button>
+                    ) : isBooking && ticket.status === 'ACTIVE' ? (
+                      <p className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-xs text-frost/55">
+                        {attemptsLeft > 0
+                          ? 'Rezervasiyanı aktivləşdirmək üçün arenaya yaxınlaşdıqda düyməni basın.'
+                          : 'Bu bilet üçün 2 aktivləşdirmə cəhdi istifadə olunub.'}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
