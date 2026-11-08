@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import Snowfall from './components/Snowfall'
 import AppHeader, { isStaffArea } from './components/AppHeader'
 import Footer from './components/Footer'
 import AuthModal from './components/AuthModal'
@@ -71,6 +72,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen">
       <ScrollToTop />
+      <Snowfall />
       <AppHeader />
       <main className="relative z-10">
         <Routes>
