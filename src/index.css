@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --bg: #060b18;
+  --bg: #080d18;
   --glass: rgba(255, 255, 255, 0.06);
   --glass-border: rgba(255, 255, 255, 0.12);
   --ice: #5bc8fb;
@@ -32,56 +32,46 @@ body {
   background: #070d1b;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #1f96d3, #18658d);
+  background: #24344f;
   border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #31466a;
 }
 
 @layer components {
   .glass {
-    @apply bg-white/[0.06] border border-white/10 backdrop-blur-md shadow-glass;
+    @apply border border-white/[0.08] bg-night-800;
   }
   .glass-strong {
-    @apply bg-white/[0.09] border border-white/15 backdrop-blur-xl shadow-glass;
+    @apply border border-white/10 bg-night-800 shadow-glass;
   }
   .text-gradient-ice {
-    background: linear-gradient(100deg, #8ad9ff 0%, #f0fbff 45%, #5bc8fb 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .shimmer {
-    background: linear-gradient(
-      110deg,
-      rgba(255, 255, 255, 0) 30%,
-      rgba(255, 255, 255, 0.14) 50%,
-      rgba(255, 255, 255, 0) 70%
-    );
-    background-size: 200% 100%;
-    animation: shine 6s linear infinite;
+    @apply text-ice-300;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-display font-bold tracking-wide text-night-950 transition-all duration-300;
-    background: linear-gradient(135deg, #8ad9ff, #38b6f0 60%, #5bc8fb);
-    box-shadow: 0 10px 30px rgba(56, 182, 240, 0.35);
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ice-400 px-6 py-3 font-display text-sm font-bold text-night-950 transition-colors duration-150;
   }
   .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 38px rgba(56, 182, 240, 0.5);
+    @apply bg-ice-300;
+  }
+  .btn-primary:active {
+    @apply bg-ice-500;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3 font-display font-semibold text-frost transition-all duration-300;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-6 py-3 font-display text-sm font-semibold text-frost transition-colors duration-150;
   }
   .btn-ghost:hover {
-    @apply border-ice-300/60 bg-white/10;
+    @apply border-white/40 bg-white/5;
   }
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-xs font-semibold text-ice-100 backdrop-blur-sm;
+    @apply inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-frost/80;
   }
   .chip-ice {
-    @apply border-ice-300/40 bg-ice-400/10 text-ice-200;
+    @apply border-ice-300/30 bg-ice-400/10 text-ice-200;
   }
   .card-hover {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-ice-glow hover:border-ice-300/40;
+    @apply transition-colors duration-150 hover:border-ice-300/40;
   }
 }
 

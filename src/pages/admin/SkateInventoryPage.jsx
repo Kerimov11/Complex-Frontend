@@ -118,7 +118,7 @@ export default function SkateInventoryPage() {
       {success && <div className="mb-3"><AdminNotice tone="success">{success}</AdminNotice></div>}
 
       {showForm && (
-        <form onSubmit={createSkate} className="glass mb-5 rounded-3xl p-5">
+        <form onSubmit={createSkate} className="glass mb-5 rounded-xl p-5">
           <h3 className="font-display text-lg font-bold text-white">Yeni ölçü əlavə et</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block">
@@ -160,9 +160,9 @@ export default function SkateInventoryPage() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {loading && <div className="glass rounded-3xl p-8 text-sm text-frost/45">Yüklənir...</div>}
+        {loading && <div className="glass rounded-xl p-8 text-sm text-frost/45">Yüklənir...</div>}
         {!loading && skates.length === 0 && (
-          <div className="glass rounded-3xl p-8 text-sm text-frost/45">İnventar boşdur.</div>
+          <div className="glass rounded-xl p-8 text-sm text-frost/45">İnventar boşdur.</div>
         )}
         {!loading &&
           skates.map((skate) => {
@@ -172,16 +172,16 @@ export default function SkateInventoryPage() {
             const used = Math.max(0, total - available)
             const rate = total === 0 ? 0 : (available / total) * 100
             return (
-              <div key={skate.id} className="glass rounded-3xl p-5">
+              <div key={skate.id} className="glass rounded-xl p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-display text-2xl font-black text-white">{skate.size}</p>
+                    <p className="font-display text-2xl font-bold text-white">{skate.size}</p>
                     <p className="text-[11px] font-bold uppercase tracking-wide text-frost/35">
                       Razmer
                     </p>
                   </div>
                   <span
-                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                    className={`rounded-md px-2.5 py-1 text-[10px] font-bold ${
                       available === 0
                         ? 'bg-red-400/10 text-red-200'
                         : available <= 5
@@ -210,7 +210,7 @@ export default function SkateInventoryPage() {
 
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-ice-400 to-emerald-300"
+                    className="h-full rounded-full bg-ice-400"
                     style={{ width: `${Math.min(100, Math.max(0, rate))}%` }}
                   />
                 </div>
@@ -223,7 +223,7 @@ export default function SkateInventoryPage() {
                     type="button"
                     disabled={Boolean(busyId)}
                     onClick={() => changeStock(skate, 'restock')}
-                    className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-3 py-1.5 text-[11px] font-bold text-emerald-200 disabled:opacity-40"
+                    className="rounded-md border border-emerald-300/25 bg-emerald-400/10 px-3 py-1.5 text-[11px] font-bold text-emerald-200 disabled:opacity-40"
                   >
                     + Stok
                   </button>
@@ -231,7 +231,7 @@ export default function SkateInventoryPage() {
                     type="button"
                     disabled={Boolean(busyId)}
                     onClick={() => changeStock(skate, 'writeoff')}
-                    className="rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1.5 text-[11px] font-bold text-amber-200 disabled:opacity-40"
+                    className="rounded-md border border-amber-300/25 bg-amber-400/10 px-3 py-1.5 text-[11px] font-bold text-amber-200 disabled:opacity-40"
                   >
                     Zədəli sil
                   </button>
@@ -239,7 +239,7 @@ export default function SkateInventoryPage() {
                     type="button"
                     disabled={Boolean(busyId)}
                     onClick={() => deleteSkate(skate)}
-                    className="rounded-full border border-red-300/20 bg-red-400/10 px-3 py-1.5 text-[11px] font-bold text-red-200 disabled:opacity-40"
+                    className="rounded-md border border-red-300/20 bg-red-400/10 px-3 py-1.5 text-[11px] font-bold text-red-200 disabled:opacity-40"
                   >
                     Sil
                   </button>

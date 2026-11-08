@@ -132,9 +132,9 @@ export default function MyTicketsPage() {
               key={tab.key}
               type="button"
               onClick={() => setFilter(tab.key)}
-              className={`rounded-full px-4 py-2 text-sm font-bold transition-colors ${
+              className={`rounded-md px-4 py-2 text-sm font-bold transition-colors ${
                 filter === tab.key
-                  ? 'bg-gradient-to-br from-ice-300 to-ice-600 text-night-900'
+                  ? 'bg-ice-400 text-night-950'
                   : 'glass text-frost/65 hover:text-white'
               }`}
             >
@@ -153,23 +153,23 @@ export default function MyTicketsPage() {
       </div>
 
       {error && (
-        <div className="mt-5 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        <div className="mt-5 rounded-lg border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           {error}
         </div>
       )}
       {success && (
-        <div className="mt-5 rounded-2xl border border-emerald-300/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+        <div className="mt-5 rounded-lg border border-emerald-300/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
           {success}
         </div>
       )}
 
       {loading ? (
-        <div className="glass mt-6 rounded-3xl p-8 text-center text-sm text-frost/60">
+        <div className="glass mt-6 rounded-xl p-8 text-center text-sm text-frost/60">
           Biletlər yüklənir…
         </div>
       ) : shown.length === 0 ? (
-        <div className="glass-strong mt-6 rounded-3xl p-10 text-center">
-          <p className="font-display text-xl font-extrabold text-white">
+        <div className="glass-strong mt-6 rounded-xl p-10 text-center">
+          <p className="font-display text-xl font-bold text-white">
             Bu bölmədə bilet yoxdur
           </p>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-frost/60">
@@ -194,14 +194,14 @@ export default function MyTicketsPage() {
             return (
               <article
                 key={`${ticket.source}-${ticket.ticketCode}`}
-                className="glass-strong overflow-hidden rounded-3xl"
+                className="glass-strong overflow-hidden rounded-xl"
               >
                 <div className="flex items-start justify-between gap-4 border-b border-dashed border-white/20 px-5 py-4">
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ice-300">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-ice-300">
                       {isBooking ? 'Onlayn bilet' : 'Kassa bileti'}
                     </p>
-                    <p className="mt-1 truncate font-display text-lg font-black tracking-wider text-white">
+                    <p className="mt-1 truncate font-display text-lg font-bold tracking-wider text-white">
                       {ticket.ticketCode}
                     </p>
                     <p className="mt-1 text-[11px] text-frost/50">
@@ -214,7 +214,7 @@ export default function MyTicketsPage() {
                 </div>
 
                 <div className="flex flex-col gap-5 p-5 sm:flex-row">
-                  <div className="grid shrink-0 place-items-center self-start rounded-2xl border border-white/10 bg-white p-3 text-night-900">
+                  <div className="grid shrink-0 place-items-center self-start rounded-lg border border-white/10 bg-white p-3 text-night-950">
                     <QrCode seed={ticket.qrCode || ticket.ticketCode} className="h-24 w-24" />
                   </div>
                   <div className="min-w-0 flex-1 space-y-3 text-sm">
@@ -256,7 +256,7 @@ export default function MyTicketsPage() {
                         </div>
                         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-ice-300 to-ice-600"
+                            className="h-full rounded-full bg-ice-400"
                             style={{
                               width: `${
                                 ((ticket.activationCount || 0) /
@@ -274,7 +274,7 @@ export default function MyTicketsPage() {
                         <p className="text-xs font-bold uppercase tracking-wider text-emerald-100">
                           Konki rezervasiyası aktivdir
                         </p>
-                        <p className="mt-1 font-display text-2xl font-black text-white">
+                        <p className="mt-1 font-display text-2xl font-bold text-white">
                           {secondsToClock(secondsLeft)}
                         </p>
                         <p className="text-[11px] text-emerald-100/70">

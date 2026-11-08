@@ -193,7 +193,7 @@ export default function VolunteerReservationsPage() {
       <section className="mb-6">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="font-display text-xl font-extrabold text-white">
+            <h2 className="font-display text-xl font-bold text-white">
               Canlı siqnal
             </h2>
             <p className="mt-1 text-xs text-frost/50">
@@ -206,11 +206,11 @@ export default function VolunteerReservationsPage() {
         </div>
 
         {loading ? (
-          <div className="glass rounded-3xl p-8 text-center text-sm text-frost/45">
+          <div className="glass rounded-xl p-8 text-center text-sm text-frost/45">
             Yüklənir...
           </div>
         ) : live.length === 0 ? (
-          <div className="glass rounded-3xl p-8 text-center">
+          <div className="glass rounded-xl p-8 text-center">
             <p className="text-sm font-semibold text-white">Hazırda canlı tələb yoxdur</p>
             <p className="mt-1 text-xs text-frost/45">
               Müştəri “Biletlərim” bölməsindən rezervasiyanı aktivləşdirəndə burada görünəcək.
@@ -224,7 +224,7 @@ export default function VolunteerReservationsPage() {
               return (
                 <article
                   key={reservation.id}
-                  className={`glass-strong overflow-hidden rounded-3xl border ${
+                  className={`glass-strong overflow-hidden rounded-xl border ${
                     reservation.skateReserved
                       ? 'border-ice-300/30'
                       : 'border-amber-300/35'
@@ -233,7 +233,7 @@ export default function VolunteerReservationsPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 px-5 py-4">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-display text-lg font-extrabold text-white">
+                        <p className="font-display text-lg font-bold text-white">
                           {reservation.customerName}
                         </p>
                         <span className="text-xs text-frost/45">
@@ -250,7 +250,7 @@ export default function VolunteerReservationsPage() {
                       </p>
                     </div>
                     <span
-                      className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                      className={`rounded-md border px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${
                         reservation.skateReserved
                           ? 'border-ice-300/30 bg-ice-400/10 text-ice-100'
                           : 'border-amber-300/30 bg-amber-400/10 text-amber-100'
@@ -262,8 +262,8 @@ export default function VolunteerReservationsPage() {
 
                   <div className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
                     <div className="flex items-center gap-4">
-                      <div className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-ice-300 to-ice-600 text-night-900">
-                        <span className="font-display text-2xl font-black">
+                      <div className="grid h-20 w-20 shrink-0 place-items-center rounded-lg bg-ice-400 text-night-950">
+                        <span className="font-display text-2xl font-bold">
                           {reservation.skateSize || '—'}
                         </span>
                         <span className="-mt-1 text-[9px] font-bold uppercase tracking-wider">
@@ -271,11 +271,11 @@ export default function VolunteerReservationsPage() {
                         </span>
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-frost/40">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-frost/40">
                           Konki rezervasiyası
                         </p>
                         <p
-                          className={`mt-1 font-display text-3xl font-black ${
+                          className={`mt-1 font-display text-3xl font-bold ${
                             expired ? 'text-red-200' : 'text-white'
                           }`}
                         >
@@ -332,7 +332,7 @@ export default function VolunteerReservationsPage() {
       <section>
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-display text-xl font-extrabold text-white">
+            <h2 className="font-display text-xl font-bold text-white">
               Növbəti rezervasiyalar
             </h2>
             <p className="mt-1 text-xs text-frost/50">
@@ -347,7 +347,7 @@ export default function VolunteerReservationsPage() {
           />
         </div>
 
-        <div className="glass overflow-hidden rounded-3xl">
+        <div className="glass overflow-hidden rounded-xl">
           <div className="divide-y divide-white/[0.06]">
             {!loading && filteredUpcoming.length === 0 && (
               <div className="p-8 text-center text-sm text-frost/45">
@@ -368,14 +368,14 @@ export default function VolunteerReservationsPage() {
                       @{reservation.customerUsername}
                     </span>
                     <span
-                      className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                      className={`rounded-md border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
                         STATUS_STYLE[reservation.status] || STATUS_STYLE.EXPIRED
                       }`}
                     >
                       {reservation.statusLabel || reservation.status}
                     </span>
                     {reservation.skateHandedOut && (
-                      <span className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-100">
+                      <span className="rounded-md border border-emerald-300/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-100">
                         Konki verilib
                       </span>
                     )}

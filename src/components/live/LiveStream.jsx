@@ -64,7 +64,7 @@ export default function LiveStream() {
   const { count, open, loading, offline } = useLiveStatus()
 
   return (
-    <div className="glass group relative overflow-hidden rounded-3xl">
+    <div className="glass group relative overflow-hidden rounded-xl">
       <div className="relative aspect-video overflow-hidden bg-night-900">
         <img
           src={STREAM_POSTER}
@@ -76,16 +76,13 @@ export default function LiveStream() {
 
         <div className="absolute left-4 top-4 flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold backdrop-blur-md ${
+            className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-bold ${
               offline
                 ? 'border-white/15 bg-white/10 text-frost/60'
                 : 'border-red-400/40 bg-red-600/20 text-red-100'
             }`}
           >
             <span className="relative flex h-2 w-2">
-              {!offline && (
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-              )}
               <span
                 className={`relative inline-flex h-2 w-2 rounded-full ${
                   offline ? 'bg-white/40' : 'bg-red-500'
@@ -96,7 +93,7 @@ export default function LiveStream() {
           </span>
           {!loading && (
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${
+              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold ${
                 offline
                   ? 'border-amber-300/30 bg-amber-400/10 text-amber-100'
                   : open
@@ -120,14 +117,14 @@ export default function LiveStream() {
 
         <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-4 p-5">
           <div>
-            <p className="font-display text-base font-extrabold text-white">
+            <p className="font-display text-base font-bold text-white">
               Buz Arenası - Canlı kamera
             </p>
             <p className="mt-0.5 text-xs text-frost/60">
               {SITE.address}
             </p>
           </div>
-          <div className="glass-strong flex items-center gap-3 rounded-2xl px-5 py-3">
+          <div className="glass-strong flex items-center gap-3 rounded-lg px-5 py-3">
             <svg
               viewBox="0 0 24 24"
               className="h-5 w-5 text-ice-200"
@@ -144,7 +141,7 @@ export default function LiveStream() {
             </svg>
             <div className="text-right">
               <p
-                className="font-display text-2xl font-black leading-none text-white"
+                className="font-display text-2xl font-bold leading-none text-white"
                 title={offline ? 'Canlı məlumat əlçatmazdır' : `${count} müştəri`}
               >
                 {offline ? '—' : <AnimatedCounter value={count} />}

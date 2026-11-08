@@ -6,7 +6,7 @@ import { formatMoney, formatNumber } from '../../components/admin/formatters'
 import { adminApi } from '../../services/api/adminApi'
 
 function LoadingCard() {
-  return <div className="glass h-36 animate-pulse rounded-3xl" />
+  return <div className="glass h-36 animate-pulse rounded-xl" />
 }
 
 export default function AdminDashboardPage() {
@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="glass rounded-3xl p-5">
+        <div className="glass rounded-xl p-5">
           <div className="flex items-center justify-between gap-3">
             <h3 className="font-display text-lg font-bold text-white">Bu günün seansları</h3>
             <span className="chip chip-ice">{formatNumber(data?.todaySessions)} seans</span>
@@ -136,19 +136,19 @@ export default function AdminDashboardPage() {
               <p className="text-sm text-frost/45">Bu gün üçün seans yoxdur.</p>
             )}
             {(data?.sessions || []).map((session) => (
-              <div key={session.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+              <div key={session.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="font-display text-sm font-bold text-white">
                       {session.startTime}–{session.endTime}
                     </span>
                     {session.blocked && (
-                      <span className="rounded-full bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-200">
+                      <span className="rounded-md bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-200">
                         Blok
                       </span>
                     )}
                     {session.active && (
-                      <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
+                      <span className="rounded-md bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
                         Aktiv
                       </span>
                     )}
@@ -159,7 +159,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-ice-400 to-emerald-300"
+                    className="h-full rounded-full bg-ice-400"
                     style={{ width: `${Math.min(100, Number(session.occupancyRate) || 0)}%` }}
                   />
                 </div>
@@ -172,7 +172,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="space-y-5">
-          <div className="glass rounded-3xl p-5">
+          <div className="glass rounded-xl p-5">
             <h3 className="font-display text-lg font-bold text-white">Son 7 gün gəliri</h3>
             <div className="mt-5 flex h-40 items-end gap-2">
               {(data?.revenueTrend || []).map((item) => {
@@ -181,7 +181,7 @@ export default function AdminDashboardPage() {
                   <div key={item.date} className="flex min-w-0 flex-1 flex-col items-center gap-2">
                     <div className="flex h-32 w-full items-end">
                       <div
-                        className="w-full rounded-t-lg bg-gradient-to-t from-ice-500/40 to-ice-300 transition-all"
+                        className="w-full rounded-t-lg bg-ice-400 transition-all"
                         style={{ height: `${height}%` }}
                         title={`${item.date}: ${formatMoney(item.amount)}`}
                       />
@@ -195,7 +195,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="glass rounded-3xl p-5">
+          <div className="glass rounded-xl p-5">
             <h3 className="font-display text-lg font-bold text-white">Anbar xəbərdarlıqları</h3>
             <div className="mt-3 space-y-2">
               {(data?.stockAlerts || []).length === 0 && (
@@ -204,7 +204,7 @@ export default function AdminDashboardPage() {
               {(data?.stockAlerts || []).map((alert) => (
                 <div
                   key={alert.skateId}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2.5"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5"
                 >
                   <div>
                     <p className="text-sm font-bold text-white">{alert.size} ölçü</p>
@@ -213,7 +213,7 @@ export default function AdminDashboardPage() {
                     </p>
                   </div>
                   <span
-                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                    className={`rounded-md px-2.5 py-1 text-[10px] font-bold ${
                       alert.level === 'CRITICAL'
                         ? 'bg-red-400/10 text-red-200'
                         : alert.level === 'LOW'

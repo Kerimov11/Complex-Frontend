@@ -25,10 +25,10 @@ export default function ReservationPanel({
   const colorCls = expired ? 'text-red-200' : needsAttention ? 'text-amber-200' : 'text-white'
 
   return (
-    <div className={`rounded-3xl border backdrop-blur-md ${tone} p-6`}>
+    <div className={`rounded-xl border ${tone} p-6`}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className={`font-display text-sm font-bold uppercase tracking-widest ${colorCls}`}>
+          <p className={`font-display text-sm font-bold uppercase tracking-wider ${colorCls}`}>
             {expired
               ? 'Rezervasiya bitdi'
               : needsAttention
@@ -44,7 +44,7 @@ export default function ReservationPanel({
               'Konkilər hazırlanmaq üçün tələb ləğv olundu. Yeni rezervasiya üçün bilet səhifəsinə keçin.'}
           </p>
           {backend && (
-            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               Backend ilə sinxron
             </p>
@@ -52,10 +52,10 @@ export default function ReservationPanel({
         </div>
 
         <div className="text-right">
-          <p className={`font-display text-4xl font-black tabular-nums sm:text-5xl ${colorCls}`}>
+          <p className={`font-display text-4xl font-bold tabular-nums sm:text-5xl ${colorCls}`}>
             {active ? secondsToClock(remaining) : '00:00'}
           </p>
-          <p className={`mt-1 text-[10px] font-bold uppercase tracking-widest ${expired ? 'text-red-200/60' : needsAttention ? 'text-amber-100/60' : 'text-ice-200/70'}`}>
+          <p className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${expired ? 'text-red-200/60' : needsAttention ? 'text-amber-100/60' : 'text-ice-200/70'}`}>
             mm:ss
           </p>
         </div>
@@ -64,7 +64,7 @@ export default function ReservationPanel({
       {active && (
         <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-ice-300 to-ice-500 transition-[width] duration-500"
+            className="h-full rounded-full bg-ice-400 transition-[width] duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>

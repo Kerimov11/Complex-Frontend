@@ -106,18 +106,18 @@ export default function StaffManagementPage() {
         {STAFF_ROLE_OPTIONS.map((role) => (
           <div
             key={role}
-            className={`rounded-2xl border bg-gradient-to-br p-4 ${
+            className={`rounded-lg border bg-night-800 p-4 ${
               role === 'ROLE_COORDINATOR'
-                ? 'border-sky-300/25 from-sky-400/15 to-sky-500/5'
+                ? 'border-sky-300/25'
                 : role === 'ROLE_CASHIER'
-                  ? 'border-emerald-300/25 from-emerald-400/15 to-emerald-500/5'
-                  : 'border-violet-300/25 from-violet-400/15 to-violet-500/5'
+                  ? 'border-emerald-300/25'
+                  : 'border-violet-300/25'
             }`}
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/50">
               {ROLE_META[role].label}
             </p>
-            <p className="mt-2 font-display text-2xl font-black text-white">
+            <p className="mt-2 font-display text-2xl font-bold text-white">
               {summary[role]}
             </p>
             <p className="mt-1 text-[11px] text-white/40">aktiv əməkdaş</p>
@@ -132,7 +132,7 @@ export default function StaffManagementPage() {
         />
       )}
 
-      <div className="glass overflow-hidden rounded-3xl">
+      <div className="glass overflow-hidden rounded-xl">
         <div className="flex flex-col gap-3 border-b border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-bold text-white">
             {loading ? 'Yüklənir...' : `${staff.length} əməkdaş`}

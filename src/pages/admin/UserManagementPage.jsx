@@ -122,7 +122,7 @@ export default function UserManagementPage() {
       {success && <div className="mb-3"><AdminNotice tone="success">{success}</AdminNotice></div>}
 
       {showCreate && (
-        <form onSubmit={createStaff} className="glass mb-5 rounded-3xl p-5">
+        <form onSubmit={createStaff} className="glass mb-5 rounded-xl p-5">
           <h3 className="font-display text-lg font-bold text-white">Yeni əməkdaş hesabı</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {[
@@ -153,7 +153,7 @@ export default function UserManagementPage() {
                 key={role}
                 type="button"
                 onClick={() => toggleFormRole(role)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
+                className={`rounded-md border px-3 py-1.5 text-xs font-bold transition-colors ${
                   form.roles.includes(role)
                     ? ROLE_META[role].className
                     : 'border-white/10 bg-white/5 text-frost/45'
@@ -173,7 +173,7 @@ export default function UserManagementPage() {
         </form>
       )}
 
-      <div className="glass overflow-hidden rounded-3xl">
+      <div className="glass overflow-hidden rounded-xl">
         <div className="flex flex-col gap-3 border-b border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-bold text-white">
             {loading ? 'Yüklənir...' : `${users.length} istifadəçi`}
@@ -225,7 +225,7 @@ export default function UserManagementPage() {
                         type="button"
                         disabled={Boolean(busyKey)}
                         onClick={() => toggleRole(user, role)}
-                        className={`rounded-full border px-3 py-1.5 text-[11px] font-bold transition-colors disabled:opacity-40 ${
+                        className={`rounded-md border px-3 py-1.5 text-[11px] font-bold transition-colors disabled:opacity-40 ${
                           active
                             ? ROLE_META[role].className
                             : 'border-white/10 bg-white/5 text-frost/40 hover:bg-white/10'

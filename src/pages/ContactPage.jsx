@@ -13,8 +13,8 @@ export default function ContactPage() {
 
       <div className="mt-12 grid gap-8 lg:grid-cols-2">
         <div className="space-y-5">
-          <div className="glass rounded-3xl p-7">
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-ice-200">
+          <div className="glass rounded-xl p-7">
+            <p className="font-display text-sm font-bold uppercase tracking-wider text-ice-200">
               Ünvan
             </p>
             <p className="mt-3 font-display text-lg font-bold text-white">
@@ -33,8 +33,8 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="glass rounded-3xl p-7">
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-ice-200">
+          <div className="glass rounded-xl p-7">
+            <p className="font-display text-sm font-bold uppercase tracking-wider text-ice-200">
               Əlaqə
             </p>
             <div className="mt-4 space-y-3 text-sm">
@@ -94,7 +94,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="glass flex h-full min-h-[380px] flex-col overflow-hidden rounded-3xl">
+        <div className="glass flex h-full min-h-[380px] flex-col overflow-hidden rounded-xl">
           <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-white/[0.04] px-5 py-4">
             <a
               href={SITE.directionsLink}

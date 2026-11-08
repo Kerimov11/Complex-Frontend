@@ -29,7 +29,7 @@ export default function AboutPage() {
       />
 
       <div className="mt-12 grid items-center gap-10 lg:grid-cols-2">
-        <div className="glass relative overflow-hidden rounded-3xl">
+        <div className="glass relative overflow-hidden rounded-xl">
           <img
             src={IMAGE}
             alt="Buz arenasında konkisürənlər"
@@ -65,7 +65,7 @@ export default function AboutPage() {
 
       <div className="mt-14 grid gap-5 md:grid-cols-3">
         {VALUES.map((v) => (
-          <div key={v.title} className="glass card-hover rounded-2xl p-6">
+          <div key={v.title} className="glass card-hover rounded-lg p-6">
             <p className="font-display text-lg font-bold text-white">{v.title}</p>
             <p className="mt-2 text-sm leading-relaxed text-frost/65">
               {v.body}

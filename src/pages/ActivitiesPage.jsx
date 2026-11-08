@@ -85,8 +85,8 @@ export default function ActivitiesPage() {
 
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {ACTIVITIES.map((a) => (
-          <div key={a.title} className="glass card-hover rounded-2xl p-6">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-ice-300 to-ice-600 text-night-900">
+          <div key={a.title} className="glass card-hover rounded-lg p-6">
+            <div className="grid h-12 w-12 place-items-center rounded-lg bg-ice-400 text-night-950">
               <svg
                 viewBox="0 0 24 24"
                 className="h-6 w-6"
@@ -108,7 +108,7 @@ export default function ActivitiesPage() {
       </div>
 
       <div className="mt-14 grid gap-8 lg:grid-cols-2">
-        <div className="glass rounded-3xl p-8">
+        <div className="glass rounded-xl p-8">
           <p className="font-display text-lg font-bold text-white">
             Məşğələ klubları
           </p>
@@ -119,7 +119,7 @@ export default function ActivitiesPage() {
             {SITE.clubs.map((c) => (
               <div
                 key={c.name}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-5 py-4"
               >
                 <div>
                   <p className="font-display font-bold text-white">{c.name}</p>
@@ -136,7 +136,7 @@ export default function ActivitiesPage() {
           </div>
         </div>
 
-        <div className="glass rounded-3xl p-8">
+        <div className="glass rounded-xl p-8">
           <p className="font-display text-lg font-bold text-white">
             Kampaniyalar
           </p>

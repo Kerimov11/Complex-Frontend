@@ -112,7 +112,7 @@ export default function AdminPaymentsPage() {
           title="Ödəniş idarəetməsi"
           description="Bu səhifə yalnız arena administratorları üçündür."
         />
-        <div className="glass-strong mt-10 rounded-3xl p-8 text-center">
+        <div className="glass-strong mt-10 rounded-xl p-8 text-center">
           <p className="text-sm text-frost/65">
             Davam etmək üçün admin hesabı ilə daxil olun.
           </p>
@@ -136,7 +136,7 @@ export default function AdminPaymentsPage() {
           title="Ödəniş idarəetməsi"
           description="Bu səhifə yalnız arena administratorları üçündür."
         />
-        <div className="glass-strong mt-10 rounded-3xl p-8 text-center">
+        <div className="glass-strong mt-10 rounded-xl p-8 text-center">
           <p className="text-sm text-frost/65">
             Hazırkı hesabınızın admin icazəsi yoxdur. Zəhmət olmasa admin
             hesabı ilə daxil olun.
@@ -155,27 +155,27 @@ export default function AdminPaymentsPage() {
       />
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <div className="glass rounded-2xl p-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-frost/45">
+        <div className="glass rounded-lg p-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-frost/45">
             Gözləyən ödəniş
           </p>
-          <p className="mt-2 font-display text-3xl font-black text-amber-200">
+          <p className="mt-2 font-display text-3xl font-bold text-amber-200">
             {summary.pending}
           </p>
         </div>
-        <div className="glass rounded-2xl p-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-frost/45">
+        <div className="glass rounded-lg p-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-frost/45">
             Uğurlu ödəniş
           </p>
-          <p className="mt-2 font-display text-3xl font-black text-emerald-200">
+          <p className="mt-2 font-display text-3xl font-bold text-emerald-200">
             {summary.successful}
           </p>
         </div>
-        <div className="glass rounded-2xl p-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-frost/45">
+        <div className="glass rounded-lg p-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-frost/45">
             Uğurlu məbləğ
           </p>
-          <p className="mt-2 font-display text-3xl font-black text-white">
+          <p className="mt-2 font-display text-3xl font-bold text-white">
             {formatTotal(summary.total)}
           </p>
         </div>
@@ -190,7 +190,7 @@ export default function AdminPaymentsPage() {
               onClick={() => setFilter(item.value)}
               className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-colors ${
                 filter === item.value
-                  ? 'bg-gradient-to-br from-ice-300 to-ice-600 text-night-900'
+                  ? 'bg-ice-400 text-night-950'
                   : 'text-frost/60 hover:text-white'
               }`}
             >
@@ -221,13 +221,13 @@ export default function AdminPaymentsPage() {
       </p>
 
       {loading && payments.length === 0 ? (
-        <div className="glass mt-6 rounded-3xl p-10 text-center">
+        <div className="glass mt-6 rounded-xl p-10 text-center">
           <p className="text-sm font-semibold text-frost/60">
             Ödənişlər yüklənir…
           </p>
         </div>
       ) : visiblePayments.length === 0 ? (
-        <div className="glass mt-6 rounded-3xl p-10 text-center">
+        <div className="glass mt-6 rounded-xl p-10 text-center">
           <p className="text-sm font-semibold text-frost/60">
             Bu filtr üzrə ödəniş tapılmadı.
           </p>
@@ -240,14 +240,14 @@ export default function AdminPaymentsPage() {
             return (
               <article
                 key={payment.transactionId}
-                className="glass-strong rounded-3xl p-5"
+                className="glass-strong rounded-xl p-5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-frost/40">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-frost/40">
                       {payment.reference || 'Booking payment'}
                     </p>
-                    <p className="mt-1 font-display text-2xl font-black text-white">
+                    <p className="mt-1 font-display text-2xl font-bold text-white">
                       {formatPrice(Number(payment.amount || 0))}
                     </p>
                   </div>

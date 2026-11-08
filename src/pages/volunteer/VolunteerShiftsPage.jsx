@@ -92,7 +92,7 @@ export default function VolunteerShiftsPage() {
       )}
 
       <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="glass overflow-hidden rounded-3xl">
+        <div className="glass overflow-hidden rounded-xl">
           <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
             <div>
               <h3 className="font-display text-lg font-bold text-white">
@@ -122,7 +122,7 @@ export default function VolunteerShiftsPage() {
                     className="flex flex-col gap-3 p-4 transition-colors hover:bg-white/[0.025] sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="font-display text-base font-extrabold text-white">
+                      <p className="font-display text-base font-bold text-white">
                         {formatShiftRange(slot.startTime, slot.endTime)}
                       </p>
                       <p className="mt-1 text-xs text-frost/45">
@@ -130,16 +130,16 @@ export default function VolunteerShiftsPage() {
                       </p>
                       {selected && (
                         <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                          <span className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-100">
+                          <span className="rounded-md border border-emerald-300/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-100">
                             Seçilib
                           </span>
                           {slot.myStationLabel && (
-                            <span className="rounded-full border border-ice-300/25 bg-ice-400/10 px-2.5 py-1 text-[10px] font-bold text-ice-100">
+                            <span className="rounded-md border border-ice-300/25 bg-ice-400/10 px-2.5 py-1 text-[10px] font-bold text-ice-100">
                               {slot.myStationLabel}
                             </span>
                           )}
                           {slot.myStatus && (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold text-frost/50">
+                            <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold text-frost/50">
                               {slot.myStatus}
                             </span>
                           )}
@@ -172,7 +172,7 @@ export default function VolunteerShiftsPage() {
           </div>
         </div>
 
-        <div className="glass overflow-hidden rounded-3xl">
+        <div className="glass overflow-hidden rounded-xl">
           <div className="border-b border-white/10 p-4">
             <h3 className="font-display text-lg font-bold text-white">Mənim smenlərim</h3>
             <p className="mt-0.5 text-xs text-frost/40">
@@ -201,7 +201,7 @@ export default function VolunteerShiftsPage() {
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span
-                      className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${
+                      className={`rounded-md border px-2.5 py-1 text-[10px] font-bold ${
                         shift.station
                           ? 'border-ice-300/25 bg-ice-400/10 text-ice-100'
                           : 'border-amber-300/25 bg-amber-400/10 text-amber-100'

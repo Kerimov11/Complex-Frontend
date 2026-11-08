@@ -156,7 +156,7 @@ export default function ShiftOverviewPage() {
         />
       </div>
 
-      <div className="glass mb-5 rounded-3xl p-4">
+      <div className="glass mb-5 rounded-xl p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-display text-base font-bold text-white">
             Stansiyalar üzrə ümumi bölgü
@@ -173,25 +173,25 @@ export default function ShiftOverviewPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((key) => (
-            <div key={key} className="glass h-32 animate-pulse rounded-3xl" />
+            <div key={key} className="glass h-32 animate-pulse rounded-xl" />
           ))}
         </div>
       ) : (data?.slots || []).length === 0 ? (
-        <div className="glass rounded-3xl p-8 text-center text-sm text-frost/45">
+        <div className="glass rounded-xl p-8 text-center text-sm text-frost/45">
           Bu tarix üçün smen slotu yoxdur.
         </div>
       ) : (
         <div className="space-y-3">
           {data.slots.map((slot) => (
-            <div key={slot.shiftSlotId} className="glass overflow-hidden rounded-3xl">
+            <div key={slot.shiftSlotId} className="glass overflow-hidden rounded-xl">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-display text-lg font-extrabold text-white">
+                    <h3 className="font-display text-lg font-bold text-white">
                       {formatShiftRange(slot.startTime, slot.endTime)}
                     </h3>
                     {!slot.active && (
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-frost/40">
+                      <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-frost/40">
                         Deaktiv
                       </span>
                     )}
@@ -223,7 +223,7 @@ export default function ShiftOverviewPage() {
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span
-                          className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${
+                          className={`rounded-md border px-2.5 py-1 text-[10px] font-bold ${
                             shift.station
                               ? 'border-ice-300/25 bg-ice-400/10 text-ice-100'
                               : 'border-amber-300/25 bg-amber-400/10 text-amber-100'

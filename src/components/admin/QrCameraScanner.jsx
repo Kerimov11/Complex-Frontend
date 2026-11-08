@@ -66,13 +66,13 @@ export default function QrCameraScanner({ onDetected }) {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-night-900/40 p-3">
+    <div className="rounded-lg border border-white/10 bg-night-900/40 p-3">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-bold text-white">Kamera ilə QR skan</p>
         <button
           type="button"
           onClick={active ? stop : start}
-          className={`rounded-full border px-3 py-1.5 text-[11px] font-bold ${
+          className={`rounded-md border px-3 py-1.5 text-[11px] font-bold ${
             active
               ? 'border-red-300/25 bg-red-400/10 text-red-200'
               : 'border-ice-300/25 bg-ice-400/10 text-ice-200'

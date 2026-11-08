@@ -137,7 +137,7 @@ export default function FinancePage() {
               onClick={() => setFilter(item.value)}
               className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-colors ${
                 filter === item.value
-                  ? 'bg-gradient-to-br from-ice-300 to-ice-600 text-night-900'
+                  ? 'bg-ice-400 text-night-950'
                   : 'text-frost/60 hover:text-white'
               }`}
             >
@@ -165,11 +165,11 @@ export default function FinancePage() {
       </div>
 
       {loading && payments.length === 0 ? (
-        <div className="glass mt-5 rounded-3xl p-10 text-center text-sm text-frost/45">
+        <div className="glass mt-5 rounded-xl p-10 text-center text-sm text-frost/45">
           Ödənişlər yüklənir...
         </div>
       ) : visible.length === 0 ? (
-        <div className="glass mt-5 rounded-3xl p-10 text-center text-sm text-frost/45">
+        <div className="glass mt-5 rounded-xl p-10 text-center text-sm text-frost/45">
           Bu filtr üzrə ödəniş tapılmadı.
         </div>
       ) : (

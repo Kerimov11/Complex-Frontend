@@ -21,7 +21,7 @@ export default function Hero() {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(120% 100% at 50% 0%, #12263f 0%, #0a1122 45%, #060b18 100%)',
+            '#0b1220',
         }}
       >
         <video
@@ -39,9 +39,8 @@ export default function Hero() {
             <source key={src} src={src} type="video/mp4" />
           ))}
         </video>
-        <div className="absolute inset-0 bg-gradient-to-t from-night-950 via-night-950/55 to-night-950/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-night-950/70 via-transparent to-night-950/40" />
-      </div>
+        <div className="absolute inset-0 bg-night-950/60" />
+              </div>
 
       <div className="relative mx-auto w-full max-w-7xl px-4 pb-40 pt-40 sm:px-6">
         <div className="max-w-3xl">
@@ -50,7 +49,7 @@ export default function Hero() {
             <span className="chip chip-ice">Nizami metrosu yaxınlığında</span>
           </div>
 
-          <h1 className="mt-6 font-display text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-6 font-display text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
             Buz Arenası -{' '}
             <span className="text-gradient-ice">
               buzda sürüşün ritmini hiss et
@@ -81,7 +80,6 @@ export default function Hero() {
             </Link>
             <Link to="/canli" className="btn-ghost">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
               </span>
               Canlı yayım
@@ -90,8 +88,8 @@ export default function Hero() {
 
           <div className="mt-12 grid max-w-lg grid-cols-3 gap-4">
             {STATS.map((s) => (
-              <div key={s.label} className="glass rounded-2xl px-4 py-4 text-center">
-                <p className="font-display text-2xl font-extrabold text-white">
+              <div key={s.label} className="glass rounded-lg px-4 py-4 text-center">
+                <p className="font-display text-2xl font-bold text-white">
                   {s.value}
                 </p>
                 <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-frost/55">

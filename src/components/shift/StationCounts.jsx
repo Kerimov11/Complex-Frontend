@@ -9,7 +9,7 @@ export default function StationCounts({ stations = [], compact = false }) {
           } font-semibold text-frost/60`}
         >
           <span className="text-white/80">{station.label || station.station}</span>
-          <span className="rounded-full bg-white/10 px-1.5 text-[10px] text-ice-100">
+          <span className="rounded-md bg-white/10 px-1.5 text-[10px] text-ice-100">
             {station.count}
           </span>
         </span>

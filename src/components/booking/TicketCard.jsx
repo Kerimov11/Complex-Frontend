@@ -25,13 +25,13 @@ export default function TicketCard({ ticket }) {
   })()
 
   return (
-    <div className="glass-strong overflow-hidden rounded-3xl">
+    <div className="glass-strong overflow-hidden rounded-xl">
       <div className="flex items-center justify-between gap-4 border-b border-dashed border-white/20 px-6 py-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-ice-300">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-ice-300">
             Rəqəmsal bilet / Digital Ticket
           </p>
-          <p className="mt-1 font-display text-xl font-black tracking-wider text-white">
+          <p className="mt-1 font-display text-xl font-bold tracking-wider text-white">
             {id}
           </p>
         </div>
@@ -44,7 +44,7 @@ export default function TicketCard({ ticket }) {
       </div>
 
       <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
-        <div className="grid shrink-0 place-items-center rounded-2xl border border-white/10 bg-white p-4 text-night-950">
+        <div className="grid shrink-0 place-items-center rounded-lg border border-white/10 bg-white p-4 text-night-950">
           <QrCode seed={id} />
         </div>
 
@@ -65,7 +65,7 @@ export default function TicketCard({ ticket }) {
             </div>
             <div>
               <p className="text-xs text-frost/50">Ödəniş</p>
-              <p className="mt-0.5 font-display text-lg font-extrabold text-white">
+              <p className="mt-0.5 font-display text-lg font-bold text-white">
                 {formatPrice(ticket.price.payable)}
               </p>
               {ticket.payment?.transactionId ? (
@@ -83,7 +83,7 @@ export default function TicketCard({ ticket }) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-frost/50">
               İştirakçılar və konki razmerləri
             </p>

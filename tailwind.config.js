@@ -17,19 +17,19 @@ export default {
           900: '#0d5375',
         },
         night: {
-          800: '#101a30',
-          900: '#0a1122',
-          950: '#060b18',
+          800: '#0f1829',
+          900: '#0b1220',
+          950: '#080d18',
         },
         frost: '#eaf6ff',
       },
       fontFamily: {
         display: ['Montserrat', 'system-ui', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        glass: '0 8px 32px rgba(2, 12, 27, 0.45)',
-        'ice-glow': '0 0 40px rgba(91, 200, 251, 0.25)',
+        glass: '0 4px 16px rgba(0, 0, 0, 0.35)',
+        'ice-glow': '0 1px 2px rgba(0, 0, 0, 0.3)',
       },
       backdropBlur: {
         xs: '2px',

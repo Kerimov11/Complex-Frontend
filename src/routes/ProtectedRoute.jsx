@@ -4,11 +4,11 @@ import { useAuth } from '../auth/AuthContext'
 function AccessGate({ title, description, action }) {
   return (
     <div className="mx-auto max-w-2xl px-4 pb-16 pt-28 sm:px-6">
-      <div className="glass-strong rounded-3xl p-8 text-center">
-        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-ice-400/10 text-2xl text-ice-200">
+      <div className="glass-strong rounded-xl p-8 text-center">
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-ice-400/10 text-2xl text-ice-200">
           ⚿
         </span>
-        <h1 className="mt-5 font-display text-2xl font-extrabold text-white">{title}</h1>
+        <h1 className="mt-5 font-display text-2xl font-bold text-white">{title}</h1>
         <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-frost/60">
           {description}
         </p>

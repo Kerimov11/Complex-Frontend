@@ -16,12 +16,12 @@ export default function AdminLayout() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-16 pt-24 sm:px-6">
-      <div className="glass mb-5 flex flex-col gap-3 rounded-3xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="glass mb-5 flex flex-col gap-3 rounded-xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-ice-300">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-ice-300">
             İdarəetmə paneli
           </p>
-          <h1 className="mt-1 font-display text-2xl font-extrabold text-white">
+          <h1 className="mt-1 font-display text-2xl font-bold text-white">
             Xoş gəldiniz, {user?.username || 'komanda'}
           </h1>
         </div>

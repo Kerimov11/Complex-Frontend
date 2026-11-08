@@ -104,14 +104,13 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
-        <div className="glass relative overflow-hidden rounded-3xl p-8 sm:p-12">
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-ice-500/15 blur-3xl" />
+        <div className="glass relative overflow-hidden rounded-xl p-8 sm:p-12">
           <div className="relative grid items-center gap-8 lg:grid-cols-2">
             <div>
-              <p className="font-display text-sm font-bold uppercase tracking-widest text-ice-200">
+              <p className="font-display text-sm font-bold uppercase tracking-wider text-ice-200">
                 Məşğələlər və klublar
               </p>
-              <h3 className="mt-3 font-display text-2xl font-extrabold text-white sm:text-3xl">
+              <h3 className="mt-3 font-display text-2xl font-bold text-white sm:text-3xl">
                 Peşəkar məşqçilərlə buz idmanı
               </h3>
               <p className="mt-4 text-sm leading-relaxed text-frost/70">

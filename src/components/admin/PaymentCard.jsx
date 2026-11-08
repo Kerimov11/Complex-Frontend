@@ -12,20 +12,20 @@ const STATUS_META = {
 export default function PaymentCard({ payment, busy, onChange }) {
   const meta = STATUS_META[payment.status] || STATUS_META.PENDING
   return (
-    <article className="glass-strong rounded-3xl p-5">
+    <article className="glass-strong rounded-xl p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-frost/40">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-frost/40">
             {payment.reference || payment.transactionId}
           </p>
-          <p className="mt-1 font-display text-2xl font-black text-white">
+          <p className="mt-1 font-display text-2xl font-bold text-white">
             {formatMoney(payment.amount)}
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-frost/55">
+            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-frost/55">
               {payment.channel === 'POS' ? 'POS' : 'Onlayn'}
             </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-frost/55">
+            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-frost/55">
               {payment.paymentMethod === 'CASH'
                 ? 'Nağd'
                 : payment.paymentMethod === 'CARD'

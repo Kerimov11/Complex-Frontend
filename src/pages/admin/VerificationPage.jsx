@@ -62,7 +62,7 @@ export default function VerificationPage() {
       {error && <div className="mb-3"><AdminNotice tone="error">{error}</AdminNotice></div>}
 
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
-        <div className="glass rounded-3xl p-5">
+        <div className="glass rounded-xl p-5">
           <form onSubmit={onSubmit}>
             <label className="block">
               <span className="mb-2 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
@@ -74,7 +74,7 @@ export default function VerificationPage() {
                 onChange={(event) => setCode(event.target.value)}
                 placeholder="Məsələn: SAV-ABC-1234 və ya POS-XXXXXXXXXXXX"
                 autoFocus
-                className="w-full rounded-2xl border border-white/10 bg-night-900/60 px-4 py-3.5 font-mono text-sm text-white outline-none placeholder:text-frost/25 focus:border-ice-300/50"
+                className="w-full rounded-lg border border-white/10 bg-night-900/60 px-4 py-3.5 font-mono text-sm text-white outline-none placeholder:text-frost/25 focus:border-ice-300/50"
               />
             </label>
             <button
@@ -98,18 +98,18 @@ export default function VerificationPage() {
 
         <div className="space-y-5">
           {result ? (
-            <div className="glass-strong rounded-3xl p-5">
+            <div className="glass-strong rounded-xl p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-frost/35">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-frost/35">
                     Nəticə
                   </p>
-                  <h3 className="mt-1 font-display text-xl font-extrabold text-white">
+                  <h3 className="mt-1 font-display text-xl font-bold text-white">
                     {meta?.label}
                   </h3>
                 </div>
                 <span
-                  className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+                  className={`rounded-md px-3 py-1.5 text-xs font-bold ${
                     meta?.tone === 'success'
                       ? 'bg-emerald-400/15 text-emerald-200'
                       : meta?.tone === 'warning'
@@ -156,8 +156,8 @@ export default function VerificationPage() {
               )}
             </div>
           ) : (
-            <div className="glass rounded-3xl p-8 text-center">
-              <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white/5 text-2xl text-ice-200">
+            <div className="glass rounded-xl p-8 text-center">
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-white/5 text-2xl text-ice-200">
                 ⌁
               </span>
               <p className="mt-4 text-sm text-frost/45">
@@ -167,7 +167,7 @@ export default function VerificationPage() {
           )}
 
           {history.length > 0 && (
-            <div className="glass overflow-hidden rounded-3xl">
+            <div className="glass overflow-hidden rounded-xl">
               <div className="border-b border-white/10 p-4">
                 <h3 className="font-display text-lg font-bold text-white">Son skanlar</h3>
               </div>

@@ -133,13 +133,13 @@ export default function AdminSidebar() {
 
   function linkClass(isActive, mobile = false) {
     if (mobile) {
-      return `shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
+      return `shrink-0 rounded-md border px-4 py-2 text-xs font-bold transition-colors ${
         isActive
           ? 'border-ice-300/40 bg-ice-400/15 text-ice-100'
           : 'border-white/10 bg-white/5 text-frost/60'
       }`
     }
-    return `group flex items-center gap-3 rounded-2xl px-3 py-3 transition-all ${
+    return `group flex items-center gap-3 rounded-lg px-3 py-3 transition-all ${
       isActive
         ? 'bg-ice-400/15 text-white ring-1 ring-ice-300/30'
         : 'text-frost/65 hover:bg-white/5 hover:text-white'
@@ -148,12 +148,12 @@ export default function AdminSidebar() {
 
   return (
     <aside className="lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
-      <div className="glass-strong overflow-hidden rounded-3xl">
+      <div className="glass-strong overflow-hidden rounded-xl">
         <div className="border-b border-white/10 px-5 py-5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-ice-300">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-ice-300">
             Ice Arena
           </p>
-          <p className="mt-1 font-display text-lg font-extrabold text-white">
+          <p className="mt-1 font-display text-lg font-bold text-white">
             İdarəetmə mərkəzi
           </p>
           <p className="mt-2 truncate text-xs text-frost/55">
@@ -164,7 +164,7 @@ export default function AdminSidebar() {
         <nav className="hidden flex-col gap-3 p-3 lg:flex">
           {groups.map((group) => (
             <div key={group.label}>
-              <p className="px-3 pb-1 pt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-frost/25">
+              <p className="px-3 pb-1 pt-1 text-[9px] font-bold uppercase tracking-wider text-frost/25">
                 {group.label}
               </p>
               <div className="flex flex-col gap-1">
@@ -175,9 +175,6 @@ export default function AdminSidebar() {
                     end={item.end}
                     className={({ isActive }) => linkClass(isActive)}
                   >
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 text-sm text-ice-200">
-                      {item.icon}
-                    </span>
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-bold">
                         {item.label}
@@ -197,7 +194,7 @@ export default function AdminSidebar() {
           <button
             type="button"
             onClick={logout}
-            className="w-full rounded-2xl px-3 py-3 text-left text-sm font-semibold text-frost/55 transition-colors hover:bg-red-400/10 hover:text-red-200"
+            className="w-full rounded-lg px-3 py-3 text-left text-sm font-semibold text-frost/55 transition-colors hover:bg-red-400/10 hover:text-red-200"
           >
             Çıxış et
           </button>

@@ -157,7 +157,7 @@ export default function SessionManagementPage() {
       {success && <div className="mb-3"><AdminNotice tone="success">{success}</AdminNotice></div>}
 
       {showForm && (
-        <form onSubmit={saveSession} className="glass mb-5 rounded-3xl p-5">
+        <form onSubmit={saveSession} className="glass mb-5 rounded-xl p-5">
           <h3 className="font-display text-lg font-bold text-white">
             {editingId ? 'Sessiyanı yenilə' : 'Yeni sessiya'}
           </h3>
@@ -229,7 +229,7 @@ export default function SessionManagementPage() {
         </form>
       )}
 
-      <div className="glass overflow-hidden rounded-3xl">
+      <div className="glass overflow-hidden rounded-xl">
         <div className="flex flex-col gap-3 border-b border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-bold text-white">{formatDate(`${date}T00:00:00`)}</p>
@@ -255,7 +255,7 @@ export default function SessionManagementPage() {
                 className="flex flex-col gap-3 p-4 transition-colors hover:bg-white/[0.025] lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="rounded-2xl bg-ice-400/10 px-3 py-2 font-display text-sm font-bold text-ice-100">
+                  <span className="rounded-lg bg-ice-400/10 px-3 py-2 font-display text-sm font-bold text-ice-100">
                     {String(session.startTime).slice(0, 5)}–{String(session.endTime).slice(0, 5)}
                   </span>
                   <div>
@@ -267,16 +267,16 @@ export default function SessionManagementPage() {
                     </p>
                   </div>
                   {session.blocked && (
-                    <span className="rounded-full bg-red-400/10 px-2.5 py-1 text-[10px] font-bold text-red-200">
+                    <span className="rounded-md bg-red-400/10 px-2.5 py-1 text-[10px] font-bold text-red-200">
                       Bloklanıb
                     </span>
                   )}
                   {session.salesOpen ? (
-                    <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-200">
+                    <span className="rounded-md bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-200">
                       Satış açıq
                     </span>
                   ) : (
-                    <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold text-frost/45">
+                    <span className="rounded-md bg-white/5 px-2.5 py-1 text-[10px] font-bold text-frost/45">
                       Satış bağlı
                     </span>
                   )}
@@ -286,7 +286,7 @@ export default function SessionManagementPage() {
                   <button
                     type="button"
                     onClick={() => startEdit(session)}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-frost/60 transition-colors hover:bg-white/10"
+                    className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-frost/60 transition-colors hover:bg-white/10"
                   >
                     Düzəliş
                   </button>
@@ -294,7 +294,7 @@ export default function SessionManagementPage() {
                     type="button"
                     disabled={busyId === `block:${session.id}`}
                     onClick={() => (session.blocked ? unblockSession(session) : blockSession(session))}
-                    className={`rounded-full border px-3 py-1.5 text-[11px] font-bold transition-colors disabled:opacity-40 ${
+                    className={`rounded-md border px-3 py-1.5 text-[11px] font-bold transition-colors disabled:opacity-40 ${
                       session.blocked
                         ? 'border-emerald-300/25 bg-emerald-400/10 text-emerald-200'
                         : 'border-amber-300/25 bg-amber-400/10 text-amber-200'
@@ -306,7 +306,7 @@ export default function SessionManagementPage() {
                     type="button"
                     disabled={busyId === `delete:${session.id}`}
                     onClick={() => deleteSession(session)}
-                    className="rounded-full border border-red-300/25 bg-red-400/10 px-3 py-1.5 text-[11px] font-bold text-red-200 transition-colors hover:bg-red-400/15 disabled:opacity-40"
+                    className="rounded-md border border-red-300/25 bg-red-400/10 px-3 py-1.5 text-[11px] font-bold text-red-200 transition-colors hover:bg-red-400/15 disabled:opacity-40"
                   >
                     Sil
                   </button>

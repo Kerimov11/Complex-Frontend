@@ -118,7 +118,7 @@ export default function PaymentModal({
 
   return (
     <div
-      className="fixed inset-0 z-[130] grid place-items-center overflow-y-auto bg-night-950/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[130] grid place-items-center overflow-y-auto bg-night-950/85 p-4"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !busy) onClose()
@@ -128,23 +128,23 @@ export default function PaymentModal({
         role="dialog"
         aria-modal="true"
         aria-label="Ödəniş"
-        className="glass-strong my-6 w-full max-w-lg overflow-hidden rounded-3xl border border-white/15 shadow-ice-glow"
+        className="glass-strong my-6 w-full max-w-lg overflow-hidden rounded-xl border border-white/15"
       >
-        <div className="relative border-b border-white/10 bg-gradient-to-br from-ice-400/15 via-transparent to-transparent p-6 pb-5">
+        <div className="relative border-b border-white/10 p-6 pb-5">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ice-200">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-ice-200">
               Təhlükəsiz ödəniş
             </p>
             <span className="chip !py-0 text-[10px] uppercase text-amber-200">
               Demo gateway
             </span>
           </div>
-          <h2 className="mt-1 font-display text-2xl font-black text-white">
+          <h2 className="mt-1 font-display text-2xl font-bold text-white">
             Ödənişi tamamlayın
           </h2>
           <p className="mt-1.5 text-xs leading-relaxed text-frost/60">
             Ödəniləcək məbləğ:{' '}
-            <span className="font-display text-base font-extrabold text-white">
+            <span className="font-display text-base font-bold text-white">
               {formatPrice(amount)}
             </span>
             . Bu demo ödənişdir — real kart məlumatı daxil etməyin.
@@ -172,17 +172,16 @@ export default function PaymentModal({
         </div>
 
         <div className="p-6">
-          <div className="relative overflow-hidden rounded-2xl border border-ice-300/25 bg-gradient-to-br from-ice-500/25 via-night-800 to-night-950 p-4">
-            <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-ice-300/10 blur-2xl" />
+          <div className="relative overflow-hidden rounded-lg border border-ice-300/25 bg-night-950 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-ice-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-ice-200">
                 Ice Arena
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-frost/45">
                 Demo card
               </span>
             </div>
-            <p className="mt-6 font-mono text-lg font-semibold tracking-[0.15em] text-white">
+            <p className="mt-6 font-mono text-lg font-semibold tracking-wider text-white">
               {card.number || '•••• •••• •••• ••••'}
             </p>
             <div className="mt-4 flex items-end justify-between gap-4">

@@ -4,7 +4,7 @@ import { monthlyPrice } from '../../utils/pricing'
 
 function DiscountCard({ title, detail, tag }) {
   return (
-    <div className="glass card-hover rounded-2xl p-5">
+    <div className="glass card-hover rounded-lg p-5">
       <div className="flex items-start justify-between gap-3">
         <p className="font-display font-bold text-white">{title}</p>
         {tag && <span className="chip chip-ice shrink-0 uppercase">{tag}</span>}
@@ -20,7 +20,7 @@ export default function PricingSection({ detailed = false }) {
 
   return (
     <div className="space-y-8">
-      <div className="glass overflow-hidden rounded-3xl">
+      <div className="glass overflow-hidden rounded-xl">
         <div className="border-b border-white/10 bg-white/[0.04] px-6 py-4">
           <p className="font-display font-bold text-white">
             Standart qiymətlər
@@ -47,13 +47,13 @@ export default function PricingSection({ detailed = false }) {
               <tr className="border-b border-white/5">
                 <td className="px-6 py-4 font-medium text-frost">1 saat</td>
                 <td className="px-6 py-4">
-                  <span className="font-display text-lg font-extrabold text-white">
+                  <span className="font-display text-lg font-bold text-white">
                     {PRICING.standard.weekday.hour}
                   </span>{' '}
                   <span className="text-xs text-ice-200">AZN</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="font-display text-lg font-extrabold text-white">
+                  <span className="font-display text-lg font-bold text-white">
                     {PRICING.standard.weekend.hour}
                   </span>{' '}
                   <span className="text-xs text-ice-200">AZN</span>
@@ -62,13 +62,13 @@ export default function PricingSection({ detailed = false }) {
               <tr>
                 <td className="px-6 py-4 font-medium text-frost">Yarım saat</td>
                 <td className="px-6 py-4">
-                  <span className="font-display text-lg font-extrabold text-white">
+                  <span className="font-display text-lg font-bold text-white">
                     {PRICING.standard.weekday.half}
                   </span>{' '}
                   <span className="text-xs text-ice-200">AZN</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="font-display text-lg font-extrabold text-white">
+                  <span className="font-display text-lg font-bold text-white">
                     {PRICING.standard.weekend.half}
                   </span>{' '}
                   <span className="text-xs text-ice-200">AZN</span>
@@ -80,35 +80,35 @@ export default function PricingSection({ detailed = false }) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="glass card-hover flex flex-col rounded-2xl p-5">
+        <div className="glass card-hover flex flex-col rounded-lg p-5">
           <div className="flex items-center justify-between">
             <p className="font-display font-bold text-white">
               Aylıq abunəlik
             </p>
             <span className="chip chip-ice uppercase">12 giriş</span>
           </div>
-          <p className="mt-3 font-display text-3xl font-black text-gradient-ice">
+          <p className="mt-3 font-display text-3xl font-bold text-gradient-ice">
             {m1.price} AZN
           </p>
           <p className="mt-1 text-sm text-frost/65">
             {m1.entries} giriş, hər biri 1 saat
           </p>
         </div>
-        <div className="glass card-hover flex flex-col rounded-2xl p-5">
+        <div className="glass card-hover flex flex-col rounded-lg p-5">
           <div className="flex items-center justify-between">
             <p className="font-display font-bold text-white">
               Aylıq abunəlik - öz konkisi
             </p>
             <span className="chip chip-ice uppercase">12 giriş</span>
           </div>
-          <p className="mt-3 font-display text-3xl font-black text-gradient-ice">
+          <p className="mt-3 font-display text-3xl font-bold text-gradient-ice">
             {m2.price} AZN
           </p>
           <p className="mt-1 text-sm text-frost/65">
             Şəxsi konkisi ilə gələnlər üçün. {m2.saved} AZN qənaət.
           </p>
         </div>
-        <div className="rounded-2xl border border-ice-300/25 bg-gradient-to-br from-ice-400/15 to-transparent p-5">
+        <div className="rounded-lg border border-ice-300/25 bg-ice-400/10 p-5">
           <p className="font-display font-bold text-white">
             Qayda - bir eyni zamanda
           </p>

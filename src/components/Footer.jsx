@@ -15,17 +15,17 @@ const QUICK_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="relative z-10 mt-24 border-t border-white/10 bg-night-900/80 pb-28 pt-16 backdrop-blur-sm sm:pb-32">
+    <footer className="relative z-10 mt-24 border-t border-white/10 bg-night-900/80 pb-28 pt-16 sm:pb-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-4">
               <Logo compact size="lg" />
               <div className="leading-tight">
-                <p className="font-display text-base font-extrabold leading-snug text-white sm:text-lg">
+                <p className="font-display text-base font-bold leading-snug text-white sm:text-lg">
                   Heydər Əliyev İdman və Konsert Kompleksi
                 </p>
-                <p className="text-gradient-ice mt-1 font-display font-extrabold tracking-widest">
+                <p className="text-gradient-ice mt-1 font-display font-bold tracking-wider">
                   BUZ ARENASI
                 </p>
               </div>
@@ -38,7 +38,7 @@ export default function Footer() {
               href={SITE.instagram}
               target="_blank"
               rel="noreferrer"
-              className="glass mt-5 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-frost transition-colors hover:border-ice-300/50 hover:text-white"
+              className="glass mt-5 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-frost transition-colors hover:border-ice-300/50 hover:text-white"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
                 <path d="M12 2.2c3.2 0 3.6 0 4.8.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.81s-.01 3.54-.07 4.81c-.15 3.23-1.66 4.77-4.92 4.92-1.2.06-1.6.07-4.8.07-3.22 0-3.6 0-4.81-.07-3.26-.15-4.77-1.7-4.92-4.92C2.2 15.64 2.2 15.24 2.2 12s.01-3.54.07-4.81C2.42 3.96 3.93 2.42 7.19 2.27 8.4 2.21 8.8 2.2 12 2.2Zm0 1.8c-3.14 0-3.52 0-4.71.07-2.5.12-3.63 1.3-3.75 3.75C3.47 9 3.47 9.38 3.47 12.5S3.47 16 3.54 17.18c.12 2.44 1.25 3.63 3.75 3.75 1.19.06 1.57.07 4.71.07s3.52 0 4.71-.07c2.5-.12 3.63-1.31 3.75-3.75.07-1.18.07-1.56.07-4.68s0-3.5-.07-4.68c-.12-2.45-1.25-3.63-3.75-3.75-1.19-.07-1.57-.07-4.71-.07Zm0 3.06a5.44 5.44 0 1 1 0 10.88 5.44 5.44 0 0 1 0-10.88Zm0 1.8a3.64 3.64 0 1 0 0 7.28 3.64 3.64 0 0 0 0-7.28Zm5.68-3.3a1.27 1.27 0 1 1 0 2.54 1.27 1.27 0 0 1 0-2.54Z" />
@@ -48,7 +48,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-ice-200">
+            <p className="font-display text-sm font-bold uppercase tracking-wider text-ice-200">
               Sürətli keçidlər
             </p>
             <ul className="mt-4 space-y-2.5">
@@ -66,7 +66,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-ice-200">
+            <p className="font-display text-sm font-bold uppercase tracking-wider text-ice-200">
               İş saatları
             </p>
             <ul className="mt-4 space-y-2.5 text-sm text-frost/70">
@@ -82,7 +82,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-ice-200">
+            <p className="font-display text-sm font-bold uppercase tracking-wider text-ice-200">
               Əlaqə
             </p>
             <address className="mt-4 space-y-3 text-sm not-italic text-frost/70">
@@ -125,14 +125,14 @@ export default function Footer() {
         </div>
 
         {/* Rəsmi məlumatlar */}
-        <div className="mt-12 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-ice-200">
+        <div className="mt-12 rounded-lg border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-ice-200">
             Rəsmi məlumatlar
           </p>
           <p className="mt-3 text-sm font-semibold text-frost/85">
             {SITE.official.founder}
           </p>
-          <p className="font-display text-base font-extrabold text-white">
+          <p className="font-display text-base font-bold text-white">
             {SITE.official.company}
           </p>
           <div className="mt-3 flex flex-col gap-1.5 text-sm text-frost/70 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-7">

@@ -12,12 +12,12 @@ import {
 function BlockTitle({ eyebrow, title }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="h-6 w-1 rounded-full bg-gradient-to-b from-ice-300 to-ice-600" />
+      <span className="h-6 w-1 rounded-full bg-ice-400" />
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-ice-300">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-ice-300">
           {eyebrow}
         </p>
-        <h3 className="font-display text-xl font-extrabold text-white sm:text-2xl">
+        <h3 className="font-display text-xl font-bold text-white sm:text-2xl">
           {title}
         </h3>
       </div>
@@ -46,7 +46,7 @@ export default function RulesPage() {
       </div>
 
       {/* Travmatik idman növü xəbərdarlığı */}
-      <div className="mx-auto mt-6 max-w-3xl rounded-2xl border border-ice-300/30 bg-ice-400/10 p-5 sm:p-6">
+      <div className="mx-auto mt-6 max-w-3xl rounded-lg border border-ice-300/30 bg-ice-400/10 p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-ice-400/20 text-ice-200">
             <svg
@@ -83,9 +83,9 @@ export default function RulesPage() {
           {ARENA_RULES.map((r) => (
             <li
               key={r.id}
-              className="glass card-hover flex gap-4 rounded-2xl p-5"
+              className="glass card-hover flex gap-4 rounded-lg p-5"
             >
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-ice-300 to-ice-600 font-display text-sm font-black text-night-900">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-ice-400 font-display text-sm font-bold text-night-950">
                 {r.id}
               </span>
               <div className="min-w-0">
@@ -102,9 +102,9 @@ export default function RulesPage() {
           {EXTRA_TERMS.map((t) => (
             <div
               key={t.title}
-              className="rounded-2xl border border-amber-300/25 bg-amber-400/[0.07] p-5"
+              className="rounded-lg border border-amber-300/25 bg-amber-400/[0.07] p-5"
             >
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-200">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-amber-200">
                 Əlavə şərtlər
               </p>
               <p className="mt-2 font-display font-bold text-white">
@@ -125,7 +125,7 @@ export default function RulesPage() {
           title="Müştəri öhdəlikləri və təsdiq"
         />
 
-        <div className="glass mt-7 rounded-3xl p-6 sm:p-8">
+        <div className="glass mt-7 rounded-xl p-6 sm:p-8">
           <p className="text-sm leading-relaxed text-frost/70">
             Aşağıdakı hər bir bəndi oxuyub onu qəbul etdiyinizi bildirin.
             Bilet alışı zamanı bu öhdəliklərə əməl etməyi öz üzərinizə götürürsünüz.
@@ -138,7 +138,7 @@ export default function RulesPage() {
                 <li key={o.id}>
                   <label
                     htmlFor={`ob-${o.id}`}
-                    className={`flex cursor-pointer items-start gap-3.5 rounded-2xl border p-4 transition-all ${
+                    className={`flex cursor-pointer items-start gap-3.5 rounded-lg border p-4 transition-all ${
                       isChecked
                         ? 'border-ice-300/60 bg-ice-400/12'
                         : 'border-white/10 bg-white/[0.03] hover:border-white/25'
@@ -164,7 +164,7 @@ export default function RulesPage() {
             <div className="flex items-center gap-3">
               <div className="h-2 w-32 overflow-hidden rounded-full bg-white/10 sm:w-44">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-ice-300 to-ice-500 transition-all duration-500"
+                  className="h-full rounded-full bg-ice-400 transition-all duration-500"
                   style={{
                     width: `${(acceptedCount / OBLIGATIONS.length) * 100}%`,
                   }}
@@ -176,7 +176,7 @@ export default function RulesPage() {
             </div>
 
             {allChecked ? (
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-4 py-2 text-sm font-bold text-emerald-200">
+              <span className="inline-flex items-center gap-2 rounded-md border border-emerald-400/40 bg-emerald-500/15 px-4 py-2 text-sm font-bold text-emerald-200">
                 <svg
                   viewBox="0 0 24 24"
                   className="h-4 w-4"

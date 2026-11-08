@@ -97,11 +97,11 @@ export default function VolunteerInventoryPage() {
       {loading ? (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3].map((key) => (
-            <div key={key} className="glass h-40 animate-pulse rounded-3xl" />
+            <div key={key} className="glass h-40 animate-pulse rounded-xl" />
           ))}
         </div>
       ) : inventory.length === 0 ? (
-        <div className="glass rounded-3xl p-8 text-center text-sm text-frost/45">
+        <div className="glass rounded-xl p-8 text-center text-sm text-frost/45">
           Anbarda konki qeydə alınmayıb.
         </div>
       ) : (
@@ -110,30 +110,30 @@ export default function VolunteerInventoryPage() {
             const percent = Math.max(0, Math.min(100, Number(item.availabilityPercent) || 0))
             const tone =
               percent <= 15
-                ? 'from-red-400 to-red-300'
+                ? 'bg-red-400'
                 : percent <= 35
-                  ? 'from-amber-400 to-amber-300'
-                  : 'from-ice-400 to-emerald-300'
+                  ? 'bg-amber-400'
+                  : 'bg-ice-400'
             return (
-              <div key={item.id} className="glass rounded-3xl p-5">
+              <div key={item.id} className="glass rounded-xl p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-frost/35">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-frost/35">
                       Konki ölçüsü
                     </p>
-                    <p className="mt-1 font-display text-2xl font-black text-white">
+                    <p className="mt-1 font-display text-2xl font-bold text-white">
                       {item.size}
                       <span className="ml-1 text-sm font-bold text-frost/40">ölçü</span>
                     </p>
                   </div>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-ice-100">
+                  <span className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-ice-100">
                     {percent.toFixed(0)}%
                   </span>
                 </div>
 
                 <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/10">
                   <div
-                    className={`h-full rounded-full bg-gradient-to-r ${tone}`}
+                    className={`h-full rounded-full ${tone}`}
                     style={{ width: `${percent}%` }}
                   />
                 </div>

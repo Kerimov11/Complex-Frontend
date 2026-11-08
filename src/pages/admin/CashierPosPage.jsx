@@ -125,7 +125,7 @@ export default function CashierPosPage() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_1.15fr]">
-        <form onSubmit={submitSale} className="glass rounded-3xl p-5">
+        <form onSubmit={submitSale} className="glass rounded-xl p-5">
           <h3 className="font-display text-lg font-bold text-white">Yeni satış</h3>
           <div className="mt-4 space-y-3">
             <label className="block">
@@ -148,7 +148,7 @@ export default function CashierPosPage() {
             </label>
 
             {selectedSession && (
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-xs text-frost/55">
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-frost/55">
                 <p>
                   Qalıq bilet: <span className="font-bold text-white">{selectedSession.availableTickets}</span>
                 </p>
@@ -240,21 +240,21 @@ export default function CashierPosPage() {
 
         <div className="space-y-5">
           {receipt && (
-            <div className="glass-strong rounded-3xl p-5">
+            <div className="glass-strong rounded-xl p-5">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="font-display text-lg font-bold text-white">Satış qəbzi</h3>
                 <span className="chip chip-ice">{receipt.saleReference}</span>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-2xl bg-white/[0.04] p-3">
+                <div className="rounded-lg bg-white/[0.04] p-3">
                   <p className="text-[10px] uppercase tracking-wide text-frost/35">Yekun</p>
-                  <p className="mt-1 font-display text-xl font-black text-emerald-200">
+                  <p className="mt-1 font-display text-xl font-bold text-emerald-200">
                     {formatMoney(receipt.totalAmount)}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-white/[0.04] p-3">
+                <div className="rounded-lg bg-white/[0.04] p-3">
                   <p className="text-[10px] uppercase tracking-wide text-frost/35">Ödəniş</p>
-                  <p className="mt-1 font-display text-xl font-black text-white">
+                  <p className="mt-1 font-display text-xl font-bold text-white">
                     {receipt.paymentMethod === 'CASH' ? 'Nağd' : 'Kart'}
                   </p>
                 </div>
@@ -275,7 +275,7 @@ export default function CashierPosPage() {
             </div>
           )}
 
-          <div className="glass overflow-hidden rounded-3xl">
+          <div className="glass overflow-hidden rounded-xl">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
               <h3 className="font-display text-lg font-bold text-white">Gün sonu hesabatı</h3>
               <span className="chip">{formatNumber(report?.ticketCount)} bilet</span>

@@ -4,7 +4,7 @@ import logoSrc from '../assets/logo.jpg'
 const SIZES = {
   sm: 'h-10 w-10 rounded-xl',
   md: 'h-11 w-11 rounded-xl',
-  lg: 'h-16 w-16 rounded-2xl',
+  lg: 'h-16 w-16 rounded-lg',
 }
 
 /**
@@ -21,7 +21,7 @@ export default function Logo({ compact = false, size = 'md' }) {
       aria-label="Heydər Əliyev İdman və Konsert Kompleksi - ana səhifə"
     >
       <span
-        className={`relative grid shrink-0 place-items-center overflow-hidden bg-black ring-1 ring-white/15 shadow-ice-glow transition-transform duration-300 group-hover:scale-105 ${SIZES[size]}`}
+        className={`relative grid shrink-0 place-items-center overflow-hidden bg-black ring-1 ring-white/15 transition-transform duration-300 group-hover:scale-105 ${SIZES[size]}`}
       >
         <img
           src={logoSrc}
@@ -37,13 +37,13 @@ export default function Logo({ compact = false, size = 'md' }) {
         <div className="leading-tight">
           {/* Geniş ekranlarda tam ad, dar ekranlarda qısa HƏİKK -
               başlıq heç vaxt sıxlıqla dolmur. */}
-          <p className="whitespace-nowrap font-display text-sm font-extrabold tracking-wide text-white">
+          <p className="whitespace-nowrap font-display text-sm font-bold tracking-wide text-white">
             <span className="hidden xl:inline">
               Heydər Əliyev İdman və Konsert Kompleksi
             </span>
             <span className="xl:hidden">HƏİKK</span>
           </p>
-          <p className="text-gradient-ice font-display text-sm font-extrabold tracking-widest">
+          <p className="text-gradient-ice font-display text-sm font-bold tracking-wider">
             BUZ ARENASI
           </p>
         </div>

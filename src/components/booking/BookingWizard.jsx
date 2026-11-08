@@ -65,7 +65,7 @@ function durationMinutesOf(duration) {
 function Step({ num, title }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-ice-300 to-ice-600 text-xs font-black text-night-900">
+      <span className="grid h-7 w-7 place-items-center rounded-full bg-ice-400 text-xs font-bold text-night-950">
         {num}
       </span>
       <span className="text-sm font-semibold text-white">{title}</span>
@@ -789,8 +789,8 @@ export default function BookingWizard() {
       <div className="space-y-6">
         <TicketCard ticket={ticket} />
 
-        <div className="glass-strong rounded-3xl border border-ice-300/30 p-6">
-          <p className="font-display text-lg font-extrabold text-white">
+        <div className="glass-strong rounded-xl border border-ice-300/30 p-6">
+          <p className="font-display text-lg font-bold text-white">
             Konki rezervasiyasını nə vaxt aktivləşdirməliyəm?
           </p>
           <p className="mt-2 text-sm leading-relaxed text-frost/65">
@@ -809,7 +809,7 @@ export default function BookingWizard() {
           </div>
         </div>
 
-        <div className="glass space-y-3 rounded-2xl p-5 text-sm text-frost/70">
+        <div className="glass space-y-3 rounded-lg p-5 text-sm text-frost/70">
           <p className="font-display font-bold text-white">
             Konki rezervasiyası necə işləyir?
           </p>
@@ -852,7 +852,7 @@ export default function BookingWizard() {
       {step === 1 && (
         <div className="mx-auto max-w-3xl space-y-5">
           {notice && (
-            <div className="flex items-start gap-3 rounded-2xl border border-ice-300/40 bg-ice-400/12 p-4">
+            <div className="flex items-start gap-3 rounded-lg border border-ice-300/40 bg-ice-400/12 p-4">
               <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ice-400/20 text-ice-100">
                 <svg
                   viewBox="0 0 24 24"
@@ -882,7 +882,7 @@ export default function BookingWizard() {
           )}
 
           {todayClosed && (
-            <div className="flex items-start gap-3 rounded-2xl border border-red-400/40 bg-red-500/12 p-4 sm:p-5">
+            <div className="flex items-start gap-3 rounded-lg border border-red-400/40 bg-red-500/12 p-4 sm:p-5">
               <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-red-500/25 text-red-100 ring-1 ring-red-300/40">
                 <svg
                   viewBox="0 0 24 24"
@@ -912,7 +912,7 @@ export default function BookingWizard() {
             </div>
           )}
 
-          <div className="glass rounded-3xl p-6 sm:p-8">
+          <div className="glass rounded-xl p-6 sm:p-8">
             <p className="font-display font-bold text-white">Tarix seçin</p>
             <input
               type="date"
@@ -925,7 +925,7 @@ export default function BookingWizard() {
               {dayNameAZ(date)}, {formatDateAZ(date)}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs">
               {sessionsLoading ? (
                 <span className="text-frost/60">Backend seansları yüklənir…</span>
               ) : sessionsError ? (
@@ -1002,7 +1002,7 @@ export default function BookingWizard() {
                       onClick={() => setDuration(d.k)}
                       className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${
                         duration === d.k
-                          ? 'bg-gradient-to-br from-ice-300 to-ice-600 text-night-900'
+                          ? 'bg-ice-400 text-night-950'
                           : 'bg-white/[0.06] text-frost/70 hover:text-white'
                       }`}
                     >
@@ -1020,17 +1020,17 @@ export default function BookingWizard() {
                   <button
                     type="button"
                     onClick={() => setQty((v) => Math.max(1, v - 1))}
-                    className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-black text-white hover:bg-white/10"
+                    className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
                   >
                     -
                   </button>
-                  <span className="w-8 text-center font-display text-2xl font-black text-white">
+                  <span className="w-8 text-center font-display text-2xl font-bold text-white">
                     {qty}
                   </span>
                   <button
                     type="button"
                     onClick={() => setQty((v) => Math.min(50, v + 1))}
-                    className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-black text-white hover:bg-white/10"
+                    className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
                   >
                     +
                   </button>
@@ -1038,7 +1038,7 @@ export default function BookingWizard() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-ice-300/30 bg-ice-400/10 p-4 sm:p-5">
+            <div className="mt-6 rounded-lg border border-ice-300/30 bg-ice-400/10 p-4 sm:p-5">
               <p className="font-display font-bold text-white">
                 Sessiya avtomatik təyin olunur
               </p>
@@ -1083,12 +1083,12 @@ export default function BookingWizard() {
       {step === 2 && (
         <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-5">
-            <div className="glass rounded-3xl p-6 sm:p-8">
+            <div className="glass rounded-xl p-6 sm:p-8">
               <div className="mb-4">
                 <SafetyNotice compact />
               </div>
 
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs">
                 {skatesLoading ? (
                   <span className="text-frost/60">Konki stoku yüklənir…</span>
                 ) : skatesError ? (
@@ -1131,9 +1131,9 @@ export default function BookingWizard() {
                 {people.map((p, i) => (
                   <div
                     key={i}
-                    className="grid items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:grid-cols-[auto_1fr_110px_130px]"
+                    className="grid items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4 sm:grid-cols-[auto_1fr_110px_130px]"
                   >
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-ice-400/15 font-display text-sm font-black text-ice-200">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-ice-400/15 font-display text-sm font-bold text-ice-200">
                       {i + 1}
                     </span>
                     <input
@@ -1172,7 +1172,7 @@ export default function BookingWizard() {
                               : 'border-white/10 bg-white/[0.04] text-frost/50'
                         }`}
                       >
-                        <option value="" className="text-night-900">
+                        <option value="" className="text-night-950">
                           {skatesLoading
                             ? 'Yüklənir…'
                             : skatesError
@@ -1186,7 +1186,7 @@ export default function BookingWizard() {
                               key={skate.id}
                               value={skate.size}
                               disabled={available <= 0}
-                              className="text-night-900"
+                              className="text-night-950"
                             >
                               {skate.size}
                               {available <= 0
@@ -1219,7 +1219,7 @@ export default function BookingWizard() {
                 </p>
               )}
 
-              <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-4">
+              <div className="mt-5 flex items-start gap-3 rounded-lg border border-amber-300/30 bg-amber-400/10 p-4">
                 <input
                   type="checkbox"
                   id="agree"
@@ -1238,7 +1238,7 @@ export default function BookingWizard() {
               </div>
             </div>
 
-            <div className="glass rounded-3xl p-6 sm:p-8">
+            <div className="glass rounded-xl p-6 sm:p-8">
               <p className="font-display font-bold text-white">
                 Endirimlər avtomatik tətbiq olunur
               </p>
@@ -1247,7 +1247,7 @@ export default function BookingWizard() {
                 eyni anda yalnız müştəri üçün ən sərfəli endirimi seçir.
               </p>
 
-              <div className="mt-4 space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="mt-4 space-y-2 rounded-lg border border-white/10 bg-white/[0.03] p-4">
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="font-semibold text-white">5+1 kampaniyası</span>
                   <span
@@ -1299,7 +1299,7 @@ export default function BookingWizard() {
                 {BENEFITS.map((d) => (
                   <label
                     key={d.key}
-                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-all ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all ${
                       benefits[d.key]
                         ? 'border-ice-300/70 bg-ice-400/15'
                         : 'border-white/10 bg-white/[0.03] hover:border-white/25'
@@ -1322,7 +1322,7 @@ export default function BookingWizard() {
               </div>
 
               {benefits.shaheed && (
-                <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="mt-4 flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
                   <input
                     type="checkbox"
                     id="shaheed"
@@ -1338,7 +1338,7 @@ export default function BookingWizard() {
               )}
 
               {benefits.qazi && (
-                <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
                   <p className="text-sm text-frost/75">
                     Bu sənədki gəlişlər sayı:
                   </p>
@@ -1347,13 +1347,13 @@ export default function BookingWizard() {
                     onChange={(e) => setQaziVisits(e.target.value)}
                     className="rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none"
                   >
-                    <option value="0" className="text-night-900">
+                    <option value="0" className="text-night-950">
                       İlk giriş (pulsuz)
                     </option>
-                    <option value="1" className="text-night-900">
+                    <option value="1" className="text-night-950">
                       2-ci giriş (50% endirim)
                     </option>
-                    <option value="2" className="text-night-900">
+                    <option value="2" className="text-night-950">
                       3+ (standart)
                     </option>
                   </select>
@@ -1382,8 +1382,8 @@ export default function BookingWizard() {
           </div>
 
           <div className="h-fit lg:sticky lg:top-24">
-            <div className="glass-strong rounded-3xl p-6">
-              <p className="font-display text-sm font-bold uppercase tracking-widest text-ice-200">
+            <div className="glass-strong rounded-xl p-6">
+              <p className="font-display text-sm font-bold uppercase tracking-wider text-ice-200">
                 Sifariş yekunu
               </p>
 
@@ -1467,7 +1467,7 @@ export default function BookingWizard() {
               <div className="mt-5 border-t border-dashed border-white/20 pt-4">
                 <div className="flex items-end justify-between">
                   <span className="text-sm text-frost/60">Ödəniləcək</span>
-                  <span className="font-display text-3xl font-black text-white">
+                  <span className="font-display text-3xl font-bold text-white">
                     {price.payable === 0
                       ? 'Pulsuz'
                       : `${Math.round(price.payable * 100) / 100} AZN`}
@@ -1535,7 +1535,7 @@ export default function BookingWizard() {
                 ))}
               </div>
 
-              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="mt-4 flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
                 <input
                   type="checkbox"
                   id="agreeTerms"
@@ -1564,7 +1564,7 @@ export default function BookingWizard() {
 
       {step === 3 && ticket === null && (
         <div className="mx-auto max-w-xl">
-          <div className="glass rounded-3xl p-8 text-center">
+          <div className="glass rounded-xl p-8 text-center">
             <p className="font-display text-xl font-bold text-white">
               Biletiniz hazırlanır...
             </p>

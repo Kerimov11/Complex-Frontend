@@ -156,7 +156,7 @@ export default function ShiftSlotPlannerPage() {
       )}
 
       <div className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
-        <form onSubmit={submit} className="glass h-fit rounded-3xl p-5">
+        <form onSubmit={submit} className="glass h-fit rounded-xl p-5">
           <h3 className="font-display text-lg font-bold text-white">
             {editingId ? 'Smeni redaktə et' : 'Yeni smen slotu'}
           </h3>
@@ -230,7 +230,7 @@ export default function ShiftSlotPlannerPage() {
           </p>
         </form>
 
-        <div className="glass overflow-hidden rounded-3xl">
+        <div className="glass overflow-hidden rounded-xl">
           <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
             <div>
               <h3 className="font-display text-lg font-bold text-white">
@@ -243,7 +243,7 @@ export default function ShiftSlotPlannerPage() {
             <button
               type="button"
               onClick={load}
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-frost/55 hover:bg-white/10"
+              className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-frost/55 hover:bg-white/10"
             >
               Yenilə
             </button>
@@ -268,11 +268,11 @@ export default function ShiftSlotPlannerPage() {
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-display text-base font-extrabold text-white">
+                      <p className="font-display text-base font-bold text-white">
                         {formatShiftRange(slot.startTime, slot.endTime)}
                       </p>
                       <span
-                        className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                        className={`rounded-md border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
                           slot.active
                             ? 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100'
                             : 'border-white/10 bg-white/5 text-frost/40'

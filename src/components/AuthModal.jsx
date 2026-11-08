@@ -66,7 +66,7 @@ export default function AuthModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[120] grid place-items-center overflow-y-auto bg-night-950/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[120] grid place-items-center overflow-y-auto bg-night-950/85 p-4"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) closeAuth()
       }}
@@ -76,13 +76,13 @@ export default function AuthModal() {
         role="dialog"
         aria-modal="true"
         aria-label={isLogin ? 'Daxil ol' : 'Qeydiyyat'}
-        className="glass-strong my-6 w-full max-w-md overflow-hidden rounded-3xl border border-white/15 shadow-ice-glow"
+        className="glass-strong my-6 w-full max-w-md overflow-hidden rounded-xl border border-white/15"
       >
-        <div className="relative border-b border-white/10 bg-gradient-to-br from-ice-400/15 via-transparent to-transparent p-6 pb-5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ice-200">
+        <div className="relative border-b border-white/10 p-6 pb-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-ice-200">
             Şəxsi kabinet
           </p>
-          <h2 className="mt-1 font-display text-2xl font-black text-white">
+          <h2 className="mt-1 font-display text-2xl font-bold text-white">
             {isLogin ? 'Hesabınıza daxil olun' : 'Yeni hesab yaradın'}
           </h2>
           <p className="mt-1.5 text-xs leading-relaxed text-frost/60">
@@ -117,7 +117,7 @@ export default function AuthModal() {
               onClick={() => openAuth('login')}
               className={`rounded-lg px-3 py-2 text-sm font-bold transition-colors ${
                 isLogin
-                  ? 'bg-gradient-to-br from-ice-300 to-ice-600 text-night-900'
+                  ? 'bg-ice-400 text-night-950'
                   : 'text-frost/60 hover:text-white'
               }`}
             >
@@ -128,7 +128,7 @@ export default function AuthModal() {
               onClick={() => openAuth('register')}
               className={`rounded-lg px-3 py-2 text-sm font-bold transition-colors ${
                 !isLogin
-                  ? 'bg-gradient-to-br from-ice-300 to-ice-600 text-night-900'
+                  ? 'bg-ice-400 text-night-950'
                   : 'text-frost/60 hover:text-white'
               }`}
             >
@@ -308,7 +308,7 @@ export default function AuthModal() {
             </p>
           )}
 
-          <div className="mt-5 rounded-2xl border border-ice-300/25 bg-ice-400/10 p-4">
+          <div className="mt-5 rounded-lg border border-ice-300/25 bg-ice-400/10 p-4">
             <p className="text-xs leading-relaxed text-frost/65">
               Demo hesab: <span className="font-bold text-white">demo</span> /{' '}
               <span className="font-bold text-white">demo123</span>

@@ -25,29 +25,29 @@ export default function HeaderBar({
 
   function desktopLinkClass({ isActive }, item) {
     if (item.tone === 'accent') {
-      return `rounded-full px-3 py-2 text-[13px] font-semibold transition-colors ${
+      return `rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
         isActive ? 'text-amber-200' : 'text-amber-200/70 hover:text-amber-100'
       }`
     }
-    return `rounded-full px-3 py-2 text-[13px] font-semibold transition-colors ${
+    return `rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
       isActive ? 'text-ice-200' : 'text-frost/75 hover:text-white'
     }`
   }
 
   function mobileLinkClass({ isActive }, item) {
     if (item.tone === 'accent') {
-      return `rounded-xl px-4 py-3 text-sm font-semibold ${
+      return `rounded-lg px-4 py-3 text-sm font-semibold ${
         isActive ? 'bg-amber-400/10 text-amber-200' : 'text-amber-200/70'
       }`
     }
-    return `rounded-xl px-4 py-3 text-sm font-semibold ${
+    return `rounded-lg px-4 py-3 text-sm font-semibold ${
       isActive ? 'bg-white/10 text-ice-200' : 'text-frost/80'
     }`
   }
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-150 ${
         scrolled
           ? 'glass-strong py-2.5'
           : 'border-b border-white/5 bg-transparent py-4'
@@ -69,14 +69,14 @@ export default function HeaderBar({
           ))}
 
           {isAuthenticated ? (
-            <div className="ml-2 flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">
+            <div className="ml-2 flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5">
               <span className="max-w-[9rem] truncate text-xs font-bold text-ice-200">
                 {user.username || 'Hesab'}
               </span>
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-full px-2 py-1 text-[11px] font-semibold text-frost/55 transition-colors hover:text-white"
+                className="rounded-md px-2 py-1 text-[11px] font-semibold text-frost/55 transition-colors hover:text-white"
               >
                 Çıxış
               </button>
@@ -85,7 +85,7 @@ export default function HeaderBar({
             <button
               type="button"
               onClick={() => openAuth('login')}
-              className="ml-2 rounded-full px-3 py-2 text-[13px] font-semibold text-frost/75 transition-colors hover:text-white"
+              className="ml-2 rounded-md px-3 py-2 text-[13px] font-semibold text-frost/75 transition-colors hover:text-white"
             >
               Daxil ol
             </button>
@@ -129,7 +129,7 @@ export default function HeaderBar({
       </div>
 
       {open && (
-        <div className="glass-strong mx-4 mt-3 rounded-2xl p-4 lg:hidden">
+        <div className="glass-strong mx-4 mt-3 rounded-lg p-4 lg:hidden">
           <nav className="flex flex-col gap-1" aria-label="Mobil naviqasiya">
             {items.map((item) => (
               <NavLink

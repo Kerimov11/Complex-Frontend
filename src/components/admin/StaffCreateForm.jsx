@@ -48,7 +48,7 @@ export default function StaffCreateForm({ onCreate, onCancel }) {
   }
 
   return (
-    <form onSubmit={submit} className="glass mb-5 rounded-3xl p-5">
+    <form onSubmit={submit} className="glass mb-5 rounded-xl p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="font-display text-lg font-bold text-white">
@@ -62,7 +62,7 @@ export default function StaffCreateForm({ onCreate, onCancel }) {
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-frost/55 hover:bg-white/10"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-frost/55 hover:bg-white/10"
           >
             Bağla
           </button>
@@ -101,7 +101,7 @@ export default function StaffCreateForm({ onCreate, onCancel }) {
             key={option}
             type="button"
             onClick={() => setRole(option)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
+            className={`rounded-md border px-3 py-1.5 text-xs font-bold transition-colors ${
               role === option
                 ? ROLE_META[option].className
                 : 'border-white/10 bg-white/5 text-frost/45'
