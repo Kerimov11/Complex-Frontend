@@ -103,7 +103,7 @@ export default function AdminSidebar() {
           to: '/admin/pos',
           label: 'Kassir POS',
           hint: 'Yerində satış',
-          show: isAdmin || isCashier,
+          show: !isCoordinator && (isAdmin || isCashier),
           icon: '▣',
         },
         {
