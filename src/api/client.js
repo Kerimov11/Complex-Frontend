@@ -26,19 +26,28 @@ function getToken() {
   }
 }
 
+function sanitize(str) {
+  if (!str || typeof str !== 'string') return ''
+  const trimmed = str.trim()
+  if (/bad\s+credentials/i.test(trimmed)) {
+    return 'İstifadəçi adı və ya şifrə yanlışdır'
+  }
+  return trimmed
+}
+
 function extractMessage(data, status) {
-  if (typeof data === 'string' && data.trim()) return data.trim()
+  if (typeof data === 'string' && data.trim()) return sanitize(data)
 
   if (data && typeof data === 'object') {
     if (typeof data.message === 'string' && data.message.trim()) {
-      return data.message.trim()
+      return sanitize(data.message)
     }
     if (typeof data.error === 'string' && data.error.trim()) {
-      return data.error.trim()
+      return sanitize(data.error)
     }
     if (data.errors && typeof data.errors === 'object') {
       const first = Object.values(data.errors)[0]
-      if (first) return String(first)
+      if (first) return sanitize(String(first))
     }
   }
 

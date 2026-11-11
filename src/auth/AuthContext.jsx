@@ -146,7 +146,12 @@ export function AuthProvider({ children }) {
         setOpen(false)
         return true
       } catch (err) {
-        setError(err?.message || 'Daxil olmaq alınmadı.')
+        const msg = err?.message || ''
+        if (/bad\s+credentials/i.test(msg)) {
+          setError('İstifadəçi adı və ya şifrə yanlışdır')
+        } else {
+          setError(msg || 'Daxil olmaq alınmadı.')
+        }
         return false
       } finally {
         setBusy(false)
