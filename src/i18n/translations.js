@@ -542,9 +542,13 @@ export const EXACT_MAP = {
     'The age registered on your account is under 18. Therefore, online ticket purchase and skate reservation are unavailable. You may review the arena entry rules.',
     'Возраст, указанный в вашем аккаунте, меньше 18 лет. В связи с этим онлайн-покупка билетов и бронирование коньков недоступны. Вы можете ознакомиться с правилами входа на арену.',
   ],
+  '18+ yaş və şəxsiyyət vəsiqəsi tələbi': [
+    '18+ Age & ID Card Requirement',
+    'Требование 18+ и удостоверения личности',
+  ],
   '18+ yaş və şəxsiyyət vəsiqəsi tələbi (Yalnız ilk biletdə)': [
-    '18+ Age & ID Card Requirement (First Ticket Only)',
-    'Требование 18+ и удостоверения личности (только при первом билете)',
+    '18+ Age & ID Card Requirement',
+    'Требование 18+ и удостоверения личности',
   ],
   '18 yaşdan kiçik şəxslərə onlayn bilet satışı qadağandır. İlk bilet alışınızda yaşınızın 18+ olduğunu və şəxsiyyət vəsiqənizi bir dəfə təsdiqləməyiniz kifayətdir; növbəti biletlərdə təkrar soruşulmayacaq.': [
     'Online ticket sales to persons under 18 are prohibited. You only need to confirm your 18+ age and ID card once on your first ticket purchase; it will not be asked again on future tickets.',
@@ -649,9 +653,13 @@ export const EXACT_MAP = {
     'Я прочитал(а) условия использования, правила и запреты, а также обязательства клиента и обязуюсь их соблюдать.',
   ],
   'Ətraflı oxu': ['Read More', 'Подробнее'],
+  '18+ yaş və şəxsiyyət vəsiqəsinin təsdiqi': [
+    '18+ Age & ID Card Confirmation',
+    'Подтверждение возраста 18+ и удостоверения личности',
+  ],
   '18+ yaş və şəxsiyyət vəsiqəsinin təsdiqi (Yalnız ilk biletdə)': [
-    '18+ Age & ID Card Confirmation (First Ticket Only)',
-    'Подтверждение возраста 18+ и удостоверения личности (только для первого билета)',
+    '18+ Age & ID Card Confirmation',
+    'Подтверждение возраста 18+ и удостоверения личности',
   ],
   '18+ bilet alışı üçün məlumatlarınızı bir dəfə təsdiqləyin. Növbəti bilet alışlarında bu təsdiq təkrar tələb olunmayacaq.': [
     'Confirm your details once for 18+ ticket purchase. This confirmation will not be required again for future tickets.',
@@ -1008,6 +1016,7 @@ export const EXACT_MAP = {
   'Əlavə et': ['Add', 'Добавить'],
   'İnventar boşdur.': ['Inventory is empty.', 'Инвентарь пуст.'],
   'Razmer': ['Size', 'Размер'],
+  'Tənzimlənən razmer': ['Adjustable size', 'Регулируемый размер'],
   'Bitib': ['Out of Stock', 'Нет в наличии'],
   'Stokda': ['In Stock', 'В наличии'],
   'Ümumi': ['Total', 'Всего'],
@@ -1464,7 +1473,7 @@ const PATTERNS = [
     ru: (_, n) => `Билет на ${n} чел.`,
   },
   {
-    re: /^(\d+)\s*razmer$/,
+    re: /^([\d-]+)\s*razmer$/,
     en: (_, n) => `Size ${n}`,
     ru: (_, n) => `Размер ${n}`,
   },
@@ -1474,7 +1483,7 @@ const PATTERNS = [
     ru: (_, s) => `Размер коньков: ${s}`,
   },
   {
-    re: /^(\d+)\s*ölçü$/,
+    re: /^([\d-]+)\s*ölçü$/,
     en: (_, n) => `Size ${n}`,
     ru: (_, n) => `Размер ${n}`,
   },
@@ -1644,12 +1653,12 @@ const PATTERNS = [
     ru: (_, p) => `Оплатить ${p} и получить билет`,
   },
   {
-    re: /^(\d+)\s*—\s*(\d+)\s*ədəd$/,
+    re: /^([\d-]+)\s*—\s*(\d+)\s*ədəd$/,
     en: (_, s, c) => `${s} — ${c} available`,
     ru: (_, s, c) => `${s} — ${c} шт.`,
   },
   {
-    re: /^(\d+)\s*—\s*bitib$/,
+    re: /^([\d-]+)\s*—\s*bitib$/,
     en: (_, s) => `${s} — out of stock`,
     ru: (_, s) => `${s} — нет в наличии`,
   },

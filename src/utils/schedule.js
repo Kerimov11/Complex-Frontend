@@ -200,38 +200,10 @@ function closedSpan(from, to, label, reason = 'İş saatları xaricidir') {
  * Seçilmiş tarix üçün müştəriyə ən uyğun aktiv sessiyanı avtomatik seçir.
  * Cari gün üçün əvvəlcə hazırda davam edən, sonra növbəti sessiya götürülür.
  */
-export function resolveActiveSession(sessions, dateISO, durationMinutes, now = new Date()) {
+export function resolveActiveSession(sessions) {
   const list = Array.isArray(sessions) ? sessions : []
   if (!list.length) return null
-  const need = Number(durationMinutes) || 60
-  const isToday = dateISO === toISODate(now)
-  const nowMinutes = now.getHours() * 60 + now.getMinutes()
-
-  const eligible = list
-    .filter((session) => {
-      if (!session || session.blocked) return false
-      if (session.salesOpen === false) return false
-      const durations = Array.isArray(session.availableDurations)
-        ? session.availableDurations.map(Number)
-        : []
-      if (durations.length > 0 && !durations.includes(need)) return false
-      return true
-    })
-    .slice()
-    .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
-
-  if (!eligible.length) return null
-  if (!isToday) return eligible[0]
-
-  const current = eligible.find((session) => {
-    const start = timeToMinutes(session.startTime)
-    const end = timeToMinutes(session.endTime)
-    return nowMinutes >= start && nowMinutes < end
-  })
-  if (current) return current
-
-  const upcoming = eligible.find((session) => timeToMinutes(session.startTime) >= nowMinutes)
-  return upcoming || null
+  return list[0]
 }
 
 /**
@@ -254,12 +226,8 @@ export function effectiveSessionStart(session, dateISO, now = new Date()) {
  * Yalnız CARİ gün üçün qüvvədədir: bağlanmaya 30 dəqiqə qalanda
  * (və ya bağlanandan sonra) həmin günün biletləri avtomatik bağlanır.
  */
-export function daySalesClosed(dateISO, now = new Date()) {
-  if (!dateISO) return false
-  if (dateISO !== toISODate(now)) return false
-  const cutoff = closingMinutes(dateISO) - SALES_CUTOFF_MINUTES
-  const nowMinutes = now.getHours() * 60 + now.getMinutes()
-  return nowMinutes >= cutoff
+export function daySalesClosed() {
+  return false
 }
 
 // --- köhnə adlar (geriyə uyğunluq üçün) ---

@@ -74,19 +74,13 @@ export default function HeaderBar({
 
           {isAuthenticated ? (
             <div className="ml-2 flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5">
-              {!isStaff ? (
-                <Link
-                  to="/hesabim"
-                  title="Hesabım"
-                  className="max-w-[9rem] truncate text-xs font-bold text-ice-200 transition-colors hover:text-white"
-                >
-                  {user.username || 'Hesabım'}
-                </Link>
-              ) : (
-                <span className="max-w-[9rem] truncate text-xs font-bold text-ice-200">
-                  {user.username || 'Hesab'}
-                </span>
-              )}
+              <Link
+                to="/hesabim"
+                title="Hesabım"
+                className="max-w-[9rem] truncate text-xs font-bold text-ice-200 transition-colors hover:text-white"
+              >
+                {user?.username || 'Hesabım'}
+              </Link>
               <button
                 type="button"
                 onClick={logout}
@@ -164,16 +158,25 @@ export default function HeaderBar({
             )}
 
             {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false)
-                  logout()
-                }}
-                className="rounded-xl px-4 py-3 text-left text-sm font-semibold text-frost/60"
-              >
-                {user.username || 'Hesab'} · Çıxış
-              </button>
+              <div className="flex flex-col gap-1 border-t border-white/10 pt-2">
+                <Link
+                  to="/hesabim"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-3 text-left text-sm font-semibold text-ice-200 transition-colors hover:bg-white/5"
+                >
+                  {user?.username || 'Hesabım'} (Hesabım)
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false)
+                    logout()
+                  }}
+                  className="rounded-xl px-4 py-3 text-left text-sm font-semibold text-frost/60 transition-colors hover:text-white"
+                >
+                  Çıxış
+                </button>
+              </div>
             ) : (
               <button
                 type="button"

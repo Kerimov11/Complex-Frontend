@@ -21,7 +21,7 @@ export default function AdminSidebar() {
         {
           to: '/admin',
           end: true,
-          label: 'Dashboard',
+          label: 'İdarəetmə paneli',
           hint: 'Canlı analitika',
           show: isAdmin,
           icon: '▦',
@@ -126,6 +126,18 @@ export default function AdminSidebar() {
           hint: 'Giriş və çıxış saatları',
           show: isAdmin || isCoordinator || isCashier || isVolunteer,
           icon: '◉',
+        },
+      ],
+    },
+    {
+      label: 'Şəxsi',
+      items: [
+        {
+          to: '/hesabim',
+          label: 'Hesabım',
+          hint: 'Profil və şifrə',
+          show: true,
+          icon: '⚙',
         },
       ],
     },

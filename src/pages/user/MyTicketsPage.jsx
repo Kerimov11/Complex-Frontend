@@ -220,14 +220,15 @@ export default function MyTicketsPage() {
                   <div className="min-w-0 flex-1 space-y-3 text-sm">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-wider text-frost/45">
-                        Sessiya
+                        Bilet və giriş
                       </p>
                       <p className="mt-0.5 font-semibold text-white">
-                        {ticket.sessionDate ? formatDateAZ(ticket.sessionDate) : '—'}
+                        {ticket.sessionDate ? formatDateAZ(ticket.sessionDate) : 'Sərbəst tarix'}
                       </p>
                       <p className="text-xs text-frost/60">
-                        {timeLabel(ticket.sessionStartTime)} – {timeLabel(ticket.sessionEndTime)}
-                        {ticket.durationMinutes ? ` · ${ticket.durationMinutes} dəq` : ''}
+                        {ticket.checkedInAt
+                          ? `Giriş edilib: ${timeLabel(ticket.checkedInAt)} · ${ticket.durationMinutes || 60} dəq`
+                          : `Giriş: İş saatları içində istənilən vaxt (limitsiz) · ${ticket.durationMinutes || 60} dəqiqəlik sürüş`}
                       </p>
                     </div>
 

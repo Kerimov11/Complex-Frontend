@@ -18,10 +18,10 @@ export default function TicketCard({ ticket }) {
     ? ticket.backendReservations
     : []
 
-  // Biletin etibarlılıq tarixi (sessiyanın bitmə vaxtınadək)
+  // Biletin etibarlılıq tarixi (QR skan edilənədək limitsiz)
   const validUntil = ticketValidUntil(ticket)
   const validLabel = (() => {
-    if (!validUntil) return '—'
+    if (!validUntil) return 'QR skan edilənədək limitsiz'
     const d = new Date(validUntil)
     return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(
       d.getHours()
@@ -42,7 +42,7 @@ export default function TicketCard({ ticket }) {
         <div className="text-right">
           <span className="chip chip-ice uppercase">Təsdiqləndi</span>
           <p className="mt-1.5 text-[11px] font-semibold text-frost/55">
-            Etibarlıq: {validLabel}-dək
+            {validUntil ? `Etibarlıq: ${validLabel}-dək` : 'Etibarlıq: QR skan edilənədək limitsiz'}
           </p>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function TicketCard({ ticket }) {
               <p className="mt-0.5 font-semibold text-white">
                 {dayNameAZ(session.date)}, {formatDateAZ(session.date)}
               </p>
-              <p className="text-ice-200">{shortTime(session.time)} - {shortTime(session.endTime)}</p>
+              <p className="text-ice-200">Giriş: İş saatları içində istənilən vaxt</p>
             </div>
             <div>
               <p className="text-xs text-frost/50">Müddət</p>

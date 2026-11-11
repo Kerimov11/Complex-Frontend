@@ -20,7 +20,7 @@ export default function AdminDashboardPage() {
     try {
       setData(await adminApi.getDashboard())
     } catch (err) {
-      setError(err?.message || 'Dashboard məlumatları yüklənmədi.')
+      setError(err?.message || 'İdarəetmə paneli məlumatları yüklənmədi.')
     } finally {
       setLoading(false)
     }
@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
   if (loading) {
     return (
       <div>
-        <AdminPageHeader eyebrow="Canlı analitika" title="Dashboard" />
+        <AdminPageHeader eyebrow="Canlı analitika" title="İdarəetmə paneli" />
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[1, 2, 3, 4].map((key) => (
             <LoadingCard key={key} />
@@ -52,7 +52,7 @@ export default function AdminDashboardPage() {
     <div>
       <AdminPageHeader
         eyebrow="Canlı analitika"
-        title="Dashboard"
+        title="İdarəetmə paneli"
         description="Günlük gəlir, seans doluluğu, ödəniş vəziyyəti və anbar siqnalları bir ekranda."
         actions={
           <button type="button" onClick={load} className="btn-ghost !px-5 !py-2.5 text-sm">

@@ -41,7 +41,11 @@ export default function SkateInventoryPage() {
         size: Number(form.size),
         quantity: Number(form.quantity),
       })
-      setSkates((prev) => [...prev, created].sort((a, b) => a.size - b.size))
+      setSkates((prev) =>
+        [...prev, created].sort(
+          (a, b) => (a.sortKey ?? parseInt(a.size, 10)) - (b.sortKey ?? parseInt(b.size, 10))
+        )
+      )
       setSuccess(`${created.size} ölçü anbara əlavə edildi.`)
       setForm(EMPTY_FORM)
       setShowForm(false)
@@ -177,7 +181,7 @@ export default function SkateInventoryPage() {
                   <div>
                     <p className="font-display text-2xl font-bold text-white">{skate.size}</p>
                     <p className="text-[11px] font-bold uppercase tracking-wide text-frost/35">
-                      Razmer
+                      {String(skate.size).includes('-') ? 'Tənzimlənən razmer' : 'Razmer'}
                     </p>
                   </div>
                   <span

@@ -24,7 +24,7 @@ function getInitials(firstName, lastName, username) {
 }
 
 export default function AccountPage() {
-  const { user, updateVerification, verifyIdentity, logout } = useAuth()
+  const { user, isStaff, isAdmin, isCoordinator, isCashier, isVolunteer, updateVerification, verifyIdentity, logout } = useAuth()
 
   const [profile, setProfile] = useState(null)
   const [tickets, setTickets] = useState([])
@@ -254,12 +254,20 @@ export default function AccountPage() {
             align="left"
           />
           <div className="flex flex-wrap items-center gap-2">
-            <Link to="/biletlerim" className="btn-ghost !px-4 !py-2.5 text-xs">
-              Biletlərim ({totalTicketCount})
-            </Link>
-            <Link to="/bilet" className="btn-primary !px-5 !py-2.5 text-xs">
-              Yeni bilet al
-            </Link>
+            {isStaff ? (
+              <Link to="/admin" className="btn-primary !px-5 !py-2.5 text-xs">
+                ← İdarəetmə panelinə qayıt
+              </Link>
+            ) : (
+              <>
+                <Link to="/biletlerim" className="btn-ghost !px-4 !py-2.5 text-xs">
+                  Biletlərim ({totalTicketCount})
+                </Link>
+                <Link to="/bilet" className="btn-primary !px-5 !py-2.5 text-xs">
+                  Yeni bilet al
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -292,9 +300,17 @@ export default function AccountPage() {
                         {displayFullName}
                       </h2>
                       <span className="rounded-full border border-ice-300/30 bg-ice-400/10 px-2.5 py-0.5 text-[11px] font-bold text-ice-200">
-                        Müştəri hesabı
+                        {isAdmin
+                          ? 'Administrator'
+                          : isCoordinator
+                            ? 'Koordinator'
+                            : isCashier
+                              ? 'Kassir'
+                              : isVolunteer
+                                ? 'Könüllü'
+                                : 'Müştəri hesabı'}
                       </span>
-                      {profile?.ageVerified && (
+                      {!isStaff && profile?.ageVerified && (
                         <span
                           className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
                             profile.isAdult
@@ -339,33 +355,35 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                {/* Sürətli Statistika */}
-                <div className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:shrink-0">
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-center">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-frost/50">
-                      Aktiv bilet
+                {/* Sürətli Statistika (yalnız müştəri hesabı üçün) */}
+                {!isStaff && (
+                  <div className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:shrink-0">
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-center">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-frost/50">
+                        Aktiv bilet
+                      </div>
+                      <div className="mt-0.5 font-display text-xl font-bold text-emerald-300">
+                        {activeTicketCount}
+                      </div>
                     </div>
-                    <div className="mt-0.5 font-display text-xl font-bold text-emerald-300">
-                      {activeTicketCount}
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-center">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-frost/50">
+                        İstifadə olunub
+                      </div>
+                      <div className="mt-0.5 font-display text-xl font-bold text-ice-200">
+                        {usedTicketCount}
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-center">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-frost/50">
+                        Cəmi bilet
+                      </div>
+                      <div className="mt-0.5 font-display text-xl font-bold text-white">
+                        {totalTicketCount}
+                      </div>
                     </div>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-center">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-frost/50">
-                      İstifadə olunub
-                    </div>
-                    <div className="mt-0.5 font-display text-xl font-bold text-ice-200">
-                      {usedTicketCount}
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-center">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-frost/50">
-                      Cəmi bilet
-                    </div>
-                    <div className="mt-0.5 font-display text-xl font-bold text-white">
-                      {totalTicketCount}
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -708,148 +726,152 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                {/* 2. Təsdiq və Təhlükəsizlik Statusu Kartı */}
-                <div className="glass rounded-2xl border border-white/10 p-6">
-                  <div className="border-b border-white/10 pb-4">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
-                      Doğrulama və Qaydalar
-                    </div>
-                    <h3 className="mt-0.5 font-display text-lg font-bold text-white">
-                      Hesab təsdiq statusu
-                    </h3>
-                  </div>
-
-                  <div className="mt-4 space-y-3">
-                    {/* Yaş təsdiqi */}
-                    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                      <div>
-                        <div className="text-xs font-semibold text-white">
-                          Doğum tarixi və yaş təsdiqi
-                        </div>
-                        <div className="mt-0.5 text-[11px] text-frost/60">
-                          {profile?.ageVerified
-                            ? `${displayDob} (${displayAge || '—'})`
-                            : 'Doğum tarixi hələ daxil edilməyib'}
-                        </div>
+                {/* 2. Təsdiq və Təhlükəsizlik Statusu Kartı (yalnız müştəri hesabı üçün) */}
+                {!isStaff && (
+                  <div className="glass rounded-2xl border border-white/10 p-6">
+                    <div className="border-b border-white/10 pb-4">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
+                        Doğrulama və Qaydalar
                       </div>
-                      <span
-                        className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
-                          profile?.ageVerified
-                            ? 'border-emerald-300/30 bg-emerald-400/10 text-emerald-200'
-                            : 'border-amber-300/30 bg-amber-400/10 text-amber-200'
-                        }`}
-                      >
-                        {profile?.ageVerified ? 'Təsdiqlənib' : 'Gözləyir'}
-                      </span>
+                      <h3 className="mt-0.5 font-display text-lg font-bold text-white">
+                        Hesab təsdiq statusu
+                      </h3>
                     </div>
 
-                    {/* Şəxsiyyət vəsiqəsi */}
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                      <div className="flex items-center justify-between">
+                    <div className="mt-4 space-y-3">
+                      {/* Yaş təsdiqi */}
+                      <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                         <div>
                           <div className="text-xs font-semibold text-white">
-                            Şəxsiyyət vəsiqəsi
+                            Doğum tarixi və yaş təsdiqi
                           </div>
                           <div className="mt-0.5 text-[11px] text-frost/60">
-                            {profile?.identityConfirmed
-                              ? `Təsdiqlənib (••••${profile.identityDocumentLast4 || ''})`
-                              : 'Onlayn bilet alışı üçün vəsiqə təsdiqi'}
+                            {profile?.ageVerified
+                              ? `${displayDob} (${displayAge || '—'})`
+                              : 'Doğum tarixi hələ daxil edilməyib'}
                           </div>
                         </div>
                         <span
                           className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
-                            profile?.identityConfirmed
+                            profile?.ageVerified
                               ? 'border-emerald-300/30 bg-emerald-400/10 text-emerald-200'
-                              : 'border-white/15 bg-white/5 text-frost/60'
+                              : 'border-amber-300/30 bg-amber-400/10 text-amber-200'
                           }`}
                         >
-                          {profile?.identityConfirmed ? 'Təsdiqlənib' : 'Təsdiqlənməyib'}
+                          {profile?.ageVerified ? 'Təsdiqlənib' : 'Gözləyir'}
                         </span>
                       </div>
 
-                      {!profile?.identityConfirmed && profile?.isAdult && (
-                        <form onSubmit={handleIdentitySubmit} className="mt-3 space-y-2 border-t border-white/10 pt-3">
-                          {docError && (
-                            <div className="text-[11px] text-red-300">{docError}</div>
-                          )}
-                          {docSuccess && (
-                            <div className="text-[11px] text-emerald-300">{docSuccess}</div>
-                          )}
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={docNumber}
-                              onChange={(e) => setDocNumber(e.target.value)}
-                              placeholder="Məs: AZE12345678"
-                              className="input-ice flex-1 !py-1.5 text-xs"
-                            />
-                            <button
-                              type="submit"
-                              disabled={docBusy}
-                              className="btn-primary !px-3.5 !py-1.5 text-xs"
-                            >
-                              {docBusy ? '...' : 'Təsdiqlə'}
-                            </button>
+                      {/* Şəxsiyyət vəsiqəsi */}
+                      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-semibold text-white">
+                              Şəxsiyyət vəsiqəsi
+                            </div>
+                            <div className="mt-0.5 text-[11px] text-frost/60">
+                              {profile?.identityConfirmed
+                                ? `Təsdiqlənib (••••${profile.identityDocumentLast4 || ''})`
+                                : 'Onlayn bilet alışı üçün vəsiqə təsdiqi'}
+                            </div>
                           </div>
-                        </form>
-                      )}
-                    </div>
+                          <span
+                            className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
+                              profile?.identityConfirmed
+                                ? 'border-emerald-300/30 bg-emerald-400/10 text-emerald-200'
+                              : 'border-white/15 bg-white/5 text-frost/60'
+                            }`}
+                          >
+                            {profile?.identityConfirmed ? 'Təsdiqlənib' : 'Təsdiqlənməyib'}
+                          </span>
+                        </div>
 
-                    {/* Arena qaydaları */}
-                    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                      <div>
-                        <div className="text-xs font-semibold text-white">
-                          Arena təhlükəsizlik qaydaları
-                        </div>
-                        <div className="mt-0.5 text-[11px] text-frost/60">
-                          {profile?.acceptedObligationsCount
-                            ? `${profile.acceptedObligationsCount} öhdəlik qəbul edilib`
-                            : 'Qaydalarla tanış olub təsdiqləyə bilərsiniz'}
-                        </div>
+                        {!profile?.identityConfirmed && profile?.isAdult && (
+                          <form onSubmit={handleIdentitySubmit} className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                            {docError && (
+                              <div className="text-[11px] text-red-300">{docError}</div>
+                            )}
+                            {docSuccess && (
+                              <div className="text-[11px] text-emerald-300">{docSuccess}</div>
+                            )}
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={docNumber}
+                                onChange={(e) => setDocNumber(e.target.value)}
+                                placeholder="Məs: AZE12345678"
+                                className="input-ice flex-1 !py-1.5 text-xs"
+                              />
+                              <button
+                                type="submit"
+                                disabled={docBusy}
+                                className="btn-primary !px-3.5 !py-1.5 text-xs"
+                              >
+                                {docBusy ? '...' : 'Təsdiqlə'}
+                              </button>
+                            </div>
+                          </form>
+                        )}
                       </div>
-                      <Link
-                        to="/qaydalar"
-                        className="rounded-lg border border-ice-300/30 bg-ice-400/10 px-2.5 py-1 text-[11px] font-bold text-ice-200 transition hover:bg-ice-400/20"
-                      >
-                        Qaydalara bax
-                      </Link>
+
+                      {/* Arena qaydaları */}
+                      <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                        <div>
+                          <div className="text-xs font-semibold text-white">
+                            Arena təhlükəsizlik qaydaları
+                          </div>
+                          <div className="mt-0.5 text-[11px] text-frost/60">
+                            {profile?.acceptedObligationsCount
+                              ? `${profile.acceptedObligationsCount} öhdəlik qəbul edilib`
+                              : 'Qaydalarla tanış olub təsdiqləyə bilərsiniz'}
+                          </div>
+                        </div>
+                        <Link
+                          to="/qaydalar"
+                          className="rounded-lg border border-ice-300/30 bg-ice-400/10 px-2.5 py-1 text-[11px] font-bold text-ice-200 transition hover:bg-ice-400/20"
+                        >
+                          Qaydalara bax
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* 3. Sürətli Keçidlər və Hesabdan Çıxış */}
-                <div className="glass rounded-2xl border border-white/10 p-6">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-frost/55">
-                    Sürətli əməliyyatlar
+                {/* 3. Sürətli Keçidlər və Hesabdan Çıxış (yalnız müştəri hesabı üçün) */}
+                {!isStaff && (
+                  <div className="glass rounded-2xl border border-white/10 p-6">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-frost/55">
+                      Sürətli əməliyyatlar
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2.5">
+                      <Link
+                        to="/biletlerim"
+                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3 text-xs font-semibold text-white transition hover:border-ice-300/40 hover:bg-white/[0.06]"
+                      >
+                        🎫 Biletlərimə keç
+                      </Link>
+                      <Link
+                        to="/bilet"
+                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3 text-xs font-semibold text-white transition hover:border-ice-300/40 hover:bg-white/[0.06]"
+                      >
+                        ⛸️ Yeni bilet al
+                      </Link>
+                      <Link
+                        to="/canli"
+                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3 text-xs font-semibold text-white transition hover:border-ice-300/40 hover:bg-white/[0.06]"
+                      >
+                        📡 Canlı buz statusu
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={logout}
+                        className="rounded-xl border border-red-400/25 bg-red-500/10 px-3.5 py-3 text-left text-xs font-semibold text-red-200 transition hover:bg-red-500/20"
+                      >
+                        🚪 Hesabdan çıxış
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2.5">
-                    <Link
-                      to="/biletlerim"
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3 text-xs font-semibold text-white transition hover:border-ice-300/40 hover:bg-white/[0.06]"
-                    >
-                      🎫 Biletlərimə keç
-                    </Link>
-                    <Link
-                      to="/bilet"
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3 text-xs font-semibold text-white transition hover:border-ice-300/40 hover:bg-white/[0.06]"
-                    >
-                      ⛸️ Yeni bilet al
-                    </Link>
-                    <Link
-                      to="/canli"
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3 text-xs font-semibold text-white transition hover:border-ice-300/40 hover:bg-white/[0.06]"
-                    >
-                      📡 Canlı buz statusu
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={logout}
-                      className="rounded-xl border border-red-400/25 bg-red-500/10 px-3.5 py-3 text-left text-xs font-semibold text-red-200 transition hover:bg-red-500/20"
-                    >
-                      🚪 Hesabdan çıxış
-                    </button>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </>

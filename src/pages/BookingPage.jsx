@@ -21,7 +21,7 @@ export default function BookingPage() {
       <SectionTitle
         eyebrow="Onlayn bilet"
         title="Bilet al və konki rezervasiya et"
-        description="Tarixi seçin, iştirakçıların yaşını və konki razmerlərini qeyd edin. Sessiya avtomatik təyin olunur; konki rezervasiyasını arenaya gəldikdə “Biletlərim” bölməsindən aktivləşdirin."
+        description="Tarixi seçin, iştirakçıların sayını və konki razmerlərini qeyd edin. Biletiniz limitsizdir — saat seçimi yoxdur; QR kod təsdiqlənənədək istədiyiniz gün və iş saatında gəlib buza daxil ola bilərsiniz."
       />
       {!hasTicket && (
         <div className="mx-auto mt-8 max-w-2xl">
@@ -51,7 +51,7 @@ export default function BookingPage() {
           {needsFirstTicketVerification && !hasTicket && (
             <div className="mx-auto mt-5 max-w-2xl rounded-xl border border-ice-300/30 bg-ice-400/10 p-5">
               <p className="font-display font-bold text-white">
-                18+ yaş və şəxsiyyət vəsiqəsi tələbi (Yalnız ilk biletdə)
+                18+ yaş və şəxsiyyət vəsiqəsi tələbi
               </p>
               <p className="mt-2 text-sm leading-relaxed text-frost/70">
                 18 yaşdan kiçik şəxslərə onlayn bilet satışı qadağandır. İlk

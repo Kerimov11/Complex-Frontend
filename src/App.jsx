@@ -72,7 +72,7 @@ export default function App() {
   const { isStaff, isAdmin, isCoordinator, isCashier, isVolunteer } = useAuth()
   const showPublicFooter = !(isStaff && isStaffArea(pathname))
 
-  // Staff accounts are confined to their management panels. Any public route
+  // Staff accounts are confined to their management panels and their account page. Any other public route
   // redirects to the role-specific panel home.
   if (isStaff && !isStaffArea(pathname)) {
     return (

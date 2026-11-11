@@ -52,16 +52,15 @@ export function formatPrice(value) {
 
 /**
  * Biletin etibarlılıq bitmə vaxtı (ms).
- * Yeni biletlərdə `validUntil` saxlanılır; köhnə biletlərdə sessiyanın
- * bitmə vaxtından hesablanır. Sessiya bitdikdən sonra bilet etibarsızdır.
+ * QR kod skan edilib təsdiqlənmədiyi müddətcə bilet heç vaxt vaxtı bitmir (limitsizdir).
+ * Yalnız turniketdə skan edildikdən sonra (`checkedInAt`) bilet müddəti (30 və ya 60 dəq) başlayır.
  */
 export function ticketValidUntil(ticket) {
   if (!ticket) return null
-  if (Number.isFinite(ticket.validUntil)) return ticket.validUntil
-  const s = ticket.session
-  if (s && s.date && s.endTime) {
-    const ts = new Date(`${s.date}T${s.endTime}:00`).getTime()
-    return Number.isNaN(ts) ? null : ts
+  if (ticket.checkedInAt) {
+    const checkedInTs = new Date(ticket.checkedInAt).getTime()
+    const durationMs = (ticket.durationMinutes || ticket.session?.durationMinutes || 60) * 60 * 1000
+    return checkedInTs + durationMs
   }
   return null
 }

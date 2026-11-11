@@ -5,7 +5,7 @@ import { staffHomePath } from '../utils/staffRoutes'
 function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
   if (isAdmin) {
     return [
-      { to: '/admin', label: 'Dashboard', end: true },
+      { to: '/admin', label: 'İdarəetmə paneli', end: true },
       { to: '/admin/shifts', label: 'Smenlər' },
       { to: '/admin/skates', label: 'Anbar' },
       { to: '/volunteer/reservations', label: 'Rezervasiyalar' },

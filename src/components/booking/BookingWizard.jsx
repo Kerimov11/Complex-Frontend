@@ -194,7 +194,12 @@ export default function BookingWizard({ onTicketChange }) {
   const dateClosed = daySalesClosed(date, new Date(now))
 
   const skatesSorted = useMemo(
-    () => [...skates].sort((a, b) => Number(a.size) - Number(b.size)),
+    () =>
+      [...skates].sort(
+        (a, b) =>
+          Number(a.sortKey ?? parseInt(a.size, 10)) -
+          Number(b.sortKey ?? parseInt(b.size, 10))
+      ),
     [skates]
   )
   const skatesReady = !skatesLoading && !skatesError && skatesSorted.length > 0
@@ -339,44 +344,20 @@ export default function BookingWizard({ onTicketChange }) {
     loadSkates()
   }, [backendSession?.id, loadSkates])
 
-  const availabilityBlocked =
-    availability &&
-    (availability.salesOpen === false ||
-      availability.requestedDurationAvailable === false)
-
   const canContinue =
-    !dateClosed &&
     hasOpenSlot &&
-    backendReady &&
-    !availabilityLoading &&
-    !availabilityBlocked
-  const continueBlockReason = dateClosed
-    ? 'Bu gün üçün bilet satışı bağlanıb - zəhmət olmasa başqa gün seçin.'
-    : !hasOpenSlot
-      ? 'Bu tarix üçün seçilmiş müddətdə aktiv sessiya yoxdur - başqa gün və ya müddət seçin.'
-      : sessionsLoading
-        ? 'Seanslar yüklənir…'
-        : sessionsError
-          ? `${sessionsError}`
-          : sessions.length === 0
-            ? 'Bu tarix üçün seans yoxdur - başqa gün seçin.'
-            : !backendSession
-              ? 'Aktiv sessiya avtomatik tapılmadı - başqa gün və ya müddət seçin.'
-              : availabilityLoading
-                ? 'Sessiya vaxtı yoxlanılır…'
-                : availability?.salesOpen === false
-                  ? availability.message ||
-                    'Sessiyanın bağlanmasına 30 dəqiqədən az qalıb; bilet satışı dayandırılıb.'
-                  : availability?.requestedDurationAvailable === false
-                    ? availability.message ||
-                      'Seçilmiş müddət üçün kifayət qədər vaxt yoxdur.'
-                    : ''
-
-  // Cari günün satışı bağlanıbsa, tarix avtomatik olaraq sabaha keçirilir
-  // (yalnız sessiya seçimi ekranında - aktiv sifarişin tarixi dəyişdirilmir)
-  useEffect(() => {
-    if (step === 1 && daySalesClosed(date)) setDate(addDaysISO(1))
-  }, [date, now, step])
+    backendReady
+  const continueBlockReason = !hasOpenSlot
+    ? 'Bu tarix üçün aktiv sessiya tapılmadı.'
+    : sessionsLoading
+      ? 'Seanslar yüklənir…'
+      : sessionsError
+        ? `${sessionsError}`
+        : sessions.length === 0
+          ? 'Bu tarix üçün seans yoxdur - başqa gün seçin.'
+          : !backendSession
+            ? 'Aktiv sessiya tapılmadı.'
+            : ''
 
   // Biletin etibarlılıq müddəti bitdikdə ekrandan/sistemdən avtomatik silinməsi
   useEffect(() => {
@@ -587,9 +568,8 @@ export default function BookingWizard({ onTicketChange }) {
       id: createTicketId(),
       reference: createReference(),
       createdAt: Date.now(),
-      // Bilet sessiyanın bitmə vaxtınadək etibarlıdır; müddət bitdikdən
-      // sonra avtomatik olaraq sistemdən silinir.
-      validUntil: new Date(`${date}T${endTime}:00`).getTime(),
+      // Bilet limitsizdir — turniketdə skan edilib təsdiqlənənədək vaxtı bitmir
+      validUntil: null,
       session: {
         date,
         time,
@@ -1040,40 +1020,11 @@ export default function BookingWizard({ onTicketChange }) {
               ) : (
                 <>
                   <span className="text-frost/65">
-                    Seans:{' '}
-                    <b className="text-white">
-                      {backendTime(backendSession?.startTime)}–
-                      {backendTime(backendSession?.endTime)}
-                    </b>{' '}
-                    · {backendSession?.availableTickets ?? '—'} yer
+                    Giriş: <b className="text-white">İş saatları içində istənilən vaxt</b> (qeyri-məhdud)
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setSessionsReload((v) => v + 1)}
-                    className="font-bold uppercase tracking-wider text-ice-200 transition-colors hover:text-white"
-                  >
-                    Yenilə
-                  </button>
                 </>
               )}
             </div>
-
-            {availabilityError && (
-              <p className="mt-2 text-xs font-semibold text-amber-200">
-                Sessiya mövcudluğu yoxlanmadı: {availabilityError}. Rezervasiya
-                zamanı yenidən yoxlanılacaq.
-              </p>
-            )}
-            {availability && !availabilityLoading && (
-              <p className="mt-2 text-xs text-frost/55">
-                Qalan vaxt {availability.remainingMinutes ?? '—'} dəq ·
-                mövcud müddətlər{' '}
-                {(availability.availableDurations || [])
-                  .map((m) => `${m} dəq`)
-                  .join(', ') || 'yoxdur'}
-                {availability.salesOpen === false ? ' · satış bağlıdır' : ''}
-              </p>
-            )}
 
             <p className="mt-6 font-display font-bold text-white">
               Vaxt və müddət
@@ -1116,12 +1067,16 @@ export default function BookingWizard({ onTicketChange }) {
                   >
                     -
                   </button>
-                  <span className="w-8 text-center font-display text-2xl font-bold text-white">
-                    {qty}
-                  </span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={qty}
+                    onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                    className="w-16 rounded-lg bg-white/[0.06] py-1 text-center font-display text-2xl font-bold text-white outline-none focus:ring-1 focus:ring-ice-300"
+                  />
                   <button
                     type="button"
-                    onClick={() => setQty((v) => Math.min(50, v + 1))}
+                    onClick={() => setQty((v) => v + 1)}
                     className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
                   >
                     +
@@ -1132,23 +1087,11 @@ export default function BookingWizard({ onTicketChange }) {
 
             <div className="mt-6 rounded-lg border border-ice-300/30 bg-ice-400/10 p-4 sm:p-5">
               <p className="font-display font-bold text-white">
-                Sessiya avtomatik təyin olunur
+                Sərbəst giriş biletləri
               </p>
-              <p className="mt-1 text-xs leading-relaxed text-frost/60">
-                Başlama vaxtı seçilmir. Seçdiyiniz tarix və bilet müddəti üçün
-                arenanın aktiv sessiyası sistem tərəfindən avtomatik tapılır.
+              <p className="mt-1 text-xs leading-relaxed text-frost/70">
+                Biletiniz qeyri-məhdud müddətlidir — saat seçimi yoxdur. QR kod təsdiqlənmədiyi müddətcə istədiyiniz gün və iş saatında gəlib buza daxil ola bilərsiniz. Vaxt yalnız turniketdən keçdikdən sonra aktivləşir.
               </p>
-              {backendSession && (
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-                  <span className="chip chip-ice">
-                    {backendTime(backendSession.startTime)} –{' '}
-                    {backendTime(backendSession.endTime)}
-                  </span>
-                  <span className="text-frost/70">
-                    Giriş vaxtı: <b className="text-white">{backendTime(time)}</b>
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -1662,7 +1605,7 @@ export default function BookingWizard({ onTicketChange }) {
                 (!user?.ageVerified || !user?.identityConfirmed) && (
                   <div className="mt-4 rounded-lg border border-ice-300/30 bg-ice-400/10 p-4">
                     <p className="font-display text-sm font-bold text-white">
-                      18+ yaş və şəxsiyyət vəsiqəsinin təsdiqi (Yalnız ilk biletdə)
+                      18+ yaş və şəxsiyyət vəsiqəsinin təsdiqi
                     </p>
                     <p className="mt-2 text-xs leading-relaxed text-frost/65">
                       18+ bilet alışı üçün məlumatlarınızı bir dəfə təsdiqləyin.

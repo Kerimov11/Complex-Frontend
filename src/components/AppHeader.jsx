@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 import PublicNavbar from './PublicNavbar'
 import StaffNavbar from './StaffNavbar'
 
-const STAFF_ROUTE_PREFIXES = ['/admin', '/volunteer']
+const STAFF_ROUTE_PREFIXES = ['/admin', '/volunteer', '/hesabim']
 
 /**
  * Staff chrome is used only inside the role management areas. Staff accounts
