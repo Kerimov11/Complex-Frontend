@@ -26,20 +26,6 @@ export default function WorkingHours() {
             ))}
           </div>
 
-          <p className="mt-3 inline-flex items-center justify-center gap-1.5 text-[11px] text-frost/50">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-3.5 w-3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M12 8v4l2.5 2.5" />
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-            Seans fasilələri ayrıdır
-          </p>
         </div>
       ))}
 

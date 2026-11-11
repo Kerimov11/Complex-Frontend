@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -9,6 +10,12 @@ import { api } from '../api/client'
 import { clearVoucher, loadLastVoucherRaw } from '../utils/voucher'
 
 const AUTH_KEY = 'ha_auth'
+const STAFF_ROLES = [
+  'ROLE_ADMIN',
+  'ROLE_COORDINATOR',
+  'ROLE_CASHIER',
+  'ROLE_VOLUNTEER',
+]
 const AuthContext = createContext(null)
 
 function readAuth() {
@@ -22,12 +29,44 @@ function readAuth() {
   }
 }
 
+function writeAuth(next) {
+  try {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(next))
+  } catch {
+    // localStorage əlçatmazdırsa sessiya yalnız yaddaşda qalır
+  }
+}
+
+function verificationFields(data) {
+  return {
+    dateOfBirth: data?.dateOfBirth || null,
+    age: data?.age ?? null,
+    ageVerified: Boolean(data?.ageVerified),
+    isAdult: Boolean(data?.isAdult),
+    identityConfirmed: Boolean(data?.identityConfirmed),
+    identityDocumentLast4: data?.identityDocumentLast4 || '',
+  }
+}
+
+function isStaffRole(role) {
+  return STAFF_ROLES.includes(role)
+}
+
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(readAuth)
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState('login')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [verificationLoading, setVerificationLoading] = useState(() => {
+    const stored = readAuth()
+    const roles = Array.isArray(stored?.roles) ? stored.roles : []
+    return Boolean(
+      stored?.token &&
+        roles.includes('ROLE_USER') &&
+        !roles.some(isStaffRole)
+    )
+  })
 
   const openAuth = useCallback((nextMode = 'login') => {
     setMode(nextMode)
@@ -41,19 +80,60 @@ export function AuthProvider({ children }) {
   }, [])
 
   const persist = useCallback((data) => {
+    const roles = Array.isArray(data?.roles) ? data.roles : []
     const next = {
       token: data?.token || '',
       userId: data?.userId ?? null,
       username: data?.username || '',
-      roles: Array.isArray(data?.roles) ? data.roles : [],
+      roles,
+      ...verificationFields(data),
     }
-    try {
-      localStorage.setItem(AUTH_KEY, JSON.stringify(next))
-    } catch {
-      // localStorage əlçatmazdırsa sessiya yalnız yaddaşda qalır
-    }
+    const customer = roles.includes('ROLE_USER') && !roles.some(isStaffRole)
+    setVerificationLoading(customer)
+    writeAuth(next)
     setAuth(next)
   }, [])
+
+  const updateVerification = useCallback((data) => {
+    setAuth((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, ...verificationFields(data) }
+      writeAuth(next)
+      return next
+    })
+  }, [])
+
+  // Köhnə localStorage sessiyaları üçün backend-dəki təsdiq vəziyyətini
+  // yeniləyirik. Beləliklə əvvəl yaşını təsdiqləmiş istifadəçidən təkrar
+  // doğum tarixi soruşulmur.
+  useEffect(() => {
+    const token = auth?.token
+    const roles = Array.isArray(auth?.roles) ? auth.roles : []
+    const customer = roles.includes('ROLE_USER') && !roles.some(isStaffRole)
+
+    if (!token || !customer) {
+      setVerificationLoading(false)
+      return undefined
+    }
+
+    let cancelled = false
+    setVerificationLoading(true)
+    api
+      .getCustomerVerification()
+      .then((data) => {
+        if (!cancelled) updateVerification(data)
+      })
+      .catch(() => {
+        // Giriş cavabındakı məlumat kifayətdir; şəbəkə xətası sessiyanı pozmur.
+      })
+      .finally(() => {
+        if (!cancelled) setVerificationLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [auth?.token, updateVerification])
 
   const login = useCallback(
     async (username, password) => {
@@ -95,6 +175,27 @@ export function AuthProvider({ children }) {
     [persist]
   )
 
+  const verifyAge = useCallback(
+    async (dateOfBirth) => {
+      const data = await api.saveAgeVerification(dateOfBirth)
+      updateVerification(data)
+      return data
+    },
+    [updateVerification]
+  )
+
+  const verifyIdentity = useCallback(
+    async ({ identityDocumentNumber, confirmed = true }) => {
+      const data = await api.saveIdentityVerification(
+        identityDocumentNumber,
+        confirmed
+      )
+      updateVerification(data)
+      return data
+    },
+    [updateVerification]
+  )
+
   const logout = useCallback(async () => {
     // Alınmış biletlər backend-də saxlanılır və "Biletlərim" tarixçəsində
     // qalır. Çıxış yalnız lokal sessiyanı təmizləyir.
@@ -115,6 +216,7 @@ export function AuthProvider({ children }) {
       // ignore
     }
     setAuth(null)
+    setVerificationLoading(false)
     setOpen(false)
     setError('')
   }, [])
@@ -124,8 +226,15 @@ export function AuthProvider({ children }) {
     [auth]
   )
 
-  const value = useMemo(
-    () => ({
+  const value = useMemo(() => {
+    const isStaff = Boolean(
+      Array.isArray(auth?.roles) && auth.roles.some(isStaffRole)
+    )
+    const isCustomer = Boolean(
+      auth?.roles?.includes('ROLE_USER') && !isStaff
+    )
+
+    return {
       auth,
       user: auth,
       isAuthenticated: Boolean(auth?.token && auth?.userId),
@@ -133,16 +242,21 @@ export function AuthProvider({ children }) {
       isCoordinator: Boolean(auth?.roles?.includes('ROLE_COORDINATOR')),
       isCashier: Boolean(auth?.roles?.includes('ROLE_CASHIER')),
       isVolunteer: Boolean(auth?.roles?.includes('ROLE_VOLUNTEER')),
-      isStaff: Boolean(
-        auth?.roles?.some((role) =>
-          [
-            'ROLE_ADMIN',
-            'ROLE_COORDINATOR',
-            'ROLE_CASHIER',
-            'ROLE_VOLUNTEER',
-          ].includes(role)
-        )
+      isStaff,
+      isCustomer,
+      isMinor: Boolean(
+        isCustomer && auth?.ageVerified && auth?.isAdult === false
       ),
+      needsAgeVerification: Boolean(
+        isCustomer && !verificationLoading && !auth?.ageVerified
+      ),
+      needsIdentityVerification: Boolean(
+        isCustomer &&
+          auth?.ageVerified &&
+          auth?.isAdult &&
+          !auth?.identityConfirmed
+      ),
+      verificationLoading,
       hasRole,
       open,
       mode,
@@ -153,22 +267,30 @@ export function AuthProvider({ children }) {
       closeAuth,
       login,
       register,
+      persist,
+      verifyAge,
+      verifyIdentity,
+      updateVerification,
       logout,
-    }),
-    [
-      auth,
-      open,
-      mode,
-      busy,
-      error,
-      hasRole,
-      openAuth,
-      closeAuth,
-      login,
-      register,
-      logout,
-    ]
-  )
+    }
+  }, [
+    auth,
+    open,
+    mode,
+    busy,
+    error,
+    verificationLoading,
+    hasRole,
+    openAuth,
+    closeAuth,
+    login,
+    register,
+    persist,
+    verifyAge,
+    verifyIdentity,
+    updateVerification,
+    logout,
+  ])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

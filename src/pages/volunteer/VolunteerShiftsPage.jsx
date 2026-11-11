@@ -90,6 +90,22 @@ export default function VolunteerShiftsPage() {
           <AdminNotice tone="success">{success}</AdminNotice>
         </div>
       )}
+      {myShifts
+        .filter(
+          (shift) =>
+            shift.status === 'CANCELLED' || shift.liveStatus === 'CANCELLED'
+        )
+        .map((shift) => (
+          <div key={`cancelled-${shift.id}`} className="mb-3">
+            <AdminNotice tone="warn">
+              {shift.cancellationMessage ||
+                `Seçdiyiniz ${formatShiftDate(shift.shiftDate)} (${formatShiftRange(
+                  shift.startTime,
+                  shift.endTime
+                )}) smeni ləğv edilmişdir.`}
+            </AdminNotice>
+          </div>
+        ))}
 
       <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="glass overflow-hidden rounded-xl">
@@ -190,33 +206,49 @@ export default function VolunteerShiftsPage() {
               </div>
             )}
             {!loading &&
-              myShifts.map((shift) => (
-                <div key={shift.id} className="p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-display text-sm font-bold text-white">
-                      {formatShiftDate(shift.shiftDate)} ·{' '}
-                      {formatShiftRange(shift.startTime, shift.endTime)}
-                    </p>
-                    <ShiftStatusBadge status={shift.liveStatus} />
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-md border px-2.5 py-1 text-[10px] font-bold ${
-                        shift.station
-                          ? 'border-ice-300/25 bg-ice-400/10 text-ice-100'
-                          : 'border-amber-300/25 bg-amber-400/10 text-amber-100'
-                      }`}
-                    >
-                      {shift.stationLabel || stationLabel(shift.station)}
-                    </span>
-                    {shift.assignedBy && (
-                      <span className="text-[10px] text-frost/30">
-                        Təyin edən: {shift.assignedBy}
-                      </span>
+              myShifts.map((shift) => {
+                const isCancelled =
+                  shift.status === 'CANCELLED' || shift.liveStatus === 'CANCELLED'
+                return (
+                  <div
+                    key={shift.id}
+                    className={`p-4 ${isCancelled ? 'bg-red-500/[0.04]' : ''}`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-display text-sm font-bold text-white">
+                        {formatShiftDate(shift.shiftDate)} ·{' '}
+                        {formatShiftRange(shift.startTime, shift.endTime)}
+                      </p>
+                      <ShiftStatusBadge
+                        status={isCancelled ? 'CANCELLED' : shift.liveStatus}
+                      />
+                    </div>
+                    {isCancelled ? (
+                      <p className="mt-2 rounded-lg border border-red-300/25 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-100">
+                        {shift.cancellationMessage ||
+                          'Seçdiyiniz bu smen ləğv edilmişdir.'}
+                      </p>
+                    ) : (
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span
+                          className={`rounded-md border px-2.5 py-1 text-[10px] font-bold ${
+                            shift.station
+                              ? 'border-ice-300/25 bg-ice-400/10 text-ice-100'
+                              : 'border-amber-300/25 bg-amber-400/10 text-amber-100'
+                          }`}
+                        >
+                          {shift.stationLabel || stationLabel(shift.station)}
+                        </span>
+                        {shift.assignedBy && (
+                          <span className="text-[10px] text-frost/30">
+                            Təyin edən: {shift.assignedBy}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
           </div>
         </div>
       </div>

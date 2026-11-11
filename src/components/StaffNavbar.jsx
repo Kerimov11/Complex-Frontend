@@ -1,7 +1,6 @@
 import HeaderBar from './HeaderBar'
 import { useAuth } from '../auth/AuthContext'
-
-const LIVE_LINK = { to: '/canli', label: 'Buza Canlı Bax' }
+import { staffHomePath } from '../utils/staffRoutes'
 
 function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
   if (isAdmin) {
@@ -10,6 +9,9 @@ function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
       { to: '/admin/shifts', label: 'Smenlər' },
       { to: '/admin/skates', label: 'Anbar' },
       { to: '/volunteer/reservations', label: 'Rezervasiyalar' },
+      { to: '/admin/verification', label: 'Turniket' },
+      { to: '/admin/cashier-verification', label: 'Kassa QR' },
+      { to: '/admin/active', label: 'Buzdakı müştərilər' },
       { to: '/admin/pos', label: 'POS' },
     ]
   }
@@ -19,6 +21,9 @@ function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
       { to: '/admin/shifts', label: 'Smenlər' },
       { to: '/volunteer/inventory', label: 'Anbar' },
       { to: '/volunteer/reservations', label: 'Rezervasiyalar' },
+      { to: '/admin/verification', label: 'Turniket' },
+      { to: '/admin/cashier-verification', label: 'Kassa QR' },
+      { to: '/admin/active', label: 'Buzdakı müştərilər' },
     ]
   }
 
@@ -27,12 +32,17 @@ function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
       { to: '/admin/pos', label: 'POS' },
       { to: '/admin/shifts', label: 'Smenlər' },
       { to: '/admin/verification', label: 'Turniket' },
+      { to: '/admin/cashier-verification', label: 'Kassa QR' },
+      { to: '/admin/active', label: 'Buzdakı müştərilər' },
     ]
   }
 
   if (isVolunteer) {
     return [
       { to: '/volunteer/reservations', label: 'Rezervasiyalar' },
+      { to: '/admin/verification', label: 'Turniket' },
+      { to: '/admin/cashier-verification', label: 'Kassa QR' },
+      { to: '/admin/active', label: 'Buzdakı müştərilər' },
       { to: '/volunteer/inventory', label: 'Anbar' },
       { to: '/volunteer/shifts', label: 'Smenlər' },
     ]
@@ -48,11 +58,12 @@ export default function StaffNavbar() {
     isCashier,
     isVolunteer,
   } = useAuth()
+  const roles = { isAdmin, isCoordinator, isCashier, isVolunteer }
 
-  const items = [
-    LIVE_LINK,
-    ...staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }),
-  ]
-
-  return <HeaderBar items={items} />
+  return (
+    <HeaderBar
+      items={staffTabs(roles)}
+      logoTo={staffHomePath(roles)}
+    />
+  )
 }

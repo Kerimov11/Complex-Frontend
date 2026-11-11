@@ -8,6 +8,10 @@ import {
 } from '../../utils/datetime'
 import { formatPrice, ticketValidUntil } from '../../utils/ticket'
 
+function shortTime(value) {
+  return value ? String(value).slice(0, 5) : ''
+}
+
 export default function TicketCard({ ticket }) {
   const { people, session, id } = ticket
   const backendReservations = Array.isArray(ticket.backendReservations)
@@ -45,7 +49,7 @@ export default function TicketCard({ ticket }) {
 
       <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
         <div className="grid shrink-0 place-items-center rounded-lg border border-white/10 bg-white p-4 text-night-950">
-          <QrCode seed={id} />
+          <QrCode value={id} />
         </div>
 
         <div className="min-w-0 flex-1 space-y-4">
@@ -55,7 +59,7 @@ export default function TicketCard({ ticket }) {
               <p className="mt-0.5 font-semibold text-white">
                 {dayNameAZ(session.date)}, {formatDateAZ(session.date)}
               </p>
-              <p className="text-ice-200">{session.time} - {session.endTime}</p>
+              <p className="text-ice-200">{shortTime(session.time)} - {shortTime(session.endTime)}</p>
             </div>
             <div>
               <p className="text-xs text-frost/50">Müddət</p>
@@ -118,9 +122,9 @@ export default function TicketCard({ ticket }) {
             </ul>
             {backendReservations.length > 0 && (
               <p className="mt-3 border-t border-white/10 pt-3 text-[11px] leading-relaxed text-emerald-200/80">
-                {backendReservations.length} konki rezervasiyası backend-də
-                yaradıldı. Arenaya gəldikdə “Biletlərim” bölməsindən konki
-                taymerini əl ilə aktivləşdirin.
+                {backendReservations.length} konki rezervasiyası yaradıldı.
+                Arenaya gəldikdə “Biletlərim” bölməsindən konki taymerini əl
+                ilə aktivləşdirin.
               </p>
             )}
           </div>
@@ -139,7 +143,8 @@ export default function TicketCard({ ticket }) {
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-white/[0.03] px-6 py-4">
         <div>
           <p className="text-xs text-frost/55">
-            Giriş üçün bu çeki girişdə işçiyə göstərin.
+            Giriş üçün bu çeki girişdə işçiyə göstərin. QR kod yalnız bir dəfə
+            skan edilir.
           </p>
           {ticket.payment?.transactionId && (
             <p className="mt-1 font-mono text-[10px] text-frost/35">

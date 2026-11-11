@@ -1,6 +1,28 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const TAU = Math.PI * 2
+const SNOWFALL_KEY = 'ha_snowfall_enabled'
+const SNOWFALL_EVENT = 'ha-snowfall-change'
+
+export function isSnowfallEnabled() {
+  try {
+    const raw = localStorage.getItem(SNOWFALL_KEY)
+    if (raw === null) return true
+    return raw !== 'false'
+  } catch {
+    return true
+  }
+}
+
+export function setSnowfallEnabled(enabled) {
+  const next = Boolean(enabled)
+  try {
+    localStorage.setItem(SNOWFALL_KEY, next ? 'true' : 'false')
+  } catch {
+    // ignore storage errors
+  }
+  window.dispatchEvent(new CustomEvent(SNOWFALL_EVENT, { detail: next }))
+}
 
 function rand(min, max) {
   return min + Math.random() * (max - min)
@@ -15,8 +37,27 @@ function rand(min, max) {
  */
 export default function Snowfall() {
   const canvasRef = useRef(null)
+  const [enabled, setEnabled] = useState(isSnowfallEnabled)
 
   useEffect(() => {
+    function onChange(e) {
+      if (e?.type === SNOWFALL_EVENT && typeof e.detail === 'boolean') {
+        setEnabled(e.detail)
+      } else {
+        setEnabled(isSnowfallEnabled())
+      }
+    }
+    window.addEventListener(SNOWFALL_EVENT, onChange)
+    window.addEventListener('storage', onChange)
+    return () => {
+      window.removeEventListener(SNOWFALL_EVENT, onChange)
+      window.removeEventListener('storage', onChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!enabled) return undefined
+
     const canvas = canvasRef.current
     if (!canvas) return undefined
 
@@ -192,7 +233,9 @@ export default function Snowfall() {
       document.removeEventListener('visibilitychange', onVisibility)
       ctx.clearRect(0, 0, canvas.width, canvas.height)
     }
-  }, [])
+  }, [enabled])
+
+  if (!enabled) return null
 
   return (
     <canvas

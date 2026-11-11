@@ -88,10 +88,10 @@ export default function PricingSection({ detailed = false }) {
             <span className="chip chip-ice uppercase">12 giriş</span>
           </div>
           <p className="mt-3 font-display text-3xl font-bold text-gradient-ice">
-            {m1.price} AZN
+            {`${m1.price} AZN`}
           </p>
           <p className="mt-1 text-sm text-frost/65">
-            {m1.entries} giriş, hər biri 1 saat
+            {`${m1.entries} giriş, hər biri 1 saat`}
           </p>
         </div>
         <div className="glass card-hover flex flex-col rounded-lg p-5">
@@ -102,10 +102,10 @@ export default function PricingSection({ detailed = false }) {
             <span className="chip chip-ice uppercase">12 giriş</span>
           </div>
           <p className="mt-3 font-display text-3xl font-bold text-gradient-ice">
-            {m2.price} AZN
+            {`${m2.price} AZN`}
           </p>
           <p className="mt-1 text-sm text-frost/65">
-            Şəxsi konkisi ilə gələnlər üçün. {m2.saved} AZN qənaət.
+            {`Şəxsi konkisi ilə gələnlər üçün. ${m2.saved} AZN qənaət.`}
           </p>
         </div>
         <div className="rounded-lg border border-ice-300/25 bg-ice-400/10 p-5">

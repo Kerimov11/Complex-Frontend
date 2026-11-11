@@ -73,6 +73,10 @@ body {
   .card-hover {
     @apply transition-colors duration-150 hover:border-ice-300/40;
   }
+  .input-ice {
+    @apply rounded-xl border border-white/15 bg-night-900/80 px-4 py-2.5 text-sm font-medium text-white placeholder-frost/35 outline-none transition-colors focus:border-ice-300/70 focus:bg-night-900;
+    color-scheme: dark;
+  }
 }
 
 .hide-scrollbar::-webkit-scrollbar {

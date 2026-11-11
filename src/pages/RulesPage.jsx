@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { api } from '../api/client'
+import { useAuth } from '../auth/AuthContext'
 import SectionTitle from '../components/SectionTitle'
 import SafetyNotice from '../components/SafetyNotice'
 import WorkingHours from '../components/home/WorkingHours'
@@ -8,6 +10,46 @@ import {
   OBLIGATIONS,
   TRAUMA_NOTE,
 } from '../data/rules'
+
+const GUEST_STORAGE_KEY = 'ha_rules_acceptance_guest'
+
+function toChecked(ids) {
+  const result = {}
+  if (Array.isArray(ids)) {
+    ids.forEach((id) => {
+      result[id] = true
+    })
+  }
+  return result
+}
+
+function readStoredAcceptance(storageKey) {
+  try {
+    const raw = localStorage.getItem(storageKey)
+    if (!raw) return { checked: {}, updatedAt: 0 }
+    const parsed = JSON.parse(raw)
+    return {
+      checked: toChecked(parsed?.acceptedObligationIds),
+      updatedAt: Number(parsed?.updatedAt) || 0,
+    }
+  } catch {
+    return { checked: {}, updatedAt: 0 }
+  }
+}
+
+function writeStoredAcceptance(storageKey, checked) {
+  const acceptedObligationIds = OBLIGATIONS.filter((o) => checked[o.id]).map(
+    (o) => o.id
+  )
+  try {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify({ acceptedObligationIds, updatedAt: Date.now() })
+    )
+  } catch {
+    // localStorage əlçatmazdırsa təsdiq yalnız cari sessiyada qalır
+  }
+}
 
 function BlockTitle({ eyebrow, title }) {
   return (
@@ -26,11 +68,145 @@ function BlockTitle({ eyebrow, title }) {
 }
 
 export default function RulesPage() {
+  const { isAuthenticated, user } = useAuth()
   const [checked, setChecked] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [saveMessage, setSaveMessage] = useState('')
+  const saveQueue = useRef(Promise.resolve())
+  const pendingSaves = useRef(0)
+  const mountedRef = useRef(true)
+
+  const storageKey = useMemo(
+    () =>
+      isAuthenticated && user?.userId
+        ? `ha_rules_acceptance_user_${user.userId}`
+        : GUEST_STORAGE_KEY,
+    [isAuthenticated, user?.userId]
+  )
+
   const acceptedCount = OBLIGATIONS.filter((o) => checked[o.id]).length
   const allChecked = acceptedCount === OBLIGATIONS.length
 
-  const toggle = (id) => setChecked((prev) => ({ ...prev, [id]: !prev[id] }))
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
+  const persist = useCallback(
+    (nextChecked) => {
+      writeStoredAcceptance(storageKey, nextChecked)
+
+      if (!isAuthenticated) {
+        setSaveMessage('Təsdiqlər bu brauzerdə saxlanıldı.')
+        setSaveError('')
+        return
+      }
+
+      const acceptedObligationIds = OBLIGATIONS.filter(
+        (o) => nextChecked[o.id]
+      ).map((o) => o.id)
+
+      pendingSaves.current += 1
+      setSaving(true)
+      setSaveMessage('Yadda saxlanılır...')
+      setSaveError('')
+
+      saveQueue.current = saveQueue.current
+        .catch(() => {})
+        .then(() => api.saveRulesAcceptance(acceptedObligationIds))
+        .then(() => {
+          if (mountedRef.current) {
+            setSaveMessage('Yadda saxlanıldı.')
+            setSaveError('')
+          }
+        })
+        .catch((error) => {
+          if (mountedRef.current) {
+            setSaveMessage('')
+            setSaveError(
+              error?.message || 'Təsdiqlər yadda saxlanılmadı.'
+            )
+          }
+        })
+        .finally(() => {
+          pendingSaves.current = Math.max(0, pendingSaves.current - 1)
+          if (mountedRef.current && pendingSaves.current === 0) {
+            setSaving(false)
+          }
+        })
+    },
+    [isAuthenticated, storageKey]
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setSaveError('')
+    setSaveMessage('')
+    setChecked({})
+
+    async function load() {
+      const stored = readStoredAcceptance(storageKey)
+
+      if (!isAuthenticated) {
+        if (!cancelled) {
+          setChecked(stored.checked)
+          setLoading(false)
+        }
+        return
+      }
+
+      try {
+        const data = await api.getRulesAcceptance()
+        if (cancelled) return
+
+        const backendChecked = toChecked(data?.acceptedObligationIds)
+        const backendUpdatedAt = data?.updatedAt
+          ? new Date(data.updatedAt).getTime()
+          : 0
+
+        if (stored.updatedAt > backendUpdatedAt) {
+          setChecked(stored.checked)
+          persist(stored.checked)
+        } else {
+          setChecked(backendChecked)
+          writeStoredAcceptance(storageKey, backendChecked)
+        }
+      } catch (error) {
+        if (cancelled) return
+        setSaveError(error?.message || 'Təsdiqlər yüklənmədi.')
+        setChecked(stored.checked)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [isAuthenticated, storageKey, persist])
+
+  const toggle = (id) => {
+    const next = { ...checked, [id]: !checked[id] }
+    setChecked(next)
+    persist(next)
+  }
+
+  const statusText = loading
+    ? 'Təsdiq vəziyyəti yüklənir...'
+    : saving
+      ? 'Yadda saxlanılır...'
+      : saveError
+        ? saveError
+        : saveMessage ||
+          (isAuthenticated
+            ? 'Təsdiqlər hesabınızda saxlanılır.'
+            : 'Təsdiqlər bu brauzerdə saxlanılır.')
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-10 pt-32 sm:px-6">
@@ -130,6 +306,17 @@ export default function RulesPage() {
             Aşağıdakı hər bir bəndi oxuyub onu qəbul etdiyinizi bildirin.
             Bilet alışı zamanı bu öhdəliklərə əməl etməyi öz üzərinizə götürürsünüz.
           </p>
+          <p
+            className={`mt-3 text-xs font-semibold ${
+              saveError
+                ? 'text-rose-300'
+                : saving
+                  ? 'text-amber-200'
+                  : 'text-frost/55'
+            }`}
+          >
+            {statusText}
+          </p>
 
           <ul className="mt-6 space-y-3">
             {OBLIGATIONS.map((o) => {
@@ -148,8 +335,9 @@ export default function RulesPage() {
                       id={`ob-${o.id}`}
                       type="checkbox"
                       checked={isChecked}
+                      disabled={loading}
                       onChange={() => toggle(o.id)}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-ice-300"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-ice-300 disabled:cursor-wait disabled:opacity-60"
                     />
                     <span className="text-sm leading-relaxed text-frost/80">
                       {o.text}

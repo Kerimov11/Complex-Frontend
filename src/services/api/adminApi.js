@@ -14,23 +14,6 @@ function query(params = {}) {
 export const adminApi = {
   getDashboard: () => request('/api/admin/dashboard'),
 
-  getUsers: (search) => request(`/api/admin/users${query({ q: search })}`),
-  createStaff: (payload) =>
-    request('/api/admin/users', { method: 'POST', body: payload }),
-  updateUserRoles: (id, roles) =>
-    request(`/api/admin/users/${id}/roles`, {
-      method: 'PUT',
-      body: { roles },
-    }),
-  addUserRole: (id, role) =>
-    request(`/api/admin/users/${id}/roles/${encodeURIComponent(role)}`, {
-      method: 'POST',
-    }),
-  removeUserRole: (id, role) =>
-    request(`/api/admin/users/${id}/roles/${encodeURIComponent(role)}`, {
-      method: 'DELETE',
-    }),
-
   getStaff: (search) => request(`/api/admin/staff${query({ q: search })}`),
   createStaffMember: (payload) =>
     request('/api/admin/staff/create', { method: 'POST', body: payload }),
@@ -83,6 +66,12 @@ export const adminApi = {
     }),
   lookupCode: (code) =>
     request(`/api/verification/lookup${query({ code })}`),
+  handoverCode: (code) =>
+    request('/api/verification/handover', {
+      method: 'POST',
+      body: { code },
+    }),
+  getActiveGuests: () => request('/api/verification/active'),
 
   getPayments: (status) => request(`/api/payments${query({ status })}`),
   processPayment: (transactionId, status) =>

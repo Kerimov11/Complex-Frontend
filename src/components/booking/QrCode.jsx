@@ -1,32 +1,32 @@
-import { useMemo } from 'react'
-import { makeQrMatrix } from '../../utils/ticket'
+import { QRCodeSVG } from 'qrcode.react'
 
-export default function QrCode({ seed, className = 'h-28 w-28' }) {
-  const matrix = useMemo(() => makeQrMatrix(seed), [seed])
-  const size = matrix.length
-  const scale = 4
+/**
+ * Real, skan edilə bilən QR kod.
+ * `seed` köhnə çağırışlarla uyğunluq üçün saxlanılır; `value` prioritetdir.
+ */
+export default function QrCode({ value, seed, className = 'h-28 w-28' }) {
+  const data = String(value ?? seed ?? '').trim()
+
+  if (!data) {
+    return (
+      <div
+        className={`${className} grid place-items-center rounded-md bg-white/10 text-center text-[10px] font-semibold text-white/60`}
+      >
+        QR kod yoxdur
+      </div>
+    )
+  }
 
   return (
-    <svg
-      viewBox={`0 0 ${size * scale} ${size * scale}`}
+    <QRCodeSVG
+      value={data}
+      size={128}
+      level="M"
+      marginSize={1}
+      bgColor="#ffffff"
+      fgColor="#07111f"
       className={className}
-      role="img"
-      aria-label="Bilet QR kodu"
-    >
-      {matrix.flatMap((row, y) =>
-        row.map((v, x) =>
-          v ? (
-            <rect
-              key={`${x}-${y}`}
-              x={x * scale}
-              y={y * scale}
-              width={scale}
-              height={scale}
-              fill="currentColor"
-            />
-          ) : null
-        )
-      )}
-    </svg>
+      title="Bilet QR kodu"
+    />
   )
 }

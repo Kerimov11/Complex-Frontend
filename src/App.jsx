@@ -14,12 +14,13 @@ import ContactPage from './pages/ContactPage'
 import RulesPage from './pages/RulesPage'
 import AdminLayout from './components/admin/AdminLayout'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
-import UserManagementPage from './pages/admin/UserManagementPage'
 import StaffManagementPage from './pages/admin/StaffManagementPage'
 import SessionManagementPage from './pages/admin/SessionManagementPage'
 import SkateInventoryPage from './pages/admin/SkateInventoryPage'
 import CashierPosPage from './pages/admin/CashierPosPage'
 import VerificationPage from './pages/admin/VerificationPage'
+import CashierVerificationPage from './pages/admin/CashierVerificationPage'
+import ActiveGuestsPage from './pages/admin/ActiveGuestsPage'
 import FinancePage from './pages/admin/FinancePage'
 import VolunteerReservationsPage from './pages/volunteer/VolunteerReservationsPage'
 import VolunteerInventoryPage from './pages/volunteer/VolunteerInventoryPage'
@@ -27,8 +28,10 @@ import VolunteerShiftsPage from './pages/volunteer/VolunteerShiftsPage'
 import ShiftOverviewPage from './pages/coordinator/ShiftOverviewPage'
 import ShiftSlotPlannerPage from './pages/coordinator/ShiftSlotPlannerPage'
 import MyTicketsPage from './pages/user/MyTicketsPage'
+import AccountPage from './pages/user/AccountPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 import { useAuth } from './auth/AuthContext'
+import { staffHomePath } from './utils/staffRoutes'
 
 const ADMIN = ['ROLE_ADMIN']
 const COORD = ['ROLE_ADMIN', 'ROLE_COORDINATOR']
@@ -66,8 +69,19 @@ function StaffHome() {
 
 export default function App() {
   const { pathname } = useLocation()
-  const { isStaff } = useAuth()
+  const { isStaff, isAdmin, isCoordinator, isCashier, isVolunteer } = useAuth()
   const showPublicFooter = !(isStaff && isStaffArea(pathname))
+
+  // Staff accounts are confined to their management panels. Any public route
+  // redirects to the role-specific panel home.
+  if (isStaff && !isStaffArea(pathname)) {
+    return (
+      <Navigate
+        to={staffHomePath({ isAdmin, isCoordinator, isCashier, isVolunteer })}
+        replace
+      />
+    )
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -85,6 +99,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MyTicketsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hesabim"
+            element={
+              <ProtectedRoute>
+                <AccountPage />
               </ProtectedRoute>
             }
           />
@@ -114,14 +136,6 @@ export default function App() {
               element={
                 <ProtectedRoute roles={ADMIN}>
                   <StaffManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="users"
-              element={
-                <ProtectedRoute roles={ADMIN}>
-                  <UserManagementPage />
                 </ProtectedRoute>
               }
             />
@@ -189,6 +203,23 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="cashier-verification"
+              element={
+                <ProtectedRoute roles={VERIFY}>
+                  <CashierVerificationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="active"
+              element={
+                <ProtectedRoute roles={STAFF}>
+                  <ActiveGuestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<StaffHome />} />
           </Route>
 
           <Route
@@ -224,12 +255,56 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="verification"
+              element={
+                <ProtectedRoute roles={VERIFY}>
+                  <VerificationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="cashier-verification"
+              element={
+                <ProtectedRoute roles={VERIFY}>
+                  <CashierVerificationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="active"
+              element={
+                <ProtectedRoute roles={STAFF}>
+                  <ActiveGuestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="reservations" replace />} />
           </Route>
 
-          <Route path="*" element={<HomePage />} />
+          <Route
+            path="*"
+            element={
+              isStaff ? (
+                <Navigate
+                  to={staffHomePath({
+                    isAdmin,
+                    isCoordinator,
+                    isCashier,
+                    isVolunteer,
+                  })}
+                  replace
+                />
+              ) : (
+                <HomePage />
+              )
+            }
+          />
         </Routes>
       </main>
-      {showPublicFooter && <Footer />}
+      {showPublicFooter && (
+        <Footer />
+      )}
       <AuthModal />
     </div>
   )

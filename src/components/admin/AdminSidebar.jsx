@@ -34,13 +34,6 @@ export default function AdminSidebar() {
           icon: '◈',
         },
         {
-          to: '/admin/users',
-          label: 'İstifadəçilər',
-          hint: 'Bütün rollar',
-          show: isAdmin,
-          icon: '◎',
-        },
-        {
           to: '/admin/sessions',
           label: 'Sessiyalar',
           hint: 'Bilet limitləri',
@@ -68,7 +61,7 @@ export default function AdminSidebar() {
       items: [
         {
           to: '/admin/shifts',
-          label: 'Smen mənzərəsi',
+          label: 'Könüllü smenləri',
           hint: 'Canlı stansiyalar',
           show: isAdmin || isCoordinator || isCashier,
           icon: '⌖',
@@ -89,9 +82,9 @@ export default function AdminSidebar() {
         },
         {
           to: '/volunteer/inventory',
-          label: 'Konki stoku',
+          label: 'Konki anbarı',
           hint: 'Ölçü üzrə canlı',
-          show: canVolunteer,
+          show: !isAdmin && canVolunteer,
           icon: '⛸',
         },
         {
@@ -119,6 +112,20 @@ export default function AdminSidebar() {
           hint: 'QR doğrulama',
           show: isAdmin || isCoordinator || isCashier || isVolunteer,
           icon: '⌁',
+        },
+        {
+          to: '/admin/cashier-verification',
+          label: 'Kassa QR',
+          hint: 'Bilet məlumatları',
+          show: isAdmin || isCoordinator || isCashier || isVolunteer,
+          icon: '▤',
+        },
+        {
+          to: '/admin/active',
+          label: 'Buzdakı müştərilər',
+          hint: 'Giriş və çıxış saatları',
+          show: isAdmin || isCoordinator || isCashier || isVolunteer,
+          icon: '◉',
         },
       ],
     },

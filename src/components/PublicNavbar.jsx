@@ -9,7 +9,7 @@ const PUBLIC_LINKS = [
   { to: '/elaqe', label: 'Əlaqə' },
 ]
 
-const LIVE_LINK = { to: '/canli', label: 'Buza Canlı Bax' }
+const LIVE_LINK = { to: '/canli', label: 'Canlı' }
 
 export default function PublicNavbar() {
   const {
@@ -43,11 +43,14 @@ export default function PublicNavbar() {
   const items = [...PUBLIC_LINKS, LIVE_LINK]
 
   if (isAuthenticated) {
-    items.push(
-      isStaff
-        ? { to: panelPath, label: panelLabel, tone: 'accent' }
-        : { to: '/biletlerim', label: 'Biletlərim', tone: 'accent' }
-    )
+    if (isStaff) {
+      items.push({ to: panelPath, label: panelLabel, tone: 'accent' })
+    } else {
+      items.push(
+        { to: '/biletlerim', label: 'Biletlərim', tone: 'accent' },
+        { to: '/hesabim', label: 'Hesabım', tone: 'accent' }
+      )
+    }
   }
 
   return <HeaderBar items={items} showBooking />

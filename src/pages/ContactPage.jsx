@@ -27,7 +27,7 @@ export default function ContactPage() {
             <p className="mt-4 flex flex-wrap gap-2">
               {SITE.buses.map((b) => (
                 <span key={b} className="chip">
-                  Avtobus {b}
+                  {`Avtobus ${b}`}
                 </span>
               ))}
             </p>
@@ -38,25 +38,28 @@ export default function ContactPage() {
               Əlaqə
             </p>
             <div className="mt-4 space-y-3 text-sm">
-              <a
-                href={`tel:${SITE.phone.replace(/\s/g, '')}`}
-                className="flex items-center gap-3 text-frost/80 transition-colors hover:text-white"
-              >
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-ice-400/15 text-ice-200">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 2 .7 2.9a2 2 0 01-.5 2.1L8 10a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.9.3 1.9.6 2.9.7a2 2 0 011.7 2z" />
-                  </svg>
-                </span>
-                {SITE.phone}
-              </a>
+              {[SITE.phone, SITE.phone2].map((phone) => (
+                <a
+                  key={phone}
+                  href={`tel:${phone.replace(/\s/g, '')}`}
+                  className="flex items-center gap-3 text-frost/80 transition-colors hover:text-white"
+                >
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-ice-400/15 text-ice-200">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 2 .7 2.9a2 2 0 01-.5 2.1L8 10a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.9.3 1.9.6 2.9.7a2 2 0 011.7 2z" />
+                    </svg>
+                  </span>
+                  {phone}
+                </a>
+              ))}
               <a
                 href={`mailto:${SITE.email}`}
                 className="flex items-center gap-3 text-frost/80 transition-colors hover:text-white"
@@ -89,6 +92,19 @@ export default function ContactPage() {
                   </svg>
                 </span>
                 {SITE.instagramHandle}
+              </a>
+              <a
+                href={SITE.tiktok}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 text-frost/80 transition-colors hover:text-white"
+              >
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-ice-400/15 text-ice-200">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+                    <path d="M21 8.5a6.5 6.5 0 0 1-4.1-1.4V15a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v3.1a2 2 0 1 0 1.1 1.8V2h3.1a3.4 3.4 0 0 0 3.4 3.2V8.5z" />
+                  </svg>
+                </span>
+                {SITE.tiktokHandle}
               </a>
             </div>
           </div>

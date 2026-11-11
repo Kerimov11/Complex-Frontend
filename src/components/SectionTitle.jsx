@@ -1,7 +1,7 @@
 export default function SectionTitle({ eyebrow, title, description, align = 'center' }) {
-  const alignCls = align === 'left' ? 'text-left' : 'text-center'
+  const alignCls = align === 'left' ? 'text-left' : 'mx-auto text-center'
   return (
-    <div className={`${alignCls} mx-auto max-w-2xl`}>
+    <div className={`${alignCls} max-w-2xl`}>
       {eyebrow && (
         <p className="text-gradient-ice font-display text-xs font-bold uppercase tracking-wider">
           {eyebrow}

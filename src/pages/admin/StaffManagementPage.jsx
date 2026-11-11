@@ -33,9 +33,13 @@ export default function StaffManagementPage() {
   }, [search])
 
   useEffect(() => {
-    const timer = setTimeout(load, 250)
+    if (!search.trim()) {
+      load()
+      return undefined
+    }
+    const timer = setTimeout(load, 200)
     return () => clearTimeout(timer)
-  }, [load])
+  }, [load, search])
 
   const summary = useMemo(() => {
     const result = Object.fromEntries(STAFF_ROLE_OPTIONS.map((role) => [role, 0]))
@@ -50,7 +54,11 @@ export default function StaffManagementPage() {
     setError('')
     setSuccess('')
     const created = await adminApi.createStaffMember(payload)
-    setStaff((prev) => [...prev, created].sort((a, b) => a.id - b.id))
+    setStaff((prev) => {
+      const filtered = prev.filter((item) => item.id !== created.id)
+      return [...filtered, created].sort((a, b) => a.id - b.id)
+    })
+    await load()
     setSuccess(`${created.username} əməkdaş hesabı yaradıldı.`)
     setShowCreate(false)
   }
@@ -157,6 +165,9 @@ export default function StaffManagementPage() {
           {!loading &&
             staff.map((member) => {
               const currentRole = staffRoleOf(member)
+              const visibleRoles = (member.roles || []).filter((role) =>
+                STAFF_ROLE_OPTIONS.includes(role)
+              )
               return (
                 <div
                   key={member.id}
@@ -176,7 +187,7 @@ export default function StaffManagementPage() {
                       </p>
                     )}
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      {(member.roles || []).map((role) => (
+                      {visibleRoles.map((role) => (
                         <RoleBadge key={role} role={role} />
                       ))}
                     </div>

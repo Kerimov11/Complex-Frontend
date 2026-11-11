@@ -153,7 +153,7 @@ export function useReservation(ticketOrId) {
         }
         saveJSON(key, next)
         setReservation(next)
-        return { ok: true, message: 'Rezervasiya backend-də 10 dəqiqə uzadıldı.' }
+        return { ok: true, message: 'Rezervasiya 10 dəqiqə uzadıldı.' }
       } catch (err) {
         return {
           ok: false,

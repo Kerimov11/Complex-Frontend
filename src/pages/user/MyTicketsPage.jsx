@@ -215,7 +215,7 @@ export default function MyTicketsPage() {
 
                 <div className="flex flex-col gap-5 p-5 sm:flex-row">
                   <div className="grid shrink-0 place-items-center self-start rounded-lg border border-white/10 bg-white p-3 text-night-950">
-                    <QrCode seed={ticket.qrCode || ticket.ticketCode} className="h-24 w-24" />
+                    <QrCode value={ticket.qrCode || ticket.ticketCode} className="h-24 w-24" />
                   </div>
                   <div className="min-w-0 flex-1 space-y-3 text-sm">
                     <div>

@@ -6,8 +6,8 @@ import StaffNavbar from './StaffNavbar'
 const STAFF_ROUTE_PREFIXES = ['/admin', '/volunteer']
 
 /**
- * Staff chrome is used only inside the role management areas. Staff and public
- * users see the full public navigation when they return to the public site.
+ * Staff chrome is used only inside the role management areas. Staff accounts
+ * are redirected to their own panel and never see the public navigation.
  */
 export function isStaffArea(pathname = '') {
   return STAFF_ROUTE_PREFIXES.some(

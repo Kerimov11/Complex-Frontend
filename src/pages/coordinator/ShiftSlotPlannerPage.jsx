@@ -93,7 +93,11 @@ export default function ShiftSlotPlannerPage() {
   }
 
   async function remove(slot) {
-    if (!window.confirm(`${formatShiftRange(slot.startTime, slot.endTime)} smenini silmək istəyirsiniz?`)) {
+    const hasVolunteers = (slot.selectedCount || 0) > 0
+    const confirmText = hasVolunteers
+      ? `${formatShiftRange(slot.startTime, slot.endTime)} smenini silmək istəyirsiniz? Bu smeni seçmiş ${slot.selectedCount} könüllüyə smenin ləğv olunduğu barədə mesaj göndəriləcək.`
+      : `${formatShiftRange(slot.startTime, slot.endTime)} smenini silmək istəyirsiniz?`
+    if (!window.confirm(confirmText)) {
       return
     }
     setBusy(true)
@@ -101,7 +105,11 @@ export default function ShiftSlotPlannerPage() {
     setSuccess('')
     try {
       await shiftApi.deleteShiftSlot(slot.id)
-      setSuccess('Smen slotu silindi.')
+      setSuccess(
+        hasVolunteers
+          ? 'Smen slotu silindi və könüllülərə seçdikləri smenin ləğv olunduğu barədə mesaj göndərildi.'
+          : 'Smen slotu silindi.'
+      )
       if (editingId === slot.id) cancelEdit()
       await load()
     } catch (err) {
@@ -223,11 +231,6 @@ export default function ShiftSlotPlannerPage() {
               </button>
             )}
           </div>
-
-          <p className="mt-4 rounded-xl border border-ice-300/15 bg-ice-400/[0.06] px-3 py-2 text-[11px] leading-relaxed text-frost/40">
-            Təhlükəsizlik qaydası: könüllü seçimi olan slotu silmək mümkün deyil.
-            Belə halda slotu deaktiv edin və ya könüllünü başqa smenə keçirin.
-          </p>
         </form>
 
         <div className="glass overflow-hidden rounded-xl">
@@ -306,12 +309,8 @@ export default function ShiftSlotPlannerPage() {
                     <button
                       type="button"
                       onClick={() => remove(slot)}
-                      disabled={busy || (slot.selectedCount || 0) > 0}
-                      title={
-                        (slot.selectedCount || 0) > 0
-                          ? 'Seçimi olan slot silinə bilməz'
-                          : 'Slotu sil'
-                      }
+                      disabled={busy}
+                      title="Slotu sil"
                       className="rounded-xl border border-red-300/20 bg-red-400/10 px-3 py-2 text-xs font-bold text-red-100 transition-colors hover:bg-red-400/15 disabled:cursor-not-allowed disabled:opacity-30"
                     >
                       Sil

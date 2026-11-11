@@ -28,7 +28,7 @@ export default function ShiftOverviewPage() {
     try {
       setData(await shiftApi.getShiftOverview(date))
     } catch (err) {
-      setError(err?.message || 'Smen mənzərəsi yüklənmədi.')
+      setError(err?.message || 'Könüllü smenləri yüklənmədi.')
     } finally {
       if (showLoading) setLoading(false)
     }
@@ -97,9 +97,9 @@ export default function ShiftOverviewPage() {
   return (
     <div>
       <AdminPageHeader
-        eyebrow="Canlı smen mənzərəsi"
+        eyebrow="Könüllü smenləri"
         title="Günün smenləri və stansiyalar"
-        description="Admin, koordinator və kassir üçün vahid mənzərə: hər smen üzrə könüllü sayı, stansiya bölgüsü və canlı növbə statusu."
+        description="Admin, koordinator və kassir üçün vahid mənzərə: hər smen üzrə könüllü sayı, stansiya bölgüsü və canlı smen statusu."
         actions={
           <div className="flex items-end gap-2">
             <ShiftDateFilter value={date} onChange={setDate} label="Smen tarixi" />
@@ -134,23 +134,20 @@ export default function ShiftOverviewPage() {
           tone="ice"
         />
         <StatCard
-          label="Növbədə"
+          label="Smendə"
           value={data?.onDutyVolunteers || 0}
-          hint="Hazırda aktiv smendə"
           icon="●"
           tone="green"
         />
         <StatCard
-          label="Stansiya təyin edilib"
+          label="Smen təyin edilib"
           value={data?.assignedVolunteers || 0}
-          hint={`${data?.unassignedVolunteers || 0} könüllü gözləyir`}
           icon="⌖"
           tone="violet"
         />
         <StatCard
           label="Təyinat gözləyən"
           value={data?.unassignedVolunteers || 0}
-          hint="Stansiyasız könüllü"
           icon="!"
           tone={(data?.unassignedVolunteers || 0) > 0 ? 'amber' : 'green'}
         />
@@ -197,7 +194,7 @@ export default function ShiftOverviewPage() {
                     )}
                   </div>
                   <p className="mt-1 text-xs text-frost/45">
-                    {slot.totalVolunteers} könüllü · {slot.onDutyVolunteers} növbədə ·{' '}
+                    {slot.totalVolunteers} könüllü · {slot.onDutyVolunteers} smendə ·{' '}
                     {slot.unassignedVolunteers} təyinat gözləyir
                   </p>
                 </div>

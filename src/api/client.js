@@ -47,7 +47,7 @@ function extractMessage(data, status) {
   }
   if (status === 404) return 'Məlumat tapılmadı.'
   if (status >= 500) {
-    return 'Server xətası baş verdi. Bir az sonra yenidən cəhd edin.'
+    return 'Sistem xətası baş verdi. Bir az sonra yenidən cəhd edin.'
   }
   return `Sorğu uğursuz oldu (${status}).`
 }
@@ -81,19 +81,20 @@ async function request(path, options = {}) {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
+      cache: 'no-store',
       signal: controller.signal,
     })
   } catch (error) {
     if (error?.name === 'AbortError') {
       if (signal?.aborted) throw error
       throw new ApiError(
-        'Server cavab vermədi. Bir az sonra yenidən cəhd edin.',
+        'Sistem cavab vermədi. Bir az sonra yenidən cəhd edin.',
         0,
         null
       )
     }
     throw new ApiError(
-      'Backend ilə əlaqə yoxdur. Serverin işlədiyini yoxlayın.',
+      'Sistemlə əlaqə yoxdur. Bir az sonra yenidən cəhd edin.',
       0,
       null
     )
@@ -128,6 +129,20 @@ export const api = {
 
   register: (payload) =>
     request(ENDPOINTS.register, {
+      method: 'POST',
+      body: payload,
+      auth: false,
+    }),
+
+  forgotPassword: (payload) =>
+    request(ENDPOINTS.forgotPassword, {
+      method: 'POST',
+      body: payload,
+      auth: false,
+    }),
+
+  resetPassword: (payload) =>
+    request(ENDPOINTS.resetPassword, {
       method: 'POST',
       body: payload,
       auth: false,
@@ -168,6 +183,43 @@ export const api = {
     request(ENDPOINTS.cancelReservation(id), { method: 'POST' }),
 
   getMyTickets: () => request(ENDPOINTS.myTickets),
+
+  getCustomerProfile: () => request(ENDPOINTS.customerProfile),
+
+  updateCustomerProfile: (payload) =>
+    request(ENDPOINTS.customerProfile, {
+      method: 'PUT',
+      body: payload,
+    }),
+
+  changeCustomerPassword: (payload) =>
+    request(ENDPOINTS.customerPassword, {
+      method: 'PUT',
+      body: payload,
+    }),
+
+  getRulesAcceptance: () => request(ENDPOINTS.rulesAcceptance),
+
+  saveRulesAcceptance: (acceptedObligationIds) =>
+    request(ENDPOINTS.rulesAcceptance, {
+      method: 'PUT',
+      body: { acceptedObligationIds },
+    }),
+
+  getCustomerVerification: () =>
+    request(ENDPOINTS.customerVerification),
+
+  saveAgeVerification: (dateOfBirth) =>
+    request(ENDPOINTS.customerAgeVerification, {
+      method: 'PUT',
+      body: { dateOfBirth },
+    }),
+
+  saveIdentityVerification: (identityDocumentNumber, confirmed = true) =>
+    request(ENDPOINTS.customerIdentityVerification, {
+      method: 'PUT',
+      body: { identityDocumentNumber, confirmed },
+    }),
 
   activateTicket: (ticketCode) =>
     request(ENDPOINTS.activateTicket(ticketCode), { method: 'POST' }),

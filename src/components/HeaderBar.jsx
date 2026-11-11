@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import Logo from './Logo'
+import LanguageSwitcher from './LanguageSwitcher'
 import { useAuth } from '../auth/AuthContext'
 
 /**
@@ -11,10 +12,11 @@ export default function HeaderBar({
   items = [],
   showBooking = false,
   bookingLabel = 'Bilet al',
+  logoTo = '/',
 }) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
-  const { isAuthenticated, user, openAuth, logout } = useAuth()
+  const { isAuthenticated, isStaff, user, openAuth, logout } = useAuth()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -25,22 +27,22 @@ export default function HeaderBar({
 
   function desktopLinkClass({ isActive }, item) {
     if (item.tone === 'accent') {
-      return `rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
+      return `whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
         isActive ? 'text-amber-200' : 'text-amber-200/70 hover:text-amber-100'
       }`
     }
-    return `rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
+    return `whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
       isActive ? 'text-ice-200' : 'text-frost/75 hover:text-white'
     }`
   }
 
   function mobileLinkClass({ isActive }, item) {
     if (item.tone === 'accent') {
-      return `rounded-lg px-4 py-3 text-sm font-semibold ${
+      return `whitespace-nowrap rounded-lg px-4 py-3 text-sm font-semibold ${
         isActive ? 'bg-amber-400/10 text-amber-200' : 'text-amber-200/70'
       }`
     }
-    return `rounded-lg px-4 py-3 text-sm font-semibold ${
+    return `whitespace-nowrap rounded-lg px-4 py-3 text-sm font-semibold ${
       isActive ? 'bg-white/10 text-ice-200' : 'text-frost/80'
     }`
   }
@@ -54,7 +56,7 @@ export default function HeaderBar({
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Logo />
+        <Logo to={logoTo} />
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Əsas naviqasiya">
           {items.map((item) => (
@@ -68,11 +70,23 @@ export default function HeaderBar({
             </NavLink>
           ))}
 
+          {!isAuthenticated && <LanguageSwitcher className="ml-2" />}
+
           {isAuthenticated ? (
             <div className="ml-2 flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5">
-              <span className="max-w-[9rem] truncate text-xs font-bold text-ice-200">
-                {user.username || 'Hesab'}
-              </span>
+              {!isStaff ? (
+                <Link
+                  to="/hesabim"
+                  title="Hesabım"
+                  className="max-w-[9rem] truncate text-xs font-bold text-ice-200 transition-colors hover:text-white"
+                >
+                  {user.username || 'Hesabım'}
+                </Link>
+              ) : (
+                <span className="max-w-[9rem] truncate text-xs font-bold text-ice-200">
+                  {user.username || 'Hesab'}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={logout}
@@ -92,7 +106,7 @@ export default function HeaderBar({
           )}
 
           {showBooking && (
-            <Link to="/bilet" className="btn-primary ml-2 !px-5 !py-2 text-[13px]">
+            <Link to="/bilet" className="btn-primary ml-2 whitespace-nowrap !px-5 !py-2 text-[13px]">
               {bookingLabel}
             </Link>
           )}
@@ -143,6 +157,12 @@ export default function HeaderBar({
               </NavLink>
             ))}
 
+            {!isAuthenticated && (
+              <div className="my-2 px-2">
+                <LanguageSwitcher full />
+              </div>
+            )}
+
             {isAuthenticated ? (
               <button
                 type="button"
@@ -171,7 +191,7 @@ export default function HeaderBar({
               <Link
                 to="/bilet"
                 onClick={() => setOpen(false)}
-                className="btn-primary mt-2 text-sm"
+                className="btn-primary mt-2 whitespace-nowrap text-sm"
               >
                 {bookingLabel}
               </Link>

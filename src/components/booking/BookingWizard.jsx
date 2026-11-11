@@ -77,8 +77,15 @@ function backendTime(value) {
   return value ? String(value).slice(0, 5) : ''
 }
 
-export default function BookingWizard() {
-  const { user, isAuthenticated, openAuth } = useAuth()
+export default function BookingWizard({ onTicketChange }) {
+  const {
+    user,
+    isAuthenticated,
+    isCustomer,
+    openAuth,
+    verifyAge,
+    verifyIdentity,
+  } = useAuth()
 
   const [step, setStep] = useState(1)
   const [error, setError] = useState('')
@@ -99,6 +106,10 @@ export default function BookingWizard() {
   const [shaheedVerified, setShaheedVerified] = useState(false)
   const [agree, setAgree] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
+
+  const [bookingDob, setBookingDob] = useState('')
+  const [identityDocumentNumber, setIdentityDocumentNumber] = useState('')
+  const [identityConfirmedCheck, setIdentityConfirmedCheck] = useState(false)
 
   const [ticket, setTicket] = useState(() => loadLastVoucher())
   const [notice, setNotice] = useState('')
@@ -122,6 +133,10 @@ export default function BookingWizard() {
   const [quoteLoading, setQuoteLoading] = useState(false)
   const [quoteError, setQuoteError] = useState('')
   const sessionIdRef = useRef(null)
+
+  useEffect(() => {
+    onTicketChange?.(Boolean(ticket))
+  }, [ticket, onTicketChange])
 
   // Cari tarix/saat üçün canlı saat: satış bağlanma qaydasını izləyir
   const [now, setNow] = useState(() => Date.now())
@@ -307,7 +322,7 @@ export default function BookingWizard() {
         .catch((err) => {
           if (!active) return
           setQuote(null)
-          setQuoteError(err?.message || 'Server qiyməti alınmadı.')
+          setQuoteError(err?.message || 'Qiymət alınmadı.')
           setQuoteLoading(false)
         })
     }, 250)
@@ -340,15 +355,15 @@ export default function BookingWizard() {
     : !hasOpenSlot
       ? 'Bu tarix üçün seçilmiş müddətdə aktiv sessiya yoxdur - başqa gün və ya müddət seçin.'
       : sessionsLoading
-        ? 'Backend seansları yüklənir…'
+        ? 'Seanslar yüklənir…'
         : sessionsError
-          ? `Backend ilə əlaqə yoxdur: ${sessionsError}`
+          ? `${sessionsError}`
           : sessions.length === 0
-            ? 'Bu tarix üçün backend-də seans yoxdur - başqa gün seçin.'
+            ? 'Bu tarix üçün seans yoxdur - başqa gün seçin.'
             : !backendSession
               ? 'Aktiv sessiya avtomatik tapılmadı - başqa gün və ya müddət seçin.'
               : availabilityLoading
-                ? 'Sessiya vaxtı backend-də yoxlanılır…'
+                ? 'Sessiya vaxtı yoxlanılır…'
                 : availability?.salesOpen === false
                   ? availability.message ||
                     'Sessiyanın bağlanmasına 30 dəqiqədən az qalıb; bilet satışı dayandırılıb.'
@@ -459,7 +474,7 @@ export default function BookingWizard() {
     return ''
   }, [benefits, shaheedVerified, qaziVisits, qty, duration, price.dayType])
 
-  function buildOrder() {
+  function buildOrder({ ageVerifiedOverride, isAdultOverride } = {}) {
     if (daySalesClosed(date)) {
       setError(
         `${formatDateAZ(date)} tarixi üçün bilet satışı bağlanıb. Zəhmət olmasa başqa gün seçin.`
@@ -495,20 +510,32 @@ export default function BookingWizard() {
       openAuth('login')
       return null
     }
+    if (isCustomer) {
+      const effectiveAgeVerified = ageVerifiedOverride ?? user?.ageVerified
+      const effectiveIsAdult = isAdultOverride ?? user?.isAdult
+      if (!effectiveAgeVerified) {
+        setError('Bilet almaq üçün əvvəlcə yaşınızı təsdiqləyin.')
+        return null
+      }
+      if (effectiveIsAdult === false) {
+        setError('18 yaşdan kiçik şəxslər bilet ala bilməz.')
+        return null
+      }
+    }
     if (sessionsLoading) {
-      setError('Backend seansları hələ yüklənməyib. Bir neçə saniyə sonra yenidən cəhd edin.')
+      setError('Seanslar hələ yüklənməyib. Bir neçə saniyə sonra yenidən cəhd edin.')
       return null
     }
     if (sessionsError) {
-      setError(`Backend ilə əlaqə yoxdur: ${sessionsError}`)
+      setError(`${sessionsError}`)
       return null
     }
     if (!backendSession) {
-      setError('Seçilmiş tarix və müddət üçün backend-də aktiv sessiya tapılmadı. Başqa gün və ya müddət seçin.')
+      setError('Seçilmiş tarix və müddət üçün aktiv sessiya tapılmadı. Başqa gün və ya müddət seçin.')
       return null
     }
     if (availabilityLoading) {
-      setError('Sessiya vaxtı backend-də yoxlanılır. Bir neçə saniyə sonra yenidən cəhd edin.')
+      setError('Sessiya vaxtı yoxlanılır. Bir neçə saniyə sonra yenidən cəhd edin.')
       return null
     }
     if (availability?.salesOpen === false) {
@@ -539,7 +566,7 @@ export default function BookingWizard() {
       const size = String(person.skateSize).trim()
       const skate = skatesBySize.get(size)
       if (!skate) {
-        setError(`Konki razmeri ${size} backend-də mövcud deyil.`)
+        setError(`Konki razmeri ${size} stokda yoxdur.`)
         return null
       }
       needBySize.set(size, (needBySize.get(size) || 0) + 1)
@@ -589,13 +616,74 @@ export default function BookingWizard() {
     return { next, skatesBySize }
   }
 
-  function handleCheckout() {
+  async function handleCheckout() {
     if (submitting) return
-    const order = buildOrder()
-    if (!order) return
-
     setError('')
     setPaymentError('')
+
+    let currentAgeVerified = Boolean(user?.ageVerified)
+    let currentIsAdult = Boolean(user?.isAdult)
+    let currentIdentityConfirmed = Boolean(user?.identityConfirmed)
+
+    if (isAuthenticated && isCustomer && !currentAgeVerified) {
+      if (!bookingDob) {
+        setError('Bilet almaq üçün doğum tarixinizi qeyd edin (18+ tələbi).')
+        return
+      }
+      setSubmitting(true)
+      try {
+        const ageRes = await verifyAge(bookingDob)
+        currentAgeVerified = Boolean(ageRes?.ageVerified)
+        currentIsAdult = Boolean(ageRes?.isAdult)
+        if (!currentIsAdult) {
+          setSubmitting(false)
+          setError('18 yaşdan kiçik şəxslər onlayn bilet ala bilməz.')
+          return
+        }
+      } catch (err) {
+        setSubmitting(false)
+        setError(err?.message || 'Yaş təsdiqi aparıla bilmədi.')
+        return
+      }
+      setSubmitting(false)
+    }
+
+    if (
+      isAuthenticated &&
+      isCustomer &&
+      currentIsAdult &&
+      !currentIdentityConfirmed
+    ) {
+      const documentNumber = identityDocumentNumber.replace(/[^A-Za-z0-9]/g, '')
+      if (documentNumber.length < 5) {
+        setError('Şəxsiyyət vəsiqəsinin seriya və nömrəsini qeyd edin.')
+        return
+      }
+      if (!identityConfirmedCheck) {
+        setError('18+ yaş və şəxsiyyət vəsiqəsi təsdiqini işarələyin.')
+        return
+      }
+
+      setSubmitting(true)
+      try {
+        await verifyIdentity({
+          identityDocumentNumber: documentNumber,
+          confirmed: true,
+        })
+        currentIdentityConfirmed = true
+      } catch (err) {
+        setSubmitting(false)
+        setError(err?.message || 'Şəxsiyyət vəsiqəsi təsdiqlənmədi.')
+        return
+      }
+      setSubmitting(false)
+    }
+
+    const order = buildOrder({
+      ageVerifiedOverride: currentAgeVerified,
+      isAdultOverride: currentIsAdult,
+    })
+    if (!order) return
 
     if (Number(order.next.price.payable) <= 0) {
       finalizeOrder(order, null)
@@ -626,10 +714,12 @@ export default function BookingWizard() {
           startTime: next.session.time,
           durationMinutes: next.session.durationMinutes,
           voucherCode: next.id,
+          participantName: person.name,
+          participantAge: person.age,
         })
 
         if (!createdReservation?.id) {
-          throw new Error('Backend rezervasiya ID-si qaytarmadı')
+          throw new Error('Rezervasiya yaradıla bilmədi')
         }
 
         created.push({
@@ -664,7 +754,7 @@ export default function BookingWizard() {
         })
 
         if (!paymentRecord?.transactionId) {
-          throw new Error('Backend ödəniş ID-si qaytarmadı')
+          throw new Error('Ödəniş yaradıla bilmədi')
         }
 
         const paid = await api.payPayment(paymentRecord.transactionId)
@@ -765,6 +855,8 @@ export default function BookingWizard() {
     setError('')
     setAgree(false)
     setAgreeTerms(false)
+    setIdentityDocumentNumber('')
+    setIdentityConfirmedCheck(false)
     setBenefits({
       student: false,
       family: false,
@@ -927,11 +1019,11 @@ export default function BookingWizard() {
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs">
               {sessionsLoading ? (
-                <span className="text-frost/60">Backend seansları yüklənir…</span>
+                <span className="text-frost/60">Seanslar yüklənir…</span>
               ) : sessionsError ? (
                 <>
                   <span className="font-semibold text-amber-200">
-                    Backend əlçatmazdır: {sessionsError}
+                    {sessionsError}
                   </span>
                   <button
                     type="button"
@@ -943,12 +1035,12 @@ export default function BookingWizard() {
                 </>
               ) : sessions.length === 0 ? (
                 <span className="font-semibold text-amber-200">
-                  Bu tarix üçün backend-də seans yoxdur.
+                  Bu tarix üçün seans yoxdur.
                 </span>
               ) : (
                 <>
                   <span className="text-frost/65">
-                    Backend seansı:{' '}
+                    Seans:{' '}
                     <b className="text-white">
                       {backendTime(backendSession?.startTime)}–
                       {backendTime(backendSession?.endTime)}
@@ -969,12 +1061,12 @@ export default function BookingWizard() {
             {availabilityError && (
               <p className="mt-2 text-xs font-semibold text-amber-200">
                 Sessiya mövcudluğu yoxlanmadı: {availabilityError}. Rezervasiya
-                zamanı backend yenidən yoxlayacaq.
+                zamanı yenidən yoxlanılacaq.
               </p>
             )}
             {availability && !availabilityLoading && (
               <p className="mt-2 text-xs text-frost/55">
-                Backend: qalan vaxt {availability.remainingMinutes ?? '—'} dəq ·
+                Qalan vaxt {availability.remainingMinutes ?? '—'} dəq ·
                 mövcud müddətlər{' '}
                 {(availability.availableDurations || [])
                   .map((m) => `${m} dəq`)
@@ -1053,7 +1145,7 @@ export default function BookingWizard() {
                     {backendTime(backendSession.endTime)}
                   </span>
                   <span className="text-frost/70">
-                    Giriş vaxtı: <b className="text-white">{time}</b>
+                    Giriş vaxtı: <b className="text-white">{backendTime(time)}</b>
                   </span>
                 </div>
               )}
@@ -1083,7 +1175,7 @@ export default function BookingWizard() {
       {step === 2 && (
         <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-5">
-            <div className="glass rounded-xl p-6 sm:p-8">
+            <div className="glass rounded-xl p-4 sm:p-8">
               <div className="mb-4">
                 <SafetyNotice compact />
               </div>
@@ -1106,7 +1198,7 @@ export default function BookingWizard() {
                   </>
                 ) : (
                   <span className="text-frost/65">
-                    Backend stoku:{' '}
+                    Stok:{' '}
                     <b className="text-white">
                       {skatesSorted.filter(
                         (s) => Number(s.availableQuantity) > 0
@@ -1131,18 +1223,24 @@ export default function BookingWizard() {
                 {people.map((p, i) => (
                   <div
                     key={i}
-                    className="grid items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4 sm:grid-cols-[auto_1fr_110px_130px]"
+                    className="grid grid-cols-[minmax(0,1fr)_52px_76px] items-end gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] p-2 sm:grid-cols-[auto_1fr_110px_130px] sm:gap-3 sm:p-4"
                   >
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-ice-400/15 font-display text-sm font-bold text-ice-200">
+                    <span className="hidden h-9 w-9 self-center place-items-center rounded-xl bg-ice-400/15 font-display text-sm font-bold text-ice-200 sm:grid">
                       {i + 1}
                     </span>
-                    <input
-                      type="text"
-                      value={p.name}
-                      onChange={(e) => setPerson(i, { name: e.target.value })}
-                      placeholder="Ad (istəyə bağlı)"
-                      className="w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-sm text-white placeholder-frost/30 outline-none focus:border-ice-300/60"
-                    />
+                    <div className="min-w-0">
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-frost/40">
+                        <span className="sm:hidden">{i + 1}. Ad Soyad</span>
+                        <span className="hidden sm:inline">Ad və soyad</span>
+                      </p>
+                      <input
+                        type="text"
+                        value={p.name}
+                        onChange={(e) => setPerson(i, { name: e.target.value })}
+                        placeholder="Ad və soyad yazın"
+                        className="w-full min-w-0 rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2.5 text-sm text-white placeholder-frost/30 outline-none focus:border-ice-300/60 sm:px-3.5"
+                      />
+                    </div>
                     <div>
                       <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-frost/40">
                         Yaş*
@@ -1152,19 +1250,20 @@ export default function BookingWizard() {
                         value={p.age}
                         min="4"
                         onChange={(e) => setPerson(i, { age: e.target.value })}
-                        placeholder="yan. 4+"
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-white placeholder-frost/30 outline-none focus:border-ice-300/60"
+                        placeholder="4+"
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2.5 text-xs text-white placeholder-frost/30 outline-none focus:border-ice-300/60 sm:px-3 sm:text-sm"
                       />
                     </div>
                     <div>
                       <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-frost/40">
-                        Konki razmeri*
+                        <span className="sm:hidden">Ölçü*</span>
+                        <span className="hidden sm:inline">Konki razmeri*</span>
                       </p>
                       <select
                         value={p.skateSize}
                         onChange={(e) => setPerson(i, { skateSize: e.target.value })}
                         disabled={!skatesReady}
-                        className={`w-full appearance-none rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors ${
+                        className={`w-full appearance-none rounded-xl border px-2 py-2.5 text-xs outline-none transition-colors sm:px-3 sm:text-sm ${
                           !skatesReady
                             ? 'cursor-not-allowed border-white/10 bg-white/[0.03] text-frost/35'
                             : p.skateSize
@@ -1368,7 +1467,7 @@ export default function BookingWizard() {
 
               {quoteError && (
                 <p className="mt-4 text-xs font-semibold text-amber-200">
-                  Server qiyməti alınmadı; ehtiyat hesablama göstərilir:{' '}
+                  Qiymət alınmadı; ehtiyat hesablama göstərilir:{' '}
                   {quoteError}
                 </p>
               )}
@@ -1397,7 +1496,7 @@ export default function BookingWizard() {
                 <div className="flex justify-between text-frost/70">
                   <span>Vaxt</span>
                   <span className="font-semibold text-white">
-                    {time} - {time ? sessionEndTime(time, duration) : ''}
+                    {backendTime(time)} - {time ? sessionEndTime(time, duration) : ''}
                   </span>
                 </div>
                 <div className="flex justify-between text-frost/70">
@@ -1457,7 +1556,7 @@ export default function BookingWizard() {
                     ))}
                     {quoteLoading && (
                       <p className="text-[11px] text-frost/45">
-                        Server qiyməti yoxlanılır…
+                        Qiymət yoxlanılır…
                       </p>
                     )}
                   </div>
@@ -1482,7 +1581,7 @@ export default function BookingWizard() {
 
               {!isAuthenticated && (
                 <p className="mt-5 rounded-xl border border-ice-300/25 bg-ice-400/10 px-4 py-3 text-xs leading-relaxed text-frost/65">
-                  Konki rezervasiyası backend-də yaradılacaq.{' '}
+                  Konki rezervasiyası avtomatik yaradılacaq.{' '}
                   <button
                     type="button"
                     onClick={() => openAuth('login')}
@@ -1504,7 +1603,7 @@ export default function BookingWizard() {
                   Boolean(skatesError) ||
                   skatesSorted.length === 0
                 }
-                className={`btn-primary mt-3 w-full ${
+                className={`btn-primary mt-3 w-full whitespace-nowrap ${
                   submitting ||
                   quoteLoading ||
                   skatesLoading ||
@@ -1557,6 +1656,71 @@ export default function BookingWizard() {
                   </Link>
                 </label>
               </div>
+
+              {isAuthenticated &&
+                isCustomer &&
+                (!user?.ageVerified || !user?.identityConfirmed) && (
+                  <div className="mt-4 rounded-lg border border-ice-300/30 bg-ice-400/10 p-4">
+                    <p className="font-display text-sm font-bold text-white">
+                      18+ yaş və şəxsiyyət vəsiqəsinin təsdiqi (Yalnız ilk biletdə)
+                    </p>
+                    <p className="mt-2 text-xs leading-relaxed text-frost/65">
+                      18+ bilet alışı üçün məlumatlarınızı bir dəfə təsdiqləyin.
+                      Növbəti bilet alışlarında bu təsdiq təkrar tələb olunmayacaq.
+                    </p>
+
+                    {!user?.ageVerified && (
+                      <div className="mt-3">
+                        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/60">
+                          Doğum tarixiniz (18+ tələbi)
+                        </label>
+                        <input
+                          type="date"
+                          value={bookingDob}
+                          min="1900-01-01"
+                          max={new Date().toISOString().slice(0, 10)}
+                          onChange={(e) => setBookingDob(e.target.value)}
+                          className="w-full rounded-xl border border-white/15 bg-night-900/80 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-ice-300/60 [color-scheme:dark]"
+                        />
+                      </div>
+                    )}
+
+                    {!user?.identityConfirmed && (
+                      <>
+                        <div className="mt-3">
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/60">
+                            Şəxsiyyət vəsiqəsinin seriya və nömrəsi
+                          </label>
+                          <input
+                            type="text"
+                            value={identityDocumentNumber}
+                            onChange={(e) =>
+                              setIdentityDocumentNumber(e.target.value)
+                            }
+                            maxLength={30}
+                            placeholder="AA1234567"
+                            className="w-full rounded-xl border border-white/15 bg-night-900/80 px-4 py-2.5 text-sm uppercase text-white placeholder-frost/30 outline-none transition-colors focus:border-ice-300/60"
+                          />
+                        </div>
+                        <label className="mt-3 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-frost/75">
+                          <input
+                            type="checkbox"
+                            checked={identityConfirmedCheck}
+                            onChange={(e) =>
+                              setIdentityConfirmedCheck(e.target.checked)
+                            }
+                            className="mt-0.5 h-4 w-4 shrink-0 accent-ice-300"
+                          />
+                          <span>
+                            18 yaşımdan böyük olduğumu, şəxsiyyət vəsiqəmi təqdim
+                            edəcəyimi və qeyd etdiyim məlumatların doğru olduğunu
+                            təsdiq edirəm.
+                          </span>
+                        </label>
+                      </>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         </div>

@@ -46,7 +46,7 @@ export default function ReservationPanel({
           {backend && (
             <p className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Backend ilə sinxron
+              Sistemlə sinxron
             </p>
           )}
         </div>

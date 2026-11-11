@@ -12,10 +12,10 @@ const SIZES = {
  * Şəkil qara fonda olduğu üçün qara dəyirmi plitkədə göstərilir -
  * saytın tünd fonu ilə səliqəli birləşir.
  */
-export default function Logo({ compact = false, size = 'md' }) {
+export default function Logo({ compact = false, size = 'md', to = '/' }) {
   return (
     <Link
-      to="/"
+      to={to}
       className="group flex items-center gap-3"
       title="Heydər Əliyev İdman və Konsert Kompleksi (HƏİKK)"
       aria-label="Heydər Əliyev İdman və Konsert Kompleksi - ana səhifə"

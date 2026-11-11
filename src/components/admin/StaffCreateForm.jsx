@@ -88,7 +88,7 @@ export default function StaffCreateForm({ onCreate, onCancel }) {
                 setForm((prev) => ({ ...prev, [key]: event.target.value }))
               }
               className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
-              required={key !== 'phoneNumber'}
+              required
               minLength={key === 'password' ? 6 : key === 'username' ? 3 : undefined}
             />
           </label>
