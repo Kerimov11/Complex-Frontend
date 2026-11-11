@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminNotice from '../../components/admin/AdminNotice'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import StatCard from '../../components/admin/StatCard'
+import QrCameraScanner from '../../components/admin/QrCameraScanner'
 import { formatDateTime } from '../../components/admin/formatters'
 import { formatShiftDate, formatShiftRange } from '../../components/shift/formatters'
 import { shiftApi } from '../../services/api/shiftApi'
+import { verificationApi } from '../../services/api/verificationApi'
 
 const STATUS_STYLE = {
   CONFIRMED: 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100',
@@ -36,6 +38,9 @@ export default function VolunteerReservationsPage() {
   const [success, setSuccess] = useState('')
   const [busyId, setBusyId] = useState(null)
   const [now, setNow] = useState(() => Date.now())
+  const [scannerOpen, setScannerOpen] = useState(false)
+  const [scanLoading, setScanLoading] = useState(false)
+  const [scannedTicket, setScannedTicket] = useState(null)
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
@@ -131,22 +136,78 @@ export default function VolunteerReservationsPage() {
     }
   }
 
+  const handleScan = useCallback(async (code) => {
+    if (!code || scanLoading) return
+    setScanLoading(true)
+    setError('')
+    setSuccess('')
+    try {
+      const res = await verificationApi.scan(code)
+      setScannedTicket(res)
+      if (res?.valid) {
+        setSuccess(`✓ ${res.message || 'Bilet təsdiqləndi!'} (Müştəri: ${res.customerName || 'Müştəri'}, Kod: ${res.code || code})`)
+        await load(true)
+      } else {
+        setError(res?.message || 'Bilet tapılmadı və ya artıq istifadə olunub.')
+      }
+    } catch (err) {
+      setError(err?.message || 'QR oxunarkən xəta baş verdi.')
+    } finally {
+      setScanLoading(false)
+    }
+  }, [scanLoading, load])
+
   return (
     <div>
       <AdminPageHeader
         eyebrow="Könüllü iş masası"
         title="Konki təhvili"
-        description="Müştəri taymeri aktivləşdirən kimi tələb aşağıdakı canlı siqnal bölməsində görünür. Lazımi ölçünü götürüb “Konki hazırdır” düyməsini basın, sonra təhvili qeyd edin."
+        description="Müştəri gəldikdə “QR Skan et” düyməsinə basıb biletini birbaşa kameradan oxudun. Bilet ilk skanda avtomatik təsdiqlənir və buza buraxılır."
         actions={
-          <button
-            type="button"
-            onClick={() => load()}
-            className="btn-ghost !px-5 !py-2.5 text-sm"
-          >
-            Yenilə
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setScannerOpen((prev) => !prev)}
+              className="btn-primary flex items-center gap-2 !px-4 !py-2.5 text-sm"
+            >
+              📷 {scannerOpen ? 'Kameranı bağla' : 'QR Skan et'}
+            </button>
+            <button
+              type="button"
+              onClick={() => load()}
+              className="btn-ghost !px-5 !py-2.5 text-sm"
+            >
+              Yenilə
+            </button>
+          </div>
         }
       />
+
+      {scannerOpen && (
+        <div className="mb-6 rounded-2xl border border-sky-400/30 bg-midnight-800/80 p-4 shadow-xl backdrop-blur-md">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
+              Müştərinin QR kodunu kameraya tutun
+            </div>
+            <button
+              type="button"
+              onClick={() => setScannerOpen(false)}
+              className="text-xs text-frost/50 hover:text-white"
+            >
+              ✕ Bağla
+            </button>
+          </div>
+          <div className="mx-auto max-w-sm overflow-hidden rounded-xl border border-white/10 bg-black/40">
+            <QrCameraScanner onDetected={handleScan} />
+          </div>
+          {scanLoading && (
+            <p className="mt-3 text-center text-xs text-sky-300 animate-pulse">
+              Bilet yoxlanılır və təsdiqlənir...
+            </p>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="mb-3">
