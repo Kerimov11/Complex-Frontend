@@ -59,8 +59,9 @@ function clockTime(value) {
 const STATUS_META = {
   CHECKED_IN: { tone: 'success', label: 'Təsdiqləndi — Buza buraxın' },
   HANDED_OUT: { tone: 'success', label: 'Konki təhvil verildi' },
-  VALID: { tone: 'success', label: 'Təsdiqlənməyib — Etibarlı bilet' },
-  ALREADY_USED: { tone: 'error', label: 'Bu QR bilet istifadə olunub' },
+  VALID: { tone: 'success', label: 'Kassada təsdiqləndi' },
+  ALREADY_USED: { tone: 'error', label: 'Bu QR bilet artıq istifadə olunub' },
+  ALREADY_CASHIER_VERIFIED: { tone: 'warning', label: 'Bilet artıq kassada təsdiqlənib' },
   ALREADY_HANDED_OUT: { tone: 'warning', label: 'Konki artıq təhvil verilib' },
   NOT_CHECKED_IN: { tone: 'warning', label: 'Əvvəlcə Kassa QR və ya Turniketdə skan edin' },
   PAYMENT_PENDING: { tone: 'warning', label: 'Ödəniş gözləyir' },
