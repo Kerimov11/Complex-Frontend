@@ -12,6 +12,30 @@ import { useAuth } from '../../auth/AuthContext'
 import { shiftApi } from '../../services/api/shiftApi'
 import { todayISO } from '../../utils/datetime'
 
+function getEligibleLaterSlots(allSlots, currentSlot, selectedDate) {
+  if (!Array.isArray(allSlots) || !currentSlot) return []
+  const isToday = selectedDate === todayISO()
+  const nowTime = new Date().toTimeString().slice(0, 5)
+  const currentStart = String(currentSlot.startTime).slice(0, 5)
+
+  return allSlots.filter((candidate) => {
+    if (candidate.shiftSlotId === currentSlot.shiftSlotId) return false
+    if (candidate.active === false) return false
+
+    // Yalnız saat olaraq cari smendən sonrakı smenlər (əvvəldə qalan smenlər olmasın)
+    const candidateStart = String(candidate.startTime).slice(0, 5)
+    if (candidateStart <= currentStart) return false
+
+    // Əgər gün bu gündürsə, vaxtı artıq bitmiş keçmiş smenlər də çıxarılsın
+    if (isToday) {
+      const candidateEnd = String(candidate.endTime).slice(0, 5)
+      if (candidateEnd <= nowTime) return false
+    }
+
+    return true
+  })
+}
+
 export default function ShiftOverviewPage() {
   const { isAdmin, isCoordinator } = useAuth()
   const canAssign = isAdmin || isCoordinator
@@ -179,7 +203,9 @@ export default function ShiftOverviewPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {data.slots.map((slot) => (
+          {data.slots.map((slot) => {
+            const laterSlots = getEligibleLaterSlots(data?.slots, slot, data?.date || date)
+            return (
             <div key={slot.shiftSlotId} className="glass overflow-hidden rounded-xl">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
                 <div>
@@ -244,17 +270,16 @@ export default function ShiftOverviewPage() {
                           disabled={busyKey === shift.id}
                           placeholder="Stansiya seç"
                         />
-                        <select
-                          value=""
-                          onChange={(event) => move(shift, event.target.value)}
-                          disabled={busyKey === shift.id}
-                          className="rounded-xl border border-white/10 bg-night-900/70 px-3 py-2 text-xs font-semibold text-frost/75 outline-none focus:border-ice-300/50 disabled:opacity-40"
-                          title="Könüllünü başqa smen vaxtına keçir"
-                        >
-                          <option value="">Başqa smenə keçir</option>
-                          {(data?.slots || [])
-                            .filter((candidate) => candidate.shiftSlotId !== slot.shiftSlotId)
-                            .map((candidate) => (
+                        {laterSlots.length > 0 ? (
+                          <select
+                            value=""
+                            onChange={(event) => move(shift, event.target.value)}
+                            disabled={busyKey === shift.id}
+                            className="rounded-xl border border-white/10 bg-night-900/70 px-3 py-2 text-xs font-semibold text-frost/75 outline-none focus:border-ice-300/50 disabled:opacity-40"
+                            title="Könüllünü sonrakı smen vaxtına keçir"
+                          >
+                            <option value="">Başqa smenə keçir</option>
+                            {laterSlots.map((candidate) => (
                               <option
                                 key={candidate.shiftSlotId}
                                 value={candidate.shiftSlotId}
@@ -262,7 +287,15 @@ export default function ShiftOverviewPage() {
                                 {formatShiftRange(candidate.startTime, candidate.endTime)}
                               </option>
                             ))}
-                        </select>
+                          </select>
+                        ) : (
+                          <span
+                            className="text-[10px] text-frost/30"
+                            title="Son smendir və ya sonrakı smen yoxdur"
+                          >
+                            Son smen
+                          </span>
+                        )}
                         <button
                           type="button"
                           onClick={() => remove(shift)}
@@ -285,7 +318,8 @@ export default function ShiftOverviewPage() {
                 ))}
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
