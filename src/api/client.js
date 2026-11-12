@@ -75,9 +75,9 @@ async function request(path, options = {}) {
   const token = auth ? getToken() : ''
   if (token) headers.Authorization = `Bearer ${token}`
 
-  // Şəbəkə cavab verməzsə sorğunu 15 saniyədən sonra dayandırırıq.
+  // Şəbəkə cavab verməzsə sorğunu 60 saniyədən sonra dayandırırıq (Render free-tier oyanma vaxtı üçün).
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 15000)
+  const timeoutId = setTimeout(() => controller.abort(), 60000)
   const onAbort = () => controller.abort()
   if (signal) {
     if (signal.aborted) controller.abort()
