@@ -205,7 +205,7 @@ export default function MyTicketsPage() {
                       {ticket.ticketCode}
                     </p>
                     <p className="mt-1 text-[11px] text-frost/50">
-                      Alınma: {dateTimeLabel(ticket.purchaseDate)}
+                      {`Alınma: ${dateTimeLabel(ticket.purchaseDate)}`}
                     </p>
                   </div>
                   <span className={`chip shrink-0 border ${statusStyle}`}>

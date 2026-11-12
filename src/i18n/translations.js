@@ -1342,6 +1342,23 @@ export const EXACT_MAP = {
   ],
   'Hələ smen seçməmisiniz.': ['You have not selected any shifts yet.', 'Вы ещё не выбрали ни одной смены.'],
   'Seçdiyiniz bu smen ləğv edilmişdir.': ['This shift you selected has been cancelled.', 'Выбранная вами смена была отменена.'],
+  'Alınma:': ['Purchased:', 'Куплено:'],
+  'Bilet və giriş': ['Ticket & Entry', 'Билет и вход'],
+  'Sərbəst tarix': ['Open date', 'Свободная дата'],
+  'Etibarlıq: QR skan edilənədək limitsiz': [
+    'Validity: Unlimited until QR is scanned',
+    'Срок действия: без ограничений до сканирования QR',
+  ],
+  'Giriş: İş saatları içində istənilən vaxt': [
+    'Entry: Any time during opening hours',
+    'Вход: в любое время в часы работы',
+  ],
+  'İştirakçılar və konki razmerləri': [
+    'Participants & Skate Sizes',
+    'Участники и размеры коньков',
+  ],
+  'Ödəniş təsdiqləndi': ['Payment confirmed', 'Оплата подтверждена'],
+  'Pulsuz giriş': ['Free entry', 'Бесплатный вход'],
 }
 
 // Month & Day replacements for date strings
@@ -1451,6 +1468,21 @@ const PATTERNS = [
     re: /^Alınma:\s*(.+)$/,
     en: (_, d) => `Purchased: ${d}`,
     ru: (_, d) => `Куплено: ${d}`,
+  },
+  {
+    re: /^Giriş:\s*İş saatları içində istənilən vaxt \(limitsiz\)\s*·\s*(\d+)\s*dəqiqəlik sürüş$/,
+    en: (_, m) => `Entry: Any time during opening hours (unlimited) · ${m}-minute session`,
+    ru: (_, m) => `Вход: в любое время в часы работы (безлимит) · ${m} мин катания`,
+  },
+  {
+    re: /^Giriş edilib:\s*(.+?)\s*·\s*(\d+)\s*dəq$/,
+    en: (_, t, m) => `Checked in: ${t} · ${m} min`,
+    ru: (_, t, m) => `Вход выполнен: ${t} · ${m} мин`,
+  },
+  {
+    re: /^(\d+)\s*yaş\s*\|\s*konki razmer\s*(.+)$/,
+    en: (_, age, sz) => `${age} yrs | skate size ${sz}`,
+    ru: (_, age, sz) => `${age} лет | размер коньков ${sz}`,
   },
   {
     re: /^Etibarlıq:\s*(.+)-dək$/,
