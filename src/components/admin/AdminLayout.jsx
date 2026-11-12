@@ -45,20 +45,20 @@ export default function AdminLayout() {
           : 'İstifadəçi'
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-16 pt-24 sm:px-6">
-      <div className="glass mb-5 flex flex-col gap-3 rounded-xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+    <section className="mx-auto max-w-7xl px-3 pb-12 pt-20 sm:px-6 sm:pb-16 sm:pt-24">
+      <div className="glass mb-4 flex flex-col gap-2 rounded-xl p-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-wider text-ice-300">
             İdarəetmə paneli
           </p>
-          <h1 className="mt-1 font-display text-2xl font-bold text-white">
+          <h1 className="mt-0.5 truncate font-display text-lg font-bold text-white sm:text-2xl">
             Xoş gəldiniz, {user?.username || 'komanda'}
           </h1>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <LanguageSwitcher />
           <span className="chip chip-ice">{roleLabel}</span>
-          <span className="chip">Canlı sistem</span>
+          <span className="chip hidden sm:inline-flex">Canlı sistem</span>
         </div>
       </div>
 
@@ -76,7 +76,7 @@ export default function AdminLayout() {
           </div>
         ))}
 
-      <div className="grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
+      <div className="grid gap-3 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-5">
         <AdminSidebar />
         <main className="min-w-0">
           <Outlet />

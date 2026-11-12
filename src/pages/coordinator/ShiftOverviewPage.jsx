@@ -150,7 +150,7 @@ export default function ShiftOverviewPage() {
         </div>
       )}
 
-      <div className="mb-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-3 grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
         <StatCard
           label="Ümumi könüllü"
           value={data?.totalVolunteers || 0}
@@ -264,19 +264,20 @@ export default function ShiftOverviewPage() {
                     </div>
 
                     {canAssign ? (
-                      <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      <div className="flex w-full flex-wrap items-center gap-1.5 sm:w-auto sm:shrink-0 sm:gap-2">
                         <StationSelect
                           value={shift.station || ''}
                           onChange={(station) => assign(shift, station)}
                           disabled={busyKey === shift.id}
                           placeholder="Stansiya seç"
+                          className="flex-1 sm:flex-initial"
                         />
                         {eligibleSlots.length > 0 && (
                           <select
                             value=""
                             onChange={(event) => move(shift, event.target.value)}
                             disabled={busyKey === shift.id}
-                            className="rounded-xl border border-white/10 bg-night-900/70 px-3 py-2 text-xs font-semibold text-frost/75 outline-none focus:border-ice-300/50 disabled:opacity-40"
+                            className="flex-1 rounded-xl border border-white/10 bg-night-900/70 px-2.5 py-2 text-xs font-semibold text-frost/75 outline-none focus:border-ice-300/50 disabled:opacity-40 sm:flex-initial sm:px-3"
                             title="Könüllünü başqa smen vaxtına keçir"
                           >
                             <option value="">Başqa smenə keçir</option>

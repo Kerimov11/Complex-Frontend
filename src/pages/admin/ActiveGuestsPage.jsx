@@ -152,9 +152,9 @@ export default function ActiveGuestsPage() {
       )}
 
       {/* Yuxarı Statistik Kartlar */}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-3">
         {/* 1. Aktiv bilet (Kassada təsdiqlənənlər, hələ Turniketdən keçməyənlər) */}
-        <div className="glass rounded-xl border border-amber-300/20 p-5">
+        <div className="glass rounded-xl border border-amber-300/20 p-3.5 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <p className="text-[11px] font-bold uppercase tracking-wider text-frost/45">
               Aktiv bilet

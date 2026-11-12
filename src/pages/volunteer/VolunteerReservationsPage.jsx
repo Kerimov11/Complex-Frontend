@@ -159,7 +159,7 @@ export default function VolunteerReservationsPage() {
         </div>
       )}
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-2 sm:mb-5 sm:gap-3 xl:grid-cols-4">
         <StatCard
           label="Canlı tələb"
           value={live.length}

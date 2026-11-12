@@ -116,7 +116,7 @@ export default function QrCameraScanner({ onDetected }) {
         ref={videoRef}
         muted
         playsInline
-        className={`mt-3 w-full rounded-xl bg-black/40 ${active ? 'block' : 'hidden'}`}
+        className={`mt-3 w-full max-h-[280px] rounded-xl bg-black/40 object-cover sm:max-h-[360px] ${active ? 'block' : 'hidden'}`}
       />
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       {error && <p className="mt-2 text-[11px] text-amber-200">{error}</p>}

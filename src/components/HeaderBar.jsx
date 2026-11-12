@@ -137,7 +137,7 @@ export default function HeaderBar({
       </div>
 
       {open && (
-        <div className="glass-strong mx-4 mt-3 rounded-lg p-4 lg:hidden">
+        <div className="glass-strong mx-3 mt-2.5 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-xl p-3 sm:mx-4 sm:mt-3 sm:p-4 lg:hidden">
           <nav className="flex flex-col gap-1" aria-label="Mobil naviqasiya">
             {items.map((item) => (
               <NavLink

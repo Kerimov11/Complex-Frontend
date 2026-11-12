@@ -152,10 +152,10 @@ export default function AdminSidebar() {
 
   function linkClass(isActive, mobile = false) {
     if (mobile) {
-      return `shrink-0 rounded-md border px-4 py-2 text-xs font-bold transition-colors ${
+      return `shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold whitespace-nowrap transition-colors ${
         isActive
-          ? 'border-ice-300/40 bg-ice-400/15 text-ice-100'
-          : 'border-white/10 bg-white/5 text-frost/60'
+          ? 'border-ice-300/40 bg-ice-400/20 text-white shadow-sm'
+          : 'border-white/10 bg-night-900/80 text-frost/70 hover:text-white'
       }`
     }
     return `group flex items-center gap-3 rounded-lg px-3 py-3 transition-all ${
@@ -167,7 +167,7 @@ export default function AdminSidebar() {
 
   return (
     <aside className="lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
-      <div className="glass-strong overflow-hidden rounded-xl">
+      <div className="glass-strong hidden overflow-hidden rounded-xl lg:block">
         <div className="border-b border-white/10 px-5 py-5">
           <p className="text-[10px] font-bold uppercase tracking-wider text-ice-300">
             Ice Arena
@@ -180,7 +180,7 @@ export default function AdminSidebar() {
           </p>
         </div>
 
-        <nav className="hidden flex-col gap-3 p-3 lg:flex">
+        <nav className="flex flex-col gap-3 p-3">
           {groups.map((group) => (
             <div key={group.label}>
               <p className="px-3 pb-1 pt-1 text-[9px] font-bold uppercase tracking-wider text-frost/25">
@@ -209,7 +209,7 @@ export default function AdminSidebar() {
           ))}
         </nav>
 
-        <div className="hidden border-t border-white/10 p-3 lg:block">
+        <div className="border-t border-white/10 p-3">
           <button
             type="button"
             onClick={logout}
@@ -220,7 +220,7 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      <div className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 lg:hidden hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
         {mobileItems.map((item) => (
           <NavLink
             key={item.to}
