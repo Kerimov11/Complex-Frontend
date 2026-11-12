@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import logoSrc from '../assets/logo.jpg'
+import { useLanguage } from '../i18n/LanguageContext'
 
 const SIZES = {
   sm: 'h-10 w-10 rounded-xl',
@@ -13,6 +14,9 @@ const SIZES = {
  * saytın tünd fonu ilə səliqəli birləşir.
  */
 export default function Logo({ compact = false, size = 'md', to = '/' }) {
+  const { lang } = useLanguage()
+  const isRu = lang === 'ru'
+
   return (
     <Link
       to={to}
@@ -38,10 +42,10 @@ export default function Logo({ compact = false, size = 'md', to = '/' }) {
           {/* Geniş ekranlarda tam ad, dar ekranlarda qısa HƏİKK -
               başlıq heç vaxt sıxlıqla dolmur. */}
           <p className="whitespace-nowrap font-display text-sm font-bold tracking-wide text-white">
-            <span className="hidden min-[1440px]:inline">
+            <span className={isRu ? 'hidden min-[1440px]:inline' : 'hidden xl:inline'}>
               Heydər Əliyev İdman və Konsert Kompleksi
             </span>
-            <span className="min-[1440px]:hidden">HƏİKK</span>
+            <span className={isRu ? 'min-[1440px]:hidden' : 'xl:hidden'}>HƏİKK</span>
           </p>
           <p className="text-gradient-ice font-display text-sm font-bold tracking-wider">
             BUZ ARENASI
