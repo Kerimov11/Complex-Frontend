@@ -257,7 +257,7 @@ export default function MyTicketsPage() {
                       <p className="text-xs text-frost/60">
                         {ticket.checkedInAt
                           ? `Giriş edilib: ${timeLabel(ticket.checkedInAt)} · ${ticket.durationMinutes || 60} dəq`
-                          : `Giriş: İş saatları içində istənilən vaxt (limitsiz) · ${ticket.durationMinutes || 60} dəqiqəlik sürüş`}
+                          : `Giriş: İş saatları içində istənilən vaxt · ${ticket.durationMinutes || 60} dəqiqəlik sürüş`}
                       </p>
                     </div>
 

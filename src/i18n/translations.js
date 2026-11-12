@@ -1470,9 +1470,9 @@ const PATTERNS = [
     ru: (_, d) => `Куплено: ${d}`,
   },
   {
-    re: /^Giriş:\s*İş saatları içində istənilən vaxt \(limitsiz\)\s*·\s*(\d+)\s*dəqiqəlik sürüş$/,
-    en: (_, m) => `Entry: Any time during opening hours (unlimited) · ${m}-minute session`,
-    ru: (_, m) => `Вход: в любое время в часы работы (безлимит) · ${m} мин катания`,
+    re: /^Giriş:\s*İş saatları içində istənilən vaxt(?:\s*\(limitsiz\))?\s*·\s*(\d+)\s*dəqiqəlik sürüş$/,
+    en: (_, m) => `Entry: Any time during opening hours · ${m}-minute session`,
+    ru: (_, m) => `Вход: в любое время в часы работы · ${m} мин катания`,
   },
   {
     re: /^Giriş edilib:\s*(.+?)\s*·\s*(\d+)\s*dəq$/,
