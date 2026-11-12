@@ -35,7 +35,7 @@ import { staffHomePath } from './utils/staffRoutes'
 
 const ADMIN = ['ROLE_ADMIN']
 const COORD = ['ROLE_ADMIN', 'ROLE_COORDINATOR']
-const OVERVIEW = ['ROLE_ADMIN', 'ROLE_COORDINATOR', 'ROLE_CASHIER']
+const OVERVIEW = ['ROLE_ADMIN', 'ROLE_COORDINATOR']
 const STAFF = [
   'ROLE_ADMIN',
   'ROLE_COORDINATOR',
@@ -44,12 +44,7 @@ const STAFF = [
 ]
 const VOLUNTEER_STAFF = ['ROLE_ADMIN', 'ROLE_COORDINATOR', 'ROLE_VOLUNTEER']
 const POS = ['ROLE_ADMIN', 'ROLE_CASHIER']
-const VERIFY = [
-  'ROLE_ADMIN',
-  'ROLE_COORDINATOR',
-  'ROLE_CASHIER',
-  'ROLE_VOLUNTEER',
-]
+const VERIFY = ['ROLE_ADMIN', 'ROLE_COORDINATOR', 'ROLE_VOLUNTEER']
 
 function ScrollToTop() {
   const { pathname } = useLocation()

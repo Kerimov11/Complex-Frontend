@@ -63,7 +63,7 @@ export default function AdminSidebar() {
           to: '/admin/shifts',
           label: 'Könüllü smenləri',
           hint: 'Canlı stansiyalar',
-          show: isAdmin || isCoordinator || isCashier,
+          show: isAdmin || isCoordinator,
           icon: '⌖',
         },
         {
@@ -110,14 +110,14 @@ export default function AdminSidebar() {
           to: '/admin/verification',
           label: 'Turniket',
           hint: 'QR doğrulama',
-          show: isAdmin || isCoordinator || isCashier || isVolunteer,
+          show: !isCashier && (isAdmin || isCoordinator || isVolunteer),
           icon: '⌁',
         },
         {
           to: '/admin/cashier-verification',
           label: 'Kassa QR',
           hint: 'Bilet məlumatları',
-          show: isAdmin || isCoordinator || isCashier || isVolunteer,
+          show: !isCashier && (isAdmin || isCoordinator || isVolunteer),
           icon: '▤',
         },
         {

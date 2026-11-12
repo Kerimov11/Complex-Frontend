@@ -30,9 +30,6 @@ function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
   if (isCashier) {
     return [
       { to: '/admin/pos', label: 'POS' },
-      { to: '/admin/shifts', label: 'Smenlər' },
-      { to: '/admin/verification', label: 'Turniket' },
-      { to: '/admin/cashier-verification', label: 'Kassa QR' },
       { to: '/admin/active', label: 'Buzdakı müştərilər' },
     ]
   }
