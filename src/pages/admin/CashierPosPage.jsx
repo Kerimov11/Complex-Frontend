@@ -53,7 +53,7 @@ export default function CashierPosPage() {
   const [sessions, setSessions] = useState([])
   const [sessionId, setSessionId] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
-  const [quantity, setQuantity] = useState(1)
+  const [quantity, setQuantity] = useState('1')
   const [duration, setDuration] = useState(60)
   const [method, setMethod] = useState('CASH')
   const [guestNames, setGuestNames] = useState([''])
@@ -94,9 +94,8 @@ export default function CashierPosPage() {
     load()
   }, [load])
 
-  function handleQuantityChange(val) {
-    const qty = Math.max(1, Math.min(50, parseInt(val, 10) || 1))
-    setQuantity(qty)
+  function syncGuestNames(qty) {
+    if (!qty || qty < 1) return
     setGuestNames((prev) => {
       const next = [...prev]
       if (next.length < qty) {
@@ -106,6 +105,31 @@ export default function CashierPosPage() {
       }
       return next
     })
+  }
+
+  function handleQuantityChange(val) {
+    if (val === '') {
+      setQuantity('')
+      return
+    }
+    const parsed = parseInt(val, 10)
+    if (isNaN(parsed)) return
+    if (parsed > 50) {
+      setQuantity('50')
+      syncGuestNames(50)
+      return
+    }
+    setQuantity(String(parsed))
+    if (parsed >= 1) {
+      syncGuestNames(parsed)
+    }
+  }
+
+  function handleQuantityBlur() {
+    if (quantity === '' || parseInt(quantity, 10) < 1) {
+      setQuantity('1')
+      syncGuestNames(1)
+    }
   }
 
   function updateGuestName(index, val) {
@@ -121,6 +145,12 @@ export default function CashierPosPage() {
     setError('')
     setSuccess('')
 
+    const numQty = parseInt(quantity, 10)
+    if (!quantity || isNaN(numQty) || numQty < 1) {
+      setError('Bilet sayını daxil edin (ən azı 1 bilet).')
+      return
+    }
+
     const errors = {}
     const phoneErr = validatePhone(customerPhone)
     if (phoneErr) {
@@ -128,13 +158,13 @@ export default function CashierPosPage() {
     }
 
     const guestErrors = []
-    for (let i = 0; i < quantity; i++) {
+    for (let i = 0; i < numQty; i++) {
       const name = guestNames[i] || ''
       const nameErr = validateFullName(name)
       if (nameErr) {
         guestErrors[i] = nameErr
         if (!errors.names) {
-          errors.names = quantity > 1
+          errors.names = numQty > 1
             ? `${i + 1}-ci qonağın ${nameErr.toLowerCase()}`
             : nameErr
         }
@@ -154,10 +184,10 @@ export default function CashierPosPage() {
     setSelling(true)
     try {
       const primaryName = guestNames[0].trim()
-      const filteredNames = guestNames.slice(0, quantity).map((n) => n.trim())
+      const filteredNames = guestNames.slice(0, numQty).map((n) => n.trim())
       const result = await cashierApi.sell({
         sessionId: sessionId ? Number(sessionId) : null,
-        quantity: Number(quantity),
+        quantity: numQty,
         durationMinutes: Number(duration),
         paymentMethod: method,
         customerPhone: customerPhone.trim(),
@@ -168,7 +198,7 @@ export default function CashierPosPage() {
       setSuccess(`${result.quantity} bilet satıldı. Yekun: ${formatMoney(result.totalAmount)}`)
       setCustomerPhone('')
       setGuestNames([''])
-      setQuantity(1)
+      setQuantity('1')
       setFieldErrors({})
       await load()
     } catch (err) {
@@ -177,6 +207,8 @@ export default function CashierPosPage() {
       setSelling(false)
     }
   }
+
+  const activeQuantity = Math.max(1, parseInt(quantity, 10) || 1)
 
   return (
     <div>
@@ -258,6 +290,8 @@ export default function CashierPosPage() {
                   max="50"
                   value={quantity}
                   onChange={(event) => handleQuantityChange(event.target.value)}
+                  onBlur={handleQuantityBlur}
+                  placeholder="1-50"
                   className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                 />
               </label>
@@ -303,10 +337,10 @@ export default function CashierPosPage() {
 
             <div className="space-y-2">
               <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
-                {quantity > 1 ? `Qonaqların ad və soyadı (${quantity} nəfər)` : 'Ad, Soyad'}
+                {activeQuantity > 1 ? `Qonaqların ad və soyadı (${activeQuantity} nəfər)` : 'Ad, Soyad'}
               </span>
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                {guestNames.slice(0, quantity).map((name, index) => {
+                {guestNames.slice(0, activeQuantity).map((name, index) => {
                   const hasErr = Boolean(fieldErrors.guestList?.[index])
                   return (
                     <div key={index} className="space-y-1">
@@ -322,7 +356,7 @@ export default function CashierPosPage() {
                             })
                           }
                         }}
-                        placeholder={quantity > 1 ? `${index + 1}-ci qonaq: Ad, Soyad` : 'Ad, Soyad'}
+                        placeholder={activeQuantity > 1 ? `${index + 1}-ci qonaq: Ad, Soyad` : 'Ad, Soyad'}
                         className={`w-full rounded-xl border bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none placeholder:text-frost/30 transition-colors ${
                           hasErr
                             ? 'border-red-500/80 focus:border-red-400'
@@ -342,7 +376,7 @@ export default function CashierPosPage() {
 
             <button
               type="submit"
-              disabled={selling || loading}
+              disabled={selling || loading || !quantity || parseInt(quantity, 10) < 1}
               className="btn-primary w-full !px-5 !py-3 text-sm disabled:opacity-50"
             >
               {selling ? 'Satış aparılır...' : 'Satışı tamamla'}
