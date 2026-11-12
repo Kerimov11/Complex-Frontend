@@ -1114,8 +1114,7 @@ export default function BookingWizard({ onTicketChange }) {
                       ).length}{' '}
                       ölçü
                     </b>{' '}
-                    mövcuddur. Ölçü seçiminiz birbaşa konki rezervasiyasına
-                    bağlanır.
+                    mövcuddur.
                   </span>
                 )}
               </div>
