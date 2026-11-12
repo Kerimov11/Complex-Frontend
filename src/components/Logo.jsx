@@ -34,14 +34,14 @@ export default function Logo({ compact = false, size = 'md', to = '/' }) {
         />
       </span>
       {!compact && (
-        <div className="leading-tight">
+        <div className="min-w-0 leading-tight">
           {/* Geniş ekranlarda tam ad, dar ekranlarda qısa HƏİKK -
               başlıq heç vaxt sıxlıqla dolmur. */}
           <p className="whitespace-nowrap font-display text-sm font-bold tracking-wide text-white">
-            <span className="hidden xl:inline">
+            <span className="hidden min-[1440px]:inline">
               Heydər Əliyev İdman və Konsert Kompleksi
             </span>
-            <span className="xl:hidden">HƏİKK</span>
+            <span className="min-[1440px]:hidden">HƏİKK</span>
           </p>
           <p className="text-gradient-ice font-display text-sm font-bold tracking-wider">
             BUZ ARENASI

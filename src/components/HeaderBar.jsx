@@ -58,7 +58,7 @@ export default function HeaderBar({
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Logo to={logoTo} />
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Əsas naviqasiya">
+        <nav className="hidden min-w-0 items-center gap-0.5 lg:flex xl:gap-1" aria-label="Əsas naviqasiya">
           {items.map((item) => (
             <NavLink
               key={`${item.to}-${item.label}`}
@@ -73,18 +73,18 @@ export default function HeaderBar({
           {!isAuthenticated && <LanguageSwitcher className="ml-2" />}
 
           {isAuthenticated ? (
-            <div className="ml-2 flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5">
+            <div className="ml-1.5 flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5">
               <Link
                 to="/hesabim"
-                title="Hesabım"
-                className="max-w-[9rem] shrink-0 truncate whitespace-nowrap text-xs font-bold text-ice-200 transition-colors hover:text-white"
+                title={user?.username || 'Hesabım'}
+                className="max-w-[5.5rem] truncate whitespace-nowrap text-xs font-bold text-ice-200 transition-colors hover:text-white xl:max-w-[7rem]"
               >
                 {user?.username || 'Hesabım'}
               </Link>
               <button
                 type="button"
                 onClick={logout}
-                className="shrink-0 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-semibold text-frost/55 transition-colors hover:text-white"
+                className="shrink-0 whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] font-semibold text-frost/55 transition-colors hover:text-white"
               >
                 Çıxış
               </button>
@@ -93,14 +93,14 @@ export default function HeaderBar({
             <button
               type="button"
               onClick={() => openAuth('login')}
-              className="ml-2 shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold text-frost/75 transition-colors hover:text-white"
+              className="ml-1.5 shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold text-frost/75 transition-colors hover:text-white"
             >
               Daxil ol
             </button>
           )}
 
           {showBooking && (
-            <Link to="/bilet" className="btn-primary ml-2 whitespace-nowrap !px-5 !py-2 text-[13px]">
+            <Link to="/bilet" className="btn-primary ml-1.5 shrink-0 whitespace-nowrap !px-4 !py-2 text-[13px]">
               {bookingLabel}
             </Link>
           )}
