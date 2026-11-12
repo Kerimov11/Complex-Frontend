@@ -230,5 +230,61 @@ export function daySalesClosed() {
   return false
 }
 
+/**
+ * Cari vaxt üçün buz meydançasının giriş xəbərdarlığı:
+ * - İş saatından əvvəl və ya fasilədən əvvəlki son 30 dəq / fasilə zamanı (növbəti seans varsa):
+ *   "Hal-hazırda iş saatı deyil. Buz {HH:MM}-də açılacaq."
+ * - Günün son bağlanmasına 30 dəq qalmış və ya bağlandıqdan sonra:
+ *   "Buza bu gün artıq giriş yoxdur."
+ */
+export function iceEntryWarning(now = new Date()) {
+  const dateISO = toISODate(now)
+  const entry = dayEntry(dateISO)
+  if (!entry || !entry.ranges?.length) return null
+
+  const ranges = entry.ranges
+    .map((range) => {
+      const [from, to] = range.split('-').map((t) => t.trim())
+      return { start: timeToMinutes(from), end: timeToMinutes(to) }
+    })
+    .sort((a, b) => a.start - b.start)
+
+  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  const first = ranges[0]
+  const last = ranges[ranges.length - 1]
+
+  if (nowMinutes < first.start) {
+    const openTime = minutesToTime(first.start)
+    return {
+      kind: 'closed-until',
+      nextOpenTime: openTime,
+      message: `Hal-hazırda iş saatı deyil. Buz ${openTime}-də açılacaq.`,
+    }
+  }
+
+  for (let i = 0; i < ranges.length - 1; i++) {
+    const curr = ranges[i]
+    const next = ranges[i + 1]
+    if (nowMinutes >= curr.end - SALES_CUTOFF_MINUTES && nowMinutes < next.start) {
+      const openTime = minutesToTime(next.start)
+      return {
+        kind: 'closed-until',
+        nextOpenTime: openTime,
+        message: `Hal-hazırda iş saatı deyil. Buz ${openTime}-də açılacaq.`,
+      }
+    }
+  }
+
+  if (nowMinutes >= last.end - SALES_CUTOFF_MINUTES) {
+    return {
+      kind: 'closed-today',
+      nextOpenTime: null,
+      message: 'Buza bu gün artıq giriş yoxdur.',
+    }
+  }
+
+  return null
+}
+
 // --- köhnə adlar (geriyə uyğunluq üçün) ---
 export { timeToMinutes as toMinutes, minutesToTime as fmtTime }

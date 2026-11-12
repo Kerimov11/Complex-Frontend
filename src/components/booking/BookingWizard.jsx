@@ -24,6 +24,7 @@ import {
   daySalesClosed,
   closingTimeLabel,
   effectiveSessionStart,
+  iceEntryWarning,
   resolveActiveSession,
   salesCutoffLabel,
   sessionEndTime,
@@ -191,6 +192,7 @@ export default function BookingWizard({ onTicketChange }) {
   const todayISO = toISODate(new Date(now))
   const todayClosed = daySalesClosed(todayISO, new Date(now))
   const dateClosed = daySalesClosed(date, new Date(now))
+  const entryWarning = iceEntryWarning(new Date(now))
 
   const skatesSorted = useMemo(
     () =>
@@ -945,6 +947,57 @@ export default function BookingWizard({ onTicketChange }) {
                   >
                     Bağla
                   </button>
+                </div>
+              </div>
+            )}
+
+            {entryWarning && (
+              <div
+                className={`flex items-start gap-3 rounded-lg border p-4 sm:p-5 ${
+                  entryWarning.kind === 'closed-today'
+                    ? 'border-red-400/40 bg-red-500/12'
+                    : 'border-amber-400/40 bg-amber-500/12'
+                }`}
+              >
+                <span
+                  className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full ring-1 ${
+                    entryWarning.kind === 'closed-today'
+                      ? 'bg-red-500/25 text-red-100 ring-red-300/40'
+                      : 'bg-amber-500/25 text-amber-100 ring-amber-300/40'
+                  }`}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <p
+                    className={`font-display text-sm font-bold ${
+                      entryWarning.kind === 'closed-today'
+                        ? 'text-red-100'
+                        : 'text-amber-100'
+                    }`}
+                  >
+                    {entryWarning.message}
+                  </p>
+                  <p
+                    className={`mt-1 text-xs leading-relaxed ${
+                      entryWarning.kind === 'closed-today'
+                        ? 'text-red-100/75'
+                        : 'text-amber-100/75'
+                    }`}
+                  >
+                    Biletinizi indi ala bilərsiniz — QR kod turniketdə təsdiqlənənədək etibarlıdır.
+                  </p>
                 </div>
               </div>
             )}
