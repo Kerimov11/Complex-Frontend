@@ -84,9 +84,9 @@ export default function Footer() {
             </p>
             <ul className="mt-4 space-y-2.5 text-sm text-frost/70">
               {SITE.workingHours.map((w) => (
-                <li key={w.day} className="flex flex-wrap justify-between gap-x-6">
-                  <span>{w.day}</span>
-                  <span className="ml-auto text-right font-semibold text-frost">
+                <li key={w.day} className="flex items-baseline justify-between gap-x-2">
+                  <span className="shrink-0">{w.day}</span>
+                  <span className="ml-auto whitespace-nowrap text-right text-[13px] font-semibold tabular-nums text-frost">
                     {w.ranges.join(' / ')}
                   </span>
                 </li>

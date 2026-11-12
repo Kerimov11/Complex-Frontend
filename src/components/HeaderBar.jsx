@@ -27,11 +27,11 @@ export default function HeaderBar({
 
   function desktopLinkClass({ isActive }, item) {
     if (item.tone === 'accent') {
-      return `whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
+      return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors xl:px-2.5 ${
         isActive ? 'text-amber-200' : 'text-amber-200/70 hover:text-amber-100'
       }`
     }
-    return `whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
+    return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors xl:px-2.5 ${
       isActive ? 'text-ice-200' : 'text-frost/75 hover:text-white'
     }`
   }
@@ -73,18 +73,18 @@ export default function HeaderBar({
           {!isAuthenticated && <LanguageSwitcher className="ml-2" />}
 
           {isAuthenticated ? (
-            <div className="ml-2 flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5">
+            <div className="ml-2 flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5">
               <Link
                 to="/hesabim"
                 title="Hesabım"
-                className="max-w-[9rem] truncate text-xs font-bold text-ice-200 transition-colors hover:text-white"
+                className="max-w-[9rem] shrink-0 truncate whitespace-nowrap text-xs font-bold text-ice-200 transition-colors hover:text-white"
               >
                 {user?.username || 'Hesabım'}
               </Link>
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-md px-2 py-1 text-[11px] font-semibold text-frost/55 transition-colors hover:text-white"
+                className="shrink-0 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-semibold text-frost/55 transition-colors hover:text-white"
               >
                 Çıxış
               </button>
@@ -93,7 +93,7 @@ export default function HeaderBar({
             <button
               type="button"
               onClick={() => openAuth('login')}
-              className="ml-2 rounded-md px-3 py-2 text-[13px] font-semibold text-frost/75 transition-colors hover:text-white"
+              className="ml-2 shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold text-frost/75 transition-colors hover:text-white"
             >
               Daxil ol
             </button>
