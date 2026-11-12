@@ -13,7 +13,14 @@ const STATUS_STYLE = {
   EXPIRED: 'border-white/10 bg-white/5 text-frost/50',
 }
 
-function secondsLeft(reservation, now) {
+function secondsLeft(reservation, now, fetchedAt) {
+  if (
+    reservation?.timerRemainingSeconds != null &&
+    Number.isFinite(Number(reservation.timerRemainingSeconds))
+  ) {
+    const elapsed = Math.max(0, Math.floor((now - fetchedAt) / 1000))
+    return Math.max(0, Number(reservation.timerRemainingSeconds) - elapsed)
+  }
   if (!reservation?.timerExpiresAt) return 0
   const end = new Date(reservation.timerExpiresAt).getTime()
   if (!Number.isFinite(end)) return 0
@@ -36,6 +43,7 @@ export default function VolunteerReservationsPage() {
   const [success, setSuccess] = useState('')
   const [busyId, setBusyId] = useState(null)
   const [now, setNow] = useState(() => Date.now())
+  const [fetchedAt, setFetchedAt] = useState(() => Date.now())
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
@@ -47,6 +55,7 @@ export default function VolunteerReservationsPage() {
       ])
       setReservations(Array.isArray(all) ? all : [])
       setLive(Array.isArray(active) ? active : [])
+      setFetchedAt(Date.now())
     } catch (err) {
       setError(err?.message || 'Aktiv rezervasiyalar yüklənmədi.')
     } finally {
@@ -219,7 +228,7 @@ export default function VolunteerReservationsPage() {
         ) : (
           <div className="grid gap-3 xl:grid-cols-2">
             {live.map((reservation) => {
-              const remaining = secondsLeft(reservation, now)
+              const remaining = secondsLeft(reservation, now, fetchedAt)
               const expired = remaining <= 0
               return (
                 <article

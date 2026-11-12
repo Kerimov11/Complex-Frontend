@@ -286,5 +286,63 @@ export function iceEntryWarning(now = new Date()) {
   return null
 }
 
+/**
+ * Konki rezervasiyası aktivləşdirmə yoxlaması:
+ * - İş saatları xaricində: bloklanır
+ * - Bağlanmaya <= 30 dəq qalıbsa (məs. 21:00-dan sonra / 13:15-dən sonra): bloklanır ("buza giriş dayandırılıb")
+ * - 1 saatlıq bilet üçün bağlanmaya 31-59 dəq qalıbsa (məs. 20:40 / 12:55): təsdiq xəbərdarlığı qaytarır
+ */
+export function skateReservationCheck(durationMinutes = 60, now = new Date()) {
+  const dateISO = toISODate(now)
+  const entry = dayEntry(dateISO)
+  if (!entry || !entry.ranges?.length) {
+    return {
+      allowed: false,
+      message: 'Hal-hazırda iş saatı deyil. İş saatları xaricində konki rezervasiya etmək mümkün deyil.',
+    }
+  }
+
+  const ranges = entry.ranges
+    .map((range) => {
+      const [from, to] = range.split('-').map((t) => t.trim())
+      return { start: timeToMinutes(from), end: timeToMinutes(to) }
+    })
+    .sort((a, b) => a.start - b.start)
+
+  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  const activeRange = ranges.find((r) => nowMinutes >= r.start && nowMinutes < r.end)
+
+  if (!activeRange) {
+    const nextRange = ranges.find((r) => nowMinutes < r.start)
+    if (nextRange) {
+      return {
+        allowed: false,
+        message: `Hal-hazırda iş saatı deyil (buz ${minutesToTime(nextRange.start)}-də açılır). İş saatları xaricində konki rezervasiya etmək mümkün deyil.`,
+      }
+    }
+    return {
+      allowed: false,
+      message: 'Artıq rezerv etmək mümkün deyil, buza giriş dayandırılıb.',
+    }
+  }
+
+  const minutesLeft = activeRange.end - nowMinutes
+  if (minutesLeft <= SALES_CUTOFF_MINUTES) {
+    return {
+      allowed: false,
+      message: 'Artıq rezerv etmək mümkün deyil, buza giriş dayandırılıb.',
+    }
+  }
+
+  if (Number(durationMinutes) >= 60 && minutesLeft < 60) {
+    return {
+      allowed: true,
+      confirmMessage: `Buzun bağlanmağına 1 saatdan az qalıb (${minutesLeft} dəq, bağlanma: ${minutesToTime(activeRange.end)}). Yenə də rezervasiya etmək istəyirsiniz?`,
+    }
+  }
+
+  return { allowed: true, confirmMessage: null }
+}
+
 // --- köhnə adlar (geriyə uyğunluq üçün) ---
 export { timeToMinutes as toMinutes, minutesToTime as fmtTime }

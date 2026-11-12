@@ -4,6 +4,7 @@ import QrCode from '../../components/booking/QrCode'
 import SectionTitle from '../../components/SectionTitle'
 import { api } from '../../api/client'
 import { formatDateAZ, pad, secondsToClock } from '../../utils/datetime'
+import { skateReservationCheck } from '../../utils/schedule'
 
 const STATUS_STYLE = {
   ACTIVE: 'border-emerald-300/30 bg-emerald-400/10 text-emerald-100',
@@ -25,7 +26,14 @@ function dateTimeLabel(value) {
   )}:${pad(d.getMinutes())}`
 }
 
-function ticketSecondsLeft(ticket, now) {
+function ticketSecondsLeft(ticket, now, fetchedAt) {
+  if (
+    ticket?.timerRemainingSeconds != null &&
+    Number.isFinite(Number(ticket.timerRemainingSeconds))
+  ) {
+    const elapsed = Math.max(0, Math.floor((now - fetchedAt) / 1000))
+    return Math.max(0, Number(ticket.timerRemainingSeconds) - elapsed)
+  }
   if (!ticket?.timerExpiresAt) return 0
   const end = new Date(ticket.timerExpiresAt).getTime()
   if (!Number.isFinite(end)) return 0
@@ -36,10 +44,13 @@ export default function MyTicketsPage() {
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [ticketErrors, setTicketErrors] = useState({})
+  const [confirmState, setConfirmState] = useState(null)
   const [success, setSuccess] = useState('')
   const [busyCode, setBusyCode] = useState(null)
   const [filter, setFilter] = useState('active')
   const [now, setNow] = useState(() => Date.now())
+  const [fetchedAt, setFetchedAt] = useState(() => Date.now())
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
@@ -47,6 +58,7 @@ export default function MyTicketsPage() {
     try {
       const list = await api.getMyTickets()
       setTickets(Array.isArray(list) ? list : [])
+      setFetchedAt(Date.now())
     } catch (err) {
       setError(err?.message || 'Bilet tarixçəsi yüklənmədi.')
     } finally {
@@ -73,12 +85,12 @@ export default function MyTicketsPage() {
   useEffect(() => {
     if (!hasActiveTimer) return undefined
     const finished = tickets.some(
-      (ticket) => ticket.reservationActive && ticketSecondsLeft(ticket, now) <= 0
+      (ticket) => ticket.reservationActive && ticketSecondsLeft(ticket, now, fetchedAt) <= 0
     )
     if (!finished) return undefined
     const timer = setTimeout(() => load(true), 2500)
     return () => clearTimeout(timer)
-  }, [now, tickets, hasActiveTimer, load])
+  }, [now, fetchedAt, tickets, hasActiveTimer, load])
 
   const shown = useMemo(() => {
     if (filter === 'all') return tickets
@@ -90,10 +102,24 @@ export default function MyTicketsPage() {
     return tickets.filter((ticket) => ['ACTIVE', 'PENDING'].includes(ticket.status))
   }, [tickets, filter])
 
-  async function activate(ticket) {
+  async function activate(ticket, skipConfirm = false) {
     if (busyCode) return
+
+    const check = skateReservationCheck(ticket.durationMinutes || 60, new Date())
+    if (!check.allowed) {
+      setError(check.message)
+      setTicketErrors((prev) => ({ ...prev, [ticket.ticketCode]: check.message }))
+      return
+    }
+    if (check.confirmMessage && !skipConfirm) {
+      setTicketErrors((prev) => ({ ...prev, [ticket.ticketCode]: '' }))
+      setConfirmState({ ticket, message: check.confirmMessage })
+      return
+    }
+
     setBusyCode(ticket.ticketCode)
     setError('')
+    setTicketErrors((prev) => ({ ...prev, [ticket.ticketCode]: '' }))
     setSuccess('')
     try {
       const updated = await api.activateTicket(ticket.ticketCode)
@@ -102,12 +128,15 @@ export default function MyTicketsPage() {
           item.ticketCode === ticket.ticketCode ? { ...item, ...updated } : item
         )
       )
+      setFetchedAt(Date.now())
       setSuccess(
         'Konki rezervasiyası aktivləşdirildi. Könüllü heyəti konkilərinizi hazırlayacaq.'
       )
       await load(true)
     } catch (err) {
-      setError(err?.message || 'Rezervasiya aktivləşdirilə bilmədi.')
+      const msg = err?.message || 'Rezervasiya aktivləşdirilə bilmədi.'
+      setError(msg)
+      setTicketErrors((prev) => ({ ...prev, [ticket.ticketCode]: msg }))
     } finally {
       setBusyCode(null)
     }
@@ -182,7 +211,7 @@ export default function MyTicketsPage() {
       ) : (
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           {shown.map((ticket) => {
-            const secondsLeft = ticketSecondsLeft(ticket, now)
+            const secondsLeft = ticketSecondsLeft(ticket, now, fetchedAt)
             const activeTimer = Boolean(ticket.reservationActive) && secondsLeft > 0
             const attemptsLeft =
               ticket.remainingActivations ??
@@ -288,16 +317,23 @@ export default function MyTicketsPage() {
                         Konki təhvil verilib. Bu bilet üçün aktivləşdirmə artıq bağlıdır.
                       </p>
                     ) : canActivate ? (
-                      <button
-                        type="button"
-                        disabled={busyCode === ticket.ticketCode}
-                        onClick={() => activate(ticket)}
-                        className="btn-primary w-full !py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {busyCode === ticket.ticketCode
-                          ? 'Aktivləşdirilir…'
-                          : `Konki rezervasiyasını aktivləşdir (${attemptsLeft} cəhd qalıb)`}
-                      </button>
+                      <div className="space-y-2">
+                        {ticketErrors[ticket.ticketCode] && (
+                          <p className="rounded-lg border border-red-400/35 bg-red-500/12 px-3 py-2 text-xs font-semibold text-red-100">
+                            {ticketErrors[ticket.ticketCode]}
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          disabled={busyCode === ticket.ticketCode}
+                          onClick={() => activate(ticket)}
+                          className="btn-primary w-full !py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {busyCode === ticket.ticketCode
+                            ? 'Aktivləşdirilir…'
+                            : `Konki rezervasiyasını aktivləşdir (${attemptsLeft} cəhd qalıb)`}
+                        </button>
+                      </div>
                     ) : isBooking && ticket.status === 'ACTIVE' ? (
                       <p className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-xs text-frost/55">
                         {attemptsLeft > 0
@@ -310,6 +346,39 @@ export default function MyTicketsPage() {
               </article>
             )
           })}
+        </div>
+      )}
+
+      {confirmState && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-night-950/75 p-4 backdrop-blur-sm">
+          <div className="glass-strong w-full max-w-md rounded-xl border border-amber-300/35 p-6">
+            <p className="font-display text-lg font-bold text-amber-100">
+              Bağlanma xəbərdarlığı
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-frost/80">
+              {confirmState.message}
+            </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmState(null)}
+                className="btn-ghost !py-2 text-xs"
+              >
+                Ləğv et
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = confirmState.ticket
+                  setConfirmState(null)
+                  activate(target, true)
+                }}
+                className="btn-primary !py-2 text-xs"
+              >
+                Bəli, rezerv et
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
