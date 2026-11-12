@@ -15,7 +15,6 @@ import RulesPage from './pages/RulesPage'
 import AdminLayout from './components/admin/AdminLayout'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import StaffManagementPage from './pages/admin/StaffManagementPage'
-import SessionManagementPage from './pages/admin/SessionManagementPage'
 import SkateInventoryPage from './pages/admin/SkateInventoryPage'
 import CashierPosPage from './pages/admin/CashierPosPage'
 import VerificationPage from './pages/admin/VerificationPage'
@@ -152,11 +151,7 @@ export default function App() {
             />
             <Route
               path="sessions"
-              element={
-                <ProtectedRoute roles={ADMIN}>
-                  <SessionManagementPage />
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/admin" replace />}
             />
             <Route
               path="skates"

@@ -34,13 +34,6 @@ export default function AdminSidebar() {
           icon: '◈',
         },
         {
-          to: '/admin/sessions',
-          label: 'Sessiyalar',
-          hint: 'Bilet limitləri',
-          show: isAdmin,
-          icon: '◷',
-        },
-        {
           to: '/admin/skates',
           label: 'Konki anbarı',
           hint: 'Stok və zədə',
