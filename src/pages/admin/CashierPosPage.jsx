@@ -291,7 +291,6 @@ export default function CashierPosPage() {
                   value={quantity}
                   onChange={(event) => handleQuantityChange(event.target.value)}
                   onBlur={handleQuantityBlur}
-                  placeholder="1-50"
                   className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                 />
               </label>
