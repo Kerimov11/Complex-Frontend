@@ -22,6 +22,15 @@ export const adminApi = {
       method: 'PUT',
       body: { role },
     }),
+  updateStaffMember: (id, payload) =>
+    request(`/api/admin/staff/${id}`, {
+      method: 'PUT',
+      body: payload,
+    }),
+  deleteStaffMember: (id) =>
+    request(`/api/admin/staff/${id}`, {
+      method: 'DELETE',
+    }),
 
   getSessions: () => request('/api/admin/sessions'),
   getSessionsByDate: (date) =>

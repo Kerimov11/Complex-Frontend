@@ -19,6 +19,18 @@ export default function StaffManagementPage() {
   const [success, setSuccess] = useState('')
   const [busyKey, setBusyKey] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [editingMember, setEditingMember] = useState(null)
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    phoneNumber: '',
+    password: '',
+    role: 'ROLE_VOLUNTEER',
+  })
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -82,6 +94,66 @@ export default function StaffManagementPage() {
     }
   }
 
+  function startEdit(member) {
+    setError('')
+    setSuccess('')
+    setConfirmDeleteId(null)
+    setEditingMember(member)
+    setEditForm({
+      firstName: member.firstName || '',
+      lastName: member.lastName || '',
+      username: member.username || '',
+      email: member.email || '',
+      phoneNumber: member.phoneNumber || '',
+      password: '',
+      role: staffRoleOf(member) || 'ROLE_VOLUNTEER',
+    })
+  }
+
+  async function saveEdit(event) {
+    event.preventDefault()
+    if (!editingMember) return
+    setSavingEdit(true)
+    setError('')
+    setSuccess('')
+    try {
+      const payload = {
+        firstName: editForm.firstName.trim(),
+        lastName: editForm.lastName.trim(),
+        username: editForm.username.trim(),
+        email: editForm.email.trim(),
+        phoneNumber: editForm.phoneNumber.trim() || null,
+        password: editForm.password.trim() || null,
+        role: editForm.role,
+      }
+      const updated = await adminApi.updateStaffMember(editingMember.id, payload)
+      setStaff((prev) => prev.map((item) => (item.id === editingMember.id ? updated : item)))
+      setSuccess(`${updated.username} məlumatları yeniləndi.`)
+      setEditingMember(null)
+    } catch (err) {
+      setError(err?.message || 'Əməkdaş məlumatları yenilənmədi.')
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  async function deleteMember(member) {
+    setBusyKey(String(member.id))
+    setError('')
+    setSuccess('')
+    try {
+      await adminApi.deleteStaffMember(member.id)
+      setStaff((prev) => prev.filter((item) => item.id !== member.id))
+      if (editingMember?.id === member.id) setEditingMember(null)
+      setConfirmDeleteId(null)
+      setSuccess(`${member.username} əməkdaş siyahısından silindi.`)
+    } catch (err) {
+      setError(err?.message || 'Əməkdaş silinə bilmədi.')
+    } finally {
+      setBusyKey('')
+    }
+  }
+
   return (
     <div>
       <AdminPageHeader
@@ -138,6 +210,132 @@ export default function StaffManagementPage() {
           onCreate={createStaff}
           onCancel={() => setShowCreate(false)}
         />
+      )}
+
+      {editingMember && (
+        <form onSubmit={saveEdit} className="glass mb-5 rounded-xl p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-ice-300">
+                Əməkdaşa düzəliş
+              </p>
+              <h3 className="font-display text-lg font-bold text-white">
+                {editingMember.firstName} {editingMember.lastName} (@{editingMember.username})
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingMember(null)}
+              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-frost/60 hover:text-white"
+            >
+              Bağla
+            </button>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+                Ad
+              </span>
+              <input
+                required
+                value={editForm.firstName}
+                onChange={(e) => setEditForm((f) => ({ ...f, firstName: e.target.value }))}
+                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2 text-sm text-white outline-none focus:border-ice-300/50"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+                Soyad
+              </span>
+              <input
+                required
+                value={editForm.lastName}
+                onChange={(e) => setEditForm((f) => ({ ...f, lastName: e.target.value }))}
+                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2 text-sm text-white outline-none focus:border-ice-300/50"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+                İstifadəçi adı
+              </span>
+              <input
+                required
+                value={editForm.username}
+                onChange={(e) => setEditForm((f) => ({ ...f, username: e.target.value }))}
+                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2 text-sm text-white outline-none focus:border-ice-300/50"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+                E-poçt
+              </span>
+              <input
+                type="email"
+                required
+                value={editForm.email}
+                onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
+                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2 text-sm text-white outline-none focus:border-ice-300/50"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+                Telefon (istəyə bağlı)
+              </span>
+              <input
+                value={editForm.phoneNumber}
+                onChange={(e) => setEditForm((f) => ({ ...f, phoneNumber: e.target.value }))}
+                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2 text-sm text-white outline-none focus:border-ice-300/50"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+                Rol
+              </span>
+              <select
+                value={editForm.role}
+                onChange={(e) => setEditForm((f) => ({ ...f, role: e.target.value }))}
+                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2 text-sm text-white outline-none focus:border-ice-300/50"
+              >
+                {STAFF_ROLE_OPTIONS.map((role) => (
+                  <option key={role} value={role}>
+                    {ROLE_META[role].label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block sm:col-span-2 lg:col-span-3">
+              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+                Yeni şifrə (dəyişmək istəmirsinizsə boş buraxın)
+              </span>
+              <input
+                type="password"
+                minLength={6}
+                value={editForm.password}
+                onChange={(e) => setEditForm((f) => ({ ...f, password: e.target.value }))}
+                placeholder="Minimum 6 simvol"
+                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2 text-sm text-white outline-none placeholder:text-frost/30 focus:border-ice-300/50"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditingMember(null)}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-frost/70 hover:text-white"
+            >
+              Ləğv et
+            </button>
+            <button
+              type="submit"
+              disabled={savingEdit}
+              className="btn-primary !px-5 !py-2 text-xs disabled:opacity-50"
+            >
+              {savingEdit ? 'Yadda saxlanır...' : 'Yadda saxla'}
+            </button>
+          </div>
+        </form>
       )}
 
       <div className="glass overflow-hidden rounded-xl">
@@ -213,6 +411,43 @@ export default function StaffManagementPage() {
                         </option>
                       ))}
                     </select>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(member)}
+                      disabled={busyKey === String(member.id)}
+                      className="rounded-xl border border-ice-300/25 bg-ice-400/10 px-3 py-2 text-xs font-bold text-ice-200 transition-colors hover:bg-ice-400/20 disabled:opacity-50"
+                    >
+                      Düzəliş et
+                    </button>
+                    {confirmDeleteId === member.id ? (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => deleteMember(member)}
+                          disabled={busyKey === String(member.id)}
+                          className="rounded-xl border border-red-400/40 bg-red-500/25 px-3 py-2 text-xs font-bold text-red-100 transition-colors hover:bg-red-500/40 disabled:opacity-50"
+                        >
+                          Təsdiqlə
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(null)}
+                          disabled={busyKey === String(member.id)}
+                          className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs font-bold text-frost/60 hover:text-white"
+                        >
+                          Ləğv et
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(member.id)}
+                        disabled={busyKey === String(member.id)}
+                        className="rounded-xl border border-red-400/25 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-200 transition-colors hover:bg-red-500/20 disabled:opacity-50"
+                      >
+                        Sil
+                      </button>
+                    )}
                     {busyKey === String(member.id) && (
                       <span className="text-xs text-frost/40">Yenilənir...</span>
                     )}
