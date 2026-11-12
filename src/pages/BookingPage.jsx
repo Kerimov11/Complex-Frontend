@@ -21,7 +21,7 @@ export default function BookingPage() {
       <SectionTitle
         eyebrow="Onlayn bilet"
         title="Bilet al və konki rezervasiya et"
-        description="Tarixi seçin, iştirakçıların sayını və konki razmerlərini qeyd edin. Biletiniz limitsizdir — saat seçimi yoxdur; QR kod təsdiqlənənədək istədiyiniz gün və iş saatında gəlib buza daxil ola bilərsiniz."
+        description="Müddəti, iştirakçıların sayını və konki razmerlərini qeyd edin. Biletiniz limitsizdir — saat seçimi yoxdur; QR kod təsdiqlənənədək istədiyiniz gün və iş saatında gəlib buza daxil ola bilərsiniz."
       />
       {!hasTicket && (
         <div className="mx-auto mt-8 max-w-2xl">

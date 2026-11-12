@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import SafetyNotice from '../SafetyNotice'
 import TicketCard from './TicketCard'
 import { useAuth } from '../../auth/AuthContext'
 import { api } from '../../api/client'
@@ -796,7 +795,7 @@ export default function BookingWizard({ onTicketChange }) {
     setPaymentOpen(false)
     setPendingOrder(null)
     setPaymentError('')
-    setStep(3)
+    setStep(2)
     setSubmitting(false)
     loadSkates()
     return { ok: true }
@@ -909,219 +908,133 @@ export default function BookingWizard({ onTicketChange }) {
 
   return (
     <div>
-      <div className="mx-auto mb-10 flex max-w-3xl items-center justify-center gap-8">
-        <Step num={1} title="Sessiya" />
+      <div className="mx-auto mb-10 flex max-w-2xl items-center justify-center gap-8">
+        <Step num={1} title="İştirakçılar" />
         <div
           className={`h-px flex-1 ${step >= 2 ? 'bg-ice-300' : 'bg-white/15'}`}
         />
-        <Step num={2} title="İştirakçılar" />
-        <div
-          className={`h-px flex-1 ${step >= 3 ? 'bg-ice-300' : 'bg-white/15'}`}
-        />
-        <Step num={3} title="Bilet" />
+        <Step num={2} title="Bilet" />
       </div>
 
       {step === 1 && (
-        <div className="mx-auto max-w-3xl space-y-5">
-          {notice && (
-            <div className="flex items-start gap-3 rounded-lg border border-ice-300/40 bg-ice-400/12 p-4">
-              <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ice-400/20 text-ice-100">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-relaxed text-ice-100">
-                  {notice}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setNotice('')}
-                  className="mt-1.5 text-[11px] font-bold uppercase tracking-wider text-frost/50 transition-colors hover:text-white"
-                >
-                  Bağla
-                </button>
-              </div>
-            </div>
-          )}
-
-          {todayClosed && (
-            <div className="flex items-start gap-3 rounded-lg border border-red-400/40 bg-red-500/12 p-4 sm:p-5">
-              <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-red-500/25 text-red-100 ring-1 ring-red-300/40">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-              </span>
-              <div className="min-w-0">
-                <p className="font-display text-sm font-bold text-red-100">
-                  {formatDateAZ(todayISO)} tarixi üçün bilet satışı avtomatik
-                  bağlanıb
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-red-100/75">
-                  Arenanın bağlanma vaxtı {closingTimeLabel(todayISO)}-dir.
-                  Bağlanmaya 30 dəqiqə qalıbdan ({salesCutoffLabel(todayISO)})
-                  sonra həmin gün üçün bilet satışı dayandırılır. Tarix avtomatik
-                  olaraq sabaha keçirildi.
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="glass rounded-xl p-6 sm:p-8">
-            <p className="font-display font-bold text-white">Tarix seçin</p>
-            <input
-              type="date"
-              value={date}
-              min={todayClosed ? addDaysISO(1) : addDaysISO(0)}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-3 w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors focus:border-ice-300/60"
-            />
-            <div className="mt-2 text-xs text-frost/55">
-              {dayNameAZ(date)}, {formatDateAZ(date)}
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs">
-              {sessionsLoading ? (
-                <span className="text-frost/60">Seanslar yüklənir…</span>
-              ) : sessionsError ? (
-                <>
-                  <span className="font-semibold text-amber-200">
-                    {sessionsError}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setSessionsReload((v) => v + 1)}
-                    className="font-bold uppercase tracking-wider text-ice-200 transition-colors hover:text-white"
-                  >
-                    Yenidən cəhd et
-                  </button>
-                </>
-              ) : sessions.length === 0 ? (
-                <span className="font-semibold text-amber-200">
-                  Bu tarix üçün seans yoxdur.
-                </span>
-              ) : (
-                <>
-                  <span className="text-frost/65">
-                    Giriş: <b className="text-white">İş saatları içində istənilən vaxt</b> (qeyri-məhdud)
-                  </span>
-                </>
-              )}
-            </div>
-
-            <p className="mt-6 font-display font-bold text-white">
-              Vaxt və müddət
-            </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-white/15 bg-white/[0.04] p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-frost/50">
-                  Müddət
-                </p>
-                <div className="mt-2 flex gap-2">
-                  {[
-                    { k: 'half', label: 'Yarım saat' },
-                    { k: 'hour', label: '1 saat' },
-                  ].map((d) => (
-                    <button
-                      key={d.k}
-                      type="button"
-                      onClick={() => setDuration(d.k)}
-                      className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${
-                        duration === d.k
-                          ? 'bg-ice-400 text-night-950'
-                          : 'bg-white/[0.06] text-frost/70 hover:text-white'
-                      }`}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-white/15 bg-white/[0.04] p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-frost/50">
-                  Nəfər sayı
-                </p>
-                <div className="mt-2 flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setQty((v) => Math.max(1, v - 1))}
-                    className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    min="1"
-                    value={qty}
-                    onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                    className="w-16 rounded-lg bg-white/[0.06] py-1 text-center font-display text-2xl font-bold text-white outline-none focus:ring-1 focus:ring-ice-300"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setQty((v) => v + 1)}
-                    className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-lg border border-ice-300/30 bg-ice-400/10 p-4 sm:p-5">
-              <p className="font-display font-bold text-white">
-                Sərbəst giriş biletləri
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-frost/70">
-                Biletiniz qeyri-məhdud müddətlidir — saat seçimi yoxdur. QR kod təsdiqlənmədiyi müddətcə istədiyiniz gün və iş saatında gəlib buza daxil ola bilərsiniz. Vaxt yalnız turniketdən keçdikdən sonra aktivləşir.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-end gap-2">
-            {!canContinue && (
-              <p className="text-right text-xs font-semibold text-amber-200">
-                {continueBlockReason}
-              </p>
-            )}
-            <button
-              type="button"
-              disabled={!canContinue}
-              onClick={() => setStep(2)}
-              className={`btn-primary ${
-                canContinue ? '' : 'cursor-not-allowed opacity-50'
-              }`}
-            >
-              Davam et
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === 2 && (
         <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-5">
-            <div className="glass rounded-xl p-4 sm:p-8">
-              <div className="mb-4">
-                <SafetyNotice compact />
+            {notice && (
+              <div className="flex items-start gap-3 rounded-lg border border-ice-300/40 bg-ice-400/12 p-4">
+                <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ice-400/20 text-ice-100">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold leading-relaxed text-ice-100">
+                    {notice}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setNotice('')}
+                    className="mt-1.5 text-[11px] font-bold uppercase tracking-wider text-frost/50 transition-colors hover:text-white"
+                  >
+                    Bağla
+                  </button>
+                </div>
               </div>
+            )}
+
+            <div className="glass rounded-xl p-4 sm:p-8">
+              <div className="mb-6">
+                <p className="font-display font-bold text-white">
+                  Vaxt və müddət
+                </p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-white/15 bg-white/[0.04] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-frost/50">
+                      Müddət
+                    </p>
+                    <div className="mt-2 flex gap-2">
+                      {[
+                        { k: 'half', label: 'Yarım saat' },
+                        { k: 'hour', label: '1 saat' },
+                      ].map((d) => (
+                        <button
+                          key={d.k}
+                          type="button"
+                          onClick={() => setDuration(d.k)}
+                          className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${
+                            duration === d.k
+                              ? 'bg-ice-400 text-night-950'
+                              : 'bg-white/[0.06] text-frost/70 hover:text-white'
+                          }`}
+                        >
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-white/15 bg-white/[0.04] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-frost/50">
+                      Nəfər sayı
+                    </p>
+                    <div className="mt-2 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setQty((v) => Math.max(1, v - 1))}
+                        className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        value={qty}
+                        onChange={(e) =>
+                          setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
+                        }
+                        className="w-16 rounded-lg bg-white/[0.06] py-1 text-center font-display text-2xl font-bold text-white outline-none focus:ring-1 focus:ring-ice-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setQty((v) => v + 1)}
+                        className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {(sessionsError || (!sessionsLoading && sessions.length === 0)) && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-xs">
+                  {sessionsError ? (
+                    <>
+                      <span className="font-semibold text-amber-200">
+                        {sessionsError}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSessionsReload((v) => v + 1)}
+                        className="font-bold uppercase tracking-wider text-ice-200 transition-colors hover:text-white"
+                      >
+                        Yenidən cəhd et
+                      </button>
+                    </>
+                  ) : (
+                    <span className="font-semibold text-amber-200">
+                      Aktiv seans tapılmadı.
+                    </span>
+                  )}
+                </div>
+              )}
 
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs">
                 {skatesLoading ? (
@@ -1415,12 +1328,6 @@ export default function BookingWizard({ onTicketChange }) {
                 </p>
               )}
             </div>
-
-            <div className="flex justify-between">
-              <button type="button" onClick={() => setStep(1)} className="btn-ghost">
-                Geri
-              </button>
-            </div>
           </div>
 
           <div className="h-fit lg:sticky lg:top-24">
@@ -1669,7 +1576,7 @@ export default function BookingWizard({ onTicketChange }) {
         </div>
       )}
 
-      {step === 3 && ticket === null && (
+      {step === 2 && ticket === null && (
         <div className="mx-auto max-w-xl">
           <div className="glass rounded-xl p-8 text-center">
             <p className="font-display text-xl font-bold text-white">
