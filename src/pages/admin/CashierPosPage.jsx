@@ -6,6 +6,48 @@ import { formatDateTime, formatMoney, formatNumber, todayISO } from '../../compo
 import { api } from '../../api/client'
 import { cashierApi } from '../../services/api/cashierApi'
 
+function validatePhone(phone) {
+  if (!phone || !phone.trim()) {
+    return 'Mobil nömrə daxil edilməlidir.'
+  }
+  const cleaned = phone.trim()
+  const digits = cleaned.replace(/\D/g, '')
+
+  if (digits.length === 12 && digits.startsWith('994')) {
+    if (!/^994(10|50|51|55|60|70|71|77|99)\d{7}$/.test(digits)) {
+      return 'Mobil nömrə prefiksi yanlışdır (məs: +994 50 123 45 67).'
+    }
+    return ''
+  }
+  if (digits.length === 10 && digits.startsWith('0')) {
+    if (!/^0(10|50|51|55|60|70|71|77|99)\d{7}$/.test(digits)) {
+      return 'Mobil nömrə prefiksi yanlışdır (məs: 050 123 45 67).'
+    }
+    return ''
+  }
+  if (digits.length === 9) {
+    if (!/^(10|50|51|55|60|70|71|77|99)\d{7}$/.test(digits)) {
+      return 'Mobil nömrə prefiksi yanlışdır (məs: 50 123 45 67).'
+    }
+    return ''
+  }
+  if (cleaned.startsWith('+') && digits.length >= 10 && digits.length <= 15) {
+    return ''
+  }
+  return 'Mobil nömrə düzgün formatda deyil (məs: +994 50 123 45 67).'
+}
+
+function validateFullName(name) {
+  if (!name || !name.trim()) {
+    return 'Ad və soyad daxil edilməlidir.'
+  }
+  const parts = name.trim().split(/\s+/)
+  if (parts.length < 2 || parts[0].length < 2 || parts[1].length < 2) {
+    return 'Həm ad, həm də soyad tam qeyd olunmalıdır (məs: Əli Əliyev).'
+  }
+  return ''
+}
+
 export default function CashierPosPage() {
   const [date, setDate] = useState(todayISO())
   const [sessions, setSessions] = useState([])
@@ -15,6 +57,7 @@ export default function CashierPosPage() {
   const [duration, setDuration] = useState(60)
   const [method, setMethod] = useState('CASH')
   const [guestNames, setGuestNames] = useState([''])
+  const [fieldErrors, setFieldErrors] = useState({})
   const [report, setReport] = useState(null)
   const [receipt, setReceipt] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -75,19 +118,50 @@ export default function CashierPosPage() {
 
   async function submitSale(event) {
     event.preventDefault()
-    setSelling(true)
     setError('')
     setSuccess('')
+
+    const errors = {}
+    const phoneErr = validatePhone(customerPhone)
+    if (phoneErr) {
+      errors.phone = phoneErr
+    }
+
+    const guestErrors = []
+    for (let i = 0; i < quantity; i++) {
+      const name = guestNames[i] || ''
+      const nameErr = validateFullName(name)
+      if (nameErr) {
+        guestErrors[i] = nameErr
+        if (!errors.names) {
+          errors.names = quantity > 1
+            ? `${i + 1}-ci qonağın ${nameErr.toLowerCase()}`
+            : nameErr
+        }
+      }
+    }
+    if (guestErrors.some(Boolean)) {
+      errors.guestList = guestErrors
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      setError(errors.phone || errors.names)
+      return
+    }
+
+    setFieldErrors({})
+    setSelling(true)
     try {
-      const primaryName = guestNames.find((n) => n.trim())?.trim() || ''
-      const filteredNames = guestNames.map((n) => n.trim())
+      const primaryName = guestNames[0].trim()
+      const filteredNames = guestNames.slice(0, quantity).map((n) => n.trim())
       const result = await cashierApi.sell({
         sessionId: sessionId ? Number(sessionId) : null,
         quantity: Number(quantity),
         durationMinutes: Number(duration),
         paymentMethod: method,
-        customerPhone: customerPhone.trim() || null,
-        customerName: primaryName || null,
+        customerPhone: customerPhone.trim(),
+        customerName: primaryName,
         customerNames: filteredNames,
       })
       setReceipt(result)
@@ -95,6 +169,7 @@ export default function CashierPosPage() {
       setCustomerPhone('')
       setGuestNames([''])
       setQuantity(1)
+      setFieldErrors({})
       await load()
     } catch (err) {
       setError(err?.message || 'POS satışı alınmadı.')
@@ -153,12 +228,23 @@ export default function CashierPosPage() {
               </span>
               <input
                 type="tel"
-                required
                 value={customerPhone}
-                onChange={(event) => setCustomerPhone(event.target.value)}
+                onChange={(event) => {
+                  setCustomerPhone(event.target.value)
+                  if (fieldErrors.phone) {
+                    setFieldErrors((prev) => ({ ...prev, phone: '' }))
+                  }
+                }}
                 placeholder="+994 (__) ___-__-__"
-                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none placeholder:text-frost/30 focus:border-ice-300/50"
+                className={`w-full rounded-xl border bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none placeholder:text-frost/30 transition-colors ${
+                  fieldErrors.phone
+                    ? 'border-red-500/80 focus:border-red-400'
+                    : 'border-white/10 focus:border-ice-300/50'
+                }`}
               />
+              {fieldErrors.phone && (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.phone}</p>
+              )}
             </label>
 
             <div className="grid grid-cols-2 gap-3">
@@ -220,15 +306,37 @@ export default function CashierPosPage() {
                 {quantity > 1 ? `Qonaqların ad və soyadı (${quantity} nəfər)` : 'Ad, Soyad'}
               </span>
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                {guestNames.map((name, index) => (
-                  <input
-                    key={index}
-                    value={name}
-                    onChange={(event) => updateGuestName(index, event.target.value)}
-                    placeholder={quantity > 1 ? `${index + 1}-ci qonaq: Ad, Soyad` : 'Ad, Soyad'}
-                    className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none placeholder:text-frost/30 focus:border-ice-300/50"
-                  />
-                ))}
+                {guestNames.slice(0, quantity).map((name, index) => {
+                  const hasErr = Boolean(fieldErrors.guestList?.[index])
+                  return (
+                    <div key={index} className="space-y-1">
+                      <input
+                        value={name}
+                        onChange={(event) => {
+                          updateGuestName(index, event.target.value)
+                          if (fieldErrors.guestList?.[index]) {
+                            setFieldErrors((prev) => {
+                              const nextList = [...(prev.guestList || [])]
+                              nextList[index] = ''
+                              return { ...prev, guestList: nextList }
+                            })
+                          }
+                        }}
+                        placeholder={quantity > 1 ? `${index + 1}-ci qonaq: Ad, Soyad` : 'Ad, Soyad'}
+                        className={`w-full rounded-xl border bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none placeholder:text-frost/30 transition-colors ${
+                          hasErr
+                            ? 'border-red-500/80 focus:border-red-400'
+                            : 'border-white/10 focus:border-ice-300/50'
+                        }`}
+                      />
+                      {hasErr && (
+                        <p className="text-[11px] text-red-400">
+                          {fieldErrors.guestList[index]}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
