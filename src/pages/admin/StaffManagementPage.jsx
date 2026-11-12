@@ -159,7 +159,7 @@ export default function StaffManagementPage() {
       <AdminPageHeader
         eyebrow="Əməkdaş idarəetməsi"
         title="Könüllü, kassir və koordinatorlar"
-        description="Limitsiz əməkdaş hesabı yaradın və mövcud əməkdaşın rolunu bir kliklə yüksəldin. Bütün dəyişikliklər dərhal JWT səlahiyyətlərinə tətbiq olunur."
+        description="Limitsiz əməkdaş hesabı yaradın və mövcud əməkdaşın rolunu bir kliklə yüksəldin."
         actions={
           <button
             type="button"
