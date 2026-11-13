@@ -27,11 +27,11 @@ export default function HeaderBar({
 
   function desktopLinkClass({ isActive }, item) {
     if (item.tone === 'accent') {
-      return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors ${
+      return `whitespace-nowrap rounded-md px-1.5 py-1.5 text-xs xl:px-2 xl:text-[13px] font-semibold transition-colors ${
         isActive ? 'text-amber-200' : 'text-amber-200/70 hover:text-amber-100'
       }`
     }
-    return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors ${
+    return `whitespace-nowrap rounded-md px-1.5 py-1.5 text-xs xl:px-2 xl:text-[13px] font-semibold transition-colors ${
       isActive ? 'text-ice-200' : 'text-frost/75 hover:text-white'
     }`
   }
@@ -55,7 +55,7 @@ export default function HeaderBar({
           : 'border-b border-white/5 bg-transparent py-4'
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
+      <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
         <Logo to={logoTo} />
 
         <nav className="hidden min-w-0 items-center gap-0.5 lg:flex xl:gap-1" aria-label="Əsas naviqasiya">

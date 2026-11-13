@@ -4,7 +4,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import { formatNumber } from '../../components/admin/formatters'
 import { adminApi } from '../../services/api/adminApi'
 
-const EMPTY_FORM = { size: '', quantity: 20 }
+const EMPTY_FORM = { size: '', quantity: '20' }
 
 export default function SkateInventoryPage() {
   const [skates, setSkates] = useState([])
@@ -18,9 +18,9 @@ export default function SkateInventoryPage() {
   // Stok düzəliş modalı
   const [editingSkate, setEditingSkate] = useState(null)
   const [editForm, setEditForm] = useState({
-    totalQuantity: 0,
-    availableQuantity: 0,
-    damagedQuantity: 0,
+    totalQuantity: '0',
+    availableQuantity: '0',
+    damagedQuantity: '0',
   })
 
   const load = useCallback(async (silent = false) => {
@@ -51,6 +51,14 @@ export default function SkateInventoryPage() {
     }
   }, [load])
 
+  const handleCleanCreateQuantity = (value) => {
+    let cleaned = value.replace(/\D/g, '')
+    if (cleaned.length > 1 && cleaned.startsWith('0')) {
+      cleaned = cleaned.replace(/^0+/, '') || '0'
+    }
+    setForm((prev) => ({ ...prev, quantity: cleaned }))
+  }
+
   async function createSkate(event) {
     event.preventDefault()
     setBusyId('create')
@@ -59,7 +67,7 @@ export default function SkateInventoryPage() {
     try {
       const created = await adminApi.createSkate({
         size: Number(form.size),
-        quantity: Math.max(0, Number(form.quantity) || 0),
+        quantity: Math.max(0, parseInt(form.quantity, 10) || 0),
       })
       setSkates((prev) =>
         [...prev, created].sort(
@@ -79,21 +87,34 @@ export default function SkateInventoryPage() {
   function startEdit(skate) {
     setEditingSkate(skate)
     setEditForm({
-      totalQuantity: skate.totalQuantity ?? 0,
-      availableQuantity: skate.availableQuantity ?? 0,
-      damagedQuantity: skate.damagedQuantity ?? 0,
+      totalQuantity: String(skate.totalQuantity ?? 0),
+      availableQuantity: String(skate.availableQuantity ?? 0),
+      damagedQuantity: String(skate.damagedQuantity ?? 0),
     })
     setError('')
     setSuccess('')
+  }
+
+  const handleCleanNumberInput = (field, value) => {
+    // Yalnız müsbət rəqəmlər; qeyri-rəqəm və mənfi işarəsi silinir
+    let cleaned = value.replace(/\D/g, '')
+    // 0-ın yanına rəqəm yazıldıqda (məs: "05"), başdakı sıfırı silirik ("5")
+    if (cleaned.length > 1 && cleaned.startsWith('0')) {
+      cleaned = cleaned.replace(/^0+/, '') || '0'
+    }
+    setEditForm((prev) => ({
+      ...prev,
+      [field]: cleaned,
+    }))
   }
 
   async function handleSaveEdit(event) {
     event.preventDefault()
     if (!editingSkate) return
 
-    const total = Math.max(0, Number(editForm.totalQuantity) || 0)
-    const available = Math.max(0, Number(editForm.availableQuantity) || 0)
-    const damaged = Math.max(0, Number(editForm.damagedQuantity) || 0)
+    const total = Math.max(0, parseInt(editForm.totalQuantity, 10) || 0)
+    const available = Math.max(0, parseInt(editForm.availableQuantity, 10) || 0)
+    const damaged = Math.max(0, parseInt(editForm.damagedQuantity, 10) || 0)
 
     setBusyId(`edit:${editingSkate.id}`)
     setError('')
@@ -201,7 +222,10 @@ export default function SkateInventoryPage() {
                 min="20"
                 max="50"
                 value={form.size}
-                onChange={(event) => setForm((prev) => ({ ...prev, size: event.target.value }))}
+                onKeyDown={(e) => {
+                  if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) e.preventDefault()
+                }}
+                onChange={(event) => setForm((prev) => ({ ...prev, size: event.target.value.replace(/\D/g, '') }))}
                 className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                 required
               />
@@ -211,10 +235,14 @@ export default function SkateInventoryPage() {
                 İlkin say
               </span>
               <input
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={form.quantity}
-                onChange={(event) => setForm((prev) => ({ ...prev, quantity: Math.max(0, event.target.value.replace(/\D/g, '')) }))}
+                onKeyDown={(e) => {
+                  if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) e.preventDefault()
+                }}
+                onChange={(event) => handleCleanCreateQuantity(event.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                 required
               />
@@ -250,15 +278,16 @@ export default function SkateInventoryPage() {
                   Ümumi say (Total)
                 </span>
                 <input
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={editForm.totalQuantity}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      totalQuantity: Math.max(0, parseInt(e.target.value, 10) || 0),
-                    }))
-                  }
+                  onKeyDown={(e) => {
+                    if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+                      e.preventDefault()
+                    }
+                  }}
+                  onChange={(e) => handleCleanNumberInput('totalQuantity', e.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-night-900/80 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                   required
                 />
@@ -269,15 +298,16 @@ export default function SkateInventoryPage() {
                   Boşda olan / Mövcud say (Available)
                 </span>
                 <input
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={editForm.availableQuantity}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      availableQuantity: Math.max(0, parseInt(e.target.value, 10) || 0),
-                    }))
-                  }
+                  onKeyDown={(e) => {
+                    if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+                      e.preventDefault()
+                    }
+                  }}
+                  onChange={(e) => handleCleanNumberInput('availableQuantity', e.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-night-900/80 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                   required
                 />
@@ -288,15 +318,16 @@ export default function SkateInventoryPage() {
                   Zədəli say (Damaged)
                 </span>
                 <input
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={editForm.damagedQuantity}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      damagedQuantity: Math.max(0, parseInt(e.target.value, 10) || 0),
-                    }))
-                  }
+                  onKeyDown={(e) => {
+                    if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+                      e.preventDefault()
+                    }
+                  }}
+                  onChange={(e) => handleCleanNumberInput('damagedQuantity', e.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-night-900/80 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                   required
                 />

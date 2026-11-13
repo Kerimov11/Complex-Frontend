@@ -16,14 +16,14 @@ function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
 
   if (isAdmin) {
     return [
-      { to: '/admin', label: 'İdarəetmə paneli', end: true },
+      { to: '/admin', label: 'İdarəetmə', end: true },
       { to: '/admin/shifts', label: 'Smenlər' },
       { to: '/admin/skates', label: 'Anbar' },
       { to: '/volunteer/reservations', label: 'Rezervasiyalar' },
       { to: '/admin/verification', label: 'Turniket' },
       { to: '/admin/cashier-verification', label: 'Kassa QR' },
       { to: '/admin/identity-verifications', label: 'Bilet təsdiqi' },
-      { to: '/admin/active', label: 'Buzdakı müştərilər' },
+      { to: '/admin/active', label: 'Buzdakılar' },
       { to: '/admin/pos', label: 'POS' },
     ]
   }
