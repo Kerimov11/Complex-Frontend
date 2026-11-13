@@ -32,6 +32,10 @@ export default function TicketCard({ ticket }) {
     )}:${pad(d.getMinutes())}`
   })()
 
+  const isPendingReview = Boolean(
+    ticket.pendingReview || ticket.identityReviewStatus === 'PENDING_REVIEW'
+  )
+
   return (
     <div className="glass-strong overflow-hidden rounded-xl">
       <div className="flex items-center justify-between gap-4 border-b border-dashed border-white/20 px-6 py-4">
@@ -44,7 +48,7 @@ export default function TicketCard({ ticket }) {
           </p>
         </div>
         <div className="text-right">
-          {ticket.pendingReview ? (
+          {isPendingReview ? (
             <span className="chip border border-amber-300/40 bg-amber-400/15 text-amber-100 uppercase">
               Təsdiq gözləyir
             </span>
@@ -58,8 +62,27 @@ export default function TicketCard({ ticket }) {
       </div>
 
       <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
-        <div className="grid shrink-0 place-items-center rounded-lg border border-white/10 bg-white p-4 text-night-950">
-          <QrCode value={id} />
+        <div className="relative grid shrink-0 place-items-center overflow-hidden rounded-lg border border-white/10 bg-white p-4 text-night-950">
+          <div
+            className={
+              isPendingReview
+                ? 'blur-md select-none pointer-events-none opacity-25 transition-all duration-300'
+                : 'transition-all duration-300'
+            }
+          >
+            <QrCode value={id} />
+          </div>
+          {isPendingReview && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-night-950/75 p-2 text-center backdrop-blur-sm">
+              <span className="text-2xl">🔒</span>
+              <span className="mt-1 text-[10px] font-bold leading-tight text-amber-200">
+                Təsdiq gözləyir
+              </span>
+              <span className="mt-0.5 text-[8px] font-medium text-frost/60">
+                QR bloklanıb
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="min-w-0 flex-1 space-y-4">

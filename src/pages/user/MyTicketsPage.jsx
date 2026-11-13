@@ -241,6 +241,7 @@ export default function MyTicketsPage() {
             const canActivate = Boolean(ticket.canActivate) && attemptsLeft > 0
             const statusStyle = STATUS_STYLE[ticket.status] || STATUS_STYLE.EXPIRED
             const isBooking = ticket.source === 'BOOKING'
+            const isPendingReview = isBooking && ticket.identityReviewStatus === 'PENDING_REVIEW'
 
             return (
               <article
@@ -265,8 +266,27 @@ export default function MyTicketsPage() {
                 </div>
 
                 <div className="flex flex-col gap-5 p-5 sm:flex-row">
-                  <div className="grid shrink-0 place-items-center self-start rounded-lg border border-white/10 bg-white p-3 text-night-950">
-                    <QrCode value={ticket.qrCode || ticket.ticketCode} className="h-24 w-24" />
+                  <div className="relative grid shrink-0 place-items-center self-start overflow-hidden rounded-lg border border-white/10 bg-white p-3 text-night-950">
+                    <div
+                      className={
+                        isPendingReview
+                          ? 'blur-md select-none pointer-events-none opacity-25 transition-all duration-300'
+                          : 'transition-all duration-300'
+                      }
+                    >
+                      <QrCode value={ticket.qrCode || ticket.ticketCode} className="h-24 w-24" />
+                    </div>
+                    {isPendingReview && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-night-950/75 p-1 text-center backdrop-blur-sm">
+                        <span className="text-xl">🔒</span>
+                        <span className="mt-1 text-[9px] font-bold leading-tight text-amber-200">
+                          Təsdiq gözləyir
+                        </span>
+                        <span className="mt-0.5 text-[8px] font-medium text-frost/60">
+                          QR bloklanıb
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="min-w-0 flex-1 space-y-3 text-sm">
                     <div>
@@ -342,7 +362,11 @@ export default function MyTicketsPage() {
                       </div>
                     )}
 
-                    {activeTimer ? (
+                    {isPendingReview ? (
+                      <p className="rounded-xl border border-amber-300/25 bg-amber-400/10 px-3 py-2.5 text-xs text-amber-100">
+                        Biletiniz kassir tərəfindən təsdiqləndikdən sonra konki rezervasiyası aktivləşdirilə bilər.
+                      </p>
+                    ) : activeTimer ? (
                       <div className="rounded-xl border border-emerald-300/30 bg-emerald-400/10 px-3 py-3">
                         <p className="text-xs font-bold uppercase tracking-wider text-emerald-100">
                           Konki rezervasiyası aktivdir
@@ -377,10 +401,6 @@ export default function MyTicketsPage() {
                             : `Konki rezervasiyasını aktivləşdir (${attemptsLeft} cəhd qalıb)`}
                         </button>
                       </div>
-                    ) : isBooking && ticket.identityReviewStatus === 'PENDING_REVIEW' ? (
-                      <p className="rounded-xl border border-amber-300/25 bg-amber-400/10 px-3 py-2.5 text-xs text-amber-100">
-                        Biletiniz kassir tərəfindən təsdiqləndikdən sonra konki rezervasiyası aktivləşdirilə bilər.
-                      </p>
                     ) : isBooking && ticket.identityReviewStatus === 'REJECTED' ? null : isBooking && ticket.status === 'ACTIVE' ? (
                       <p className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-xs text-frost/55">
                         {attemptsLeft > 0
