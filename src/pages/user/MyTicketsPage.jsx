@@ -40,6 +40,26 @@ function ticketSecondsLeft(ticket, now, fetchedAt) {
   return Math.max(0, Math.floor((end - now) / 1000))
 }
 
+function isSessionDurationFinished(ticket, currentNow) {
+  if (ticket?.skateReturned) return true
+  if (ticket?.canReturnSkates) return true
+  if (!ticket?.checkedInAt) return false
+  const durationMins = ticket.durationMinutes || 60
+  const entryMs = new Date(ticket.checkedInAt).getTime()
+  if (!Number.isFinite(entryMs)) return false
+  return currentNow >= entryMs + durationMins * 60 * 1000
+}
+
+function getSessionRemainingMinutes(ticket, currentNow) {
+  if (!ticket?.checkedInAt) return 0
+  const durationMins = ticket.durationMinutes || 60
+  const entryMs = new Date(ticket.checkedInAt).getTime()
+  if (!Number.isFinite(entryMs)) return 0
+  const finishMs = entryMs + durationMins * 60 * 1000
+  const diffMs = finishMs - currentNow
+  return Math.max(0, Math.ceil(diffMs / (60 * 1000)))
+}
+
 export default function MyTicketsPage() {
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
@@ -48,6 +68,7 @@ export default function MyTicketsPage() {
   const [confirmState, setConfirmState] = useState(null)
   const [success, setSuccess] = useState('')
   const [busyCode, setBusyCode] = useState(null)
+  const [returningCode, setReturningCode] = useState(null)
   const [filter, setFilter] = useState('active')
   const [now, setNow] = useState(() => Date.now())
   const [fetchedAt, setFetchedAt] = useState(() => Date.now())
@@ -121,8 +142,41 @@ export default function MyTicketsPage() {
         ['USED', 'EXPIRED', 'CANCELLED'].includes(ticket.status)
       )
     }
-    return paidTickets.filter((ticket) => ticket.status === 'ACTIVE')
+    // Aktiv biletlər: hələ istifadə olunmamış və ya buza daxil olub hələ konki təhvil verməmiş biletlər
+    return paidTickets.filter(
+      (ticket) =>
+        ticket.status === 'ACTIVE' ||
+        (ticket.checkedInAt && !ticket.skateReturned)
+    )
   }, [tickets, filter])
+
+  async function handleReturnSkates(ticket) {
+    if (returningCode) return
+    const code = ticket.ticketCode
+    setReturningCode(code)
+    setError('')
+    setSuccess('')
+    try {
+      const updated = await api.returnTicketSkates(code)
+      setTickets((prev) =>
+        prev.map((item) => (item.ticketCode === code ? { ...item, ...updated } : item))
+      )
+      setSuccess(
+        `Konki uğurla təhvil verildi! Bilet üzrə ${
+          ticket.participantCount > 1
+            ? `${ticket.participantCount} cüt konki`
+            : 'konki'
+        } avtomatik anbar stokuna əlavə olundu.`
+      )
+      await load(true)
+    } catch (err) {
+      const msg = err?.message || 'Konkini təhvil vermək mümkün olmadı.'
+      setError(msg)
+      setTicketErrors((prev) => ({ ...prev, [code]: msg }))
+    } finally {
+      setReturningCode(null)
+    }
+  }
 
   async function activate(ticket, skipConfirm = false) {
     if (busyCode) return
@@ -377,6 +431,58 @@ export default function MyTicketsPage() {
                         <p className="text-[11px] text-emerald-100/70">
                           Könüllü heyəti konkilərinizi hazırlayır. Taymer bitərsə stok
                           avtomatik geri qaytarılır.
+                        </p>
+                      </div>
+                    ) : ticket.skateReturned ? (
+                      <div className="rounded-xl border border-emerald-400/35 bg-emerald-500/15 px-3.5 py-3 text-xs">
+                        <div className="flex items-center gap-2 font-bold text-emerald-200">
+                          <span>✅</span>
+                          <span>Konki anbara təhvil verildi</span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-emerald-100/75">
+                          {ticket.participantCount > 1
+                            ? `Bilet üzrə ${ticket.participantCount} cüt konki anbar stokuna qaytarıldı.`
+                            : 'Konki uğurla təhvil verildi və anbar stokuna əlavə olundu.'}
+                        </p>
+                      </div>
+                    ) : ticket.checkedInAt && isSessionDurationFinished(ticket, now) ? (
+                      <div className="space-y-2">
+                        {ticketErrors[ticket.ticketCode] && (
+                          <p className="rounded-lg border border-red-400/35 bg-red-500/12 px-3 py-2 text-xs font-semibold text-red-100">
+                            {ticketErrors[ticket.ticketCode]}
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          disabled={returningCode === ticket.ticketCode}
+                          onClick={() => handleReturnSkates(ticket)}
+                          className="btn-primary w-full !bg-gradient-to-r !from-emerald-500 !to-teal-500 hover:!from-emerald-400 hover:!to-teal-400 !py-3 text-sm font-bold shadow-lg shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {returningCode === ticket.ticketCode ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              Konki anbara qaytarılır…
+                            </span>
+                          ) : (
+                            <span>
+                              ⛸️ {ticket.participantCount > 1 ? 'Konkiləri təhvil verdim' : 'Konkini təhvil verdim'}
+                            </span>
+                          )}
+                        </button>
+                        <p className="text-center text-[11px] text-frost/60">
+                          1 saatlıq seansınız başa çatdı. Düyməni basdıqda konki(lər) avtomatik inventar stokuna əlavə olunacaq.
+                        </p>
+                      </div>
+                    ) : ticket.checkedInAt && !isSessionDurationFinished(ticket, now) ? (
+                      <div className="rounded-xl border border-sky-400/30 bg-sky-500/10 px-3.5 py-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-sky-200">⛸️ Buz seansı davam edir</span>
+                          <span className="rounded-md bg-sky-400/20 px-2 py-0.5 font-mono text-[11px] font-bold text-sky-100">
+                            {getSessionRemainingMinutes(ticket, now)} dəq qalıb
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-frost/70">
+                          1 saatlıq seansınız bitdikdən sonra konkini anbara təhvil vermək üçün düymə burada aktiv olacaq.
                         </p>
                       </div>
                     ) : isBooking && ticket.skateHandedOut ? (

@@ -254,6 +254,9 @@ export const api = {
   activateTicket: (ticketCode) =>
     request(ENDPOINTS.activateTicket(ticketCode), { method: 'POST' }),
 
+  returnTicketSkates: (ticketCode) =>
+    request(ENDPOINTS.returnTicketSkates(ticketCode), { method: 'POST' }),
+
   createPayment: (payload) =>
     request(ENDPOINTS.createPayment, {
       method: 'POST',

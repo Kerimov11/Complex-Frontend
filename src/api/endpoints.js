@@ -56,6 +56,8 @@ export const ENDPOINTS = {
   customerIdentityVerification: '/api/customer/verification/identity',
   activateTicket: (ticketCode) =>
     `/api/customer/reservations/${encodeURIComponent(ticketCode)}/activate`,
+  returnTicketSkates: (ticketCode) =>
+    `/api/tickets/${encodeURIComponent(ticketCode)}/return-skates`,
   createPayment: '/api/payments/checkout',
   payPayment: (transactionId) =>
     `/api/payments/${encodeURIComponent(transactionId)}/pay`,

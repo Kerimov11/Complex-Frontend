@@ -420,7 +420,20 @@ export default function AccountPage() {
         })
       }
 
-      // 5. İlkin bilet rezervasiyası / alışı
+      // 5. Konki anbara təhvil verildikdə
+      if (ticket.skateReturned || ticket.skateReturnedAt) {
+        list.push({
+          id: `returned-${code}`,
+          type: 'success',
+          icon: '✅',
+          title: 'Konki anbara təhvil verildi',
+          message: `${code} kodlu bilet üzrə konki(lər) təhvil verildi və avtomatik anbar stokuna qaytarıldı.`,
+          date: ticket.skateReturnedAt || time,
+          badge: 'Təhvil verildi',
+        })
+      }
+
+      // 6. İlkin bilet rezervasiyası / alışı
       if (ticket.status === 'ACTIVE') {
         list.push({
           id: `order-${code}`,
