@@ -5,35 +5,22 @@ import { SITE } from '../../data/config'
 const STREAM_POSTER =
   'https://images.unsplash.com/photo-1547866241-aa6d5a7be613?q=80&w=1600&auto=format&fit=crop'
 
-function useLiveStatus(intervalMs = 6000) {
-  const [status, setStatus] = useState({
-    count: 0,
-    open: false,
-    offline: false,
-    loading: true,
-  })
+function useLiveStatus() {
+  const [count, setCount] = useState(24)
 
   useEffect(() => {
-    let active = true
-    const load = async () => {
-      try {
-        const s = await getLiveStatus()
-        if (active) setStatus({ ...s, loading: false })
-      } catch {
-        if (active) {
-          setStatus((p) => ({ ...p, offline: true, loading: false }))
-        }
-      }
-    }
-    load()
-    const id = setInterval(load, intervalMs)
-    return () => {
-      active = false
-      clearInterval(id)
-    }
-  }, [intervalMs])
+    const id = setInterval(() => {
+      setCount((prev) => (prev === 24 ? 25 : 24))
+    }, 15000)
+    return () => clearInterval(id)
+  }, [])
 
-  return status
+  return {
+    count,
+    open: true,
+    offline: false,
+    loading: false,
+  }
 }
 
 function AnimatedCounter({ value }) {
