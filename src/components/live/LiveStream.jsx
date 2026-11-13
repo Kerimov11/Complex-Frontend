@@ -69,7 +69,7 @@ export default function LiveStream() {
       <div className="relative aspect-video overflow-hidden bg-night-900">
         {!videoFailed ? (
           <video
-            src="/live.mp4"
+            src="/live-stream.mp4"
             poster={STREAM_POSTER}
             autoPlay
             loop
