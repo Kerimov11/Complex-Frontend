@@ -113,13 +113,15 @@ export default function MyTicketsPage() {
   }, [now, fetchedAt, tickets, hasActiveTimer, load])
 
   const shown = useMemo(() => {
-    if (filter === 'all') return tickets
+    // Yalnız ödənişi təsdiq olunmuş biletlər göstərilir (ödənişi tamamlanmamış PENDING biletlər düşmür)
+    const paidTickets = tickets.filter((ticket) => ticket.status !== 'PENDING')
+    if (filter === 'all') return paidTickets
     if (filter === 'past') {
-      return tickets.filter((ticket) =>
+      return paidTickets.filter((ticket) =>
         ['USED', 'EXPIRED', 'CANCELLED'].includes(ticket.status)
       )
     }
-    return tickets.filter((ticket) => ['ACTIVE', 'PENDING'].includes(ticket.status))
+    return paidTickets.filter((ticket) => ticket.status === 'ACTIVE')
   }, [tickets, filter])
 
   async function activate(ticket, skipConfirm = false) {
