@@ -224,10 +224,15 @@ export const api = {
       body: { dateOfBirth },
     }),
 
-  saveIdentityVerification: (identityDocumentNumber, confirmed = true) =>
+  saveIdentityVerification: ({
+    identityDocumentNumber,
+    finCode,
+    identityPhotoData,
+    confirmed = true,
+  }) =>
     request(ENDPOINTS.customerIdentityVerification, {
       method: 'PUT',
-      body: { identityDocumentNumber, confirmed },
+      body: { identityDocumentNumber, finCode, identityPhotoData, confirmed },
     }),
 
   activateTicket: (ticketCode) =>

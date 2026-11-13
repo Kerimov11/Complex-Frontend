@@ -46,6 +46,10 @@ function verificationFields(data) {
     isAdult: Boolean(data?.isAdult),
     identityConfirmed: Boolean(data?.identityConfirmed),
     identityDocumentLast4: data?.identityDocumentLast4 || '',
+    finCode: data?.finCode || '',
+    identityReviewStatus: data?.identityReviewStatus || null,
+    identityRejectionReason: data?.identityRejectionReason || '',
+    hasIdentityPhoto: Boolean(data?.hasIdentityPhoto),
   }
 }
 
@@ -192,11 +196,13 @@ export function AuthProvider({ children }) {
   )
 
   const verifyIdentity = useCallback(
-    async ({ identityDocumentNumber, confirmed = true }) => {
-      const data = await api.saveIdentityVerification(
+    async ({ identityDocumentNumber, finCode, identityPhotoData, confirmed = true }) => {
+      const data = await api.saveIdentityVerification({
         identityDocumentNumber,
-        confirmed
-      )
+        finCode,
+        identityPhotoData,
+        confirmed,
+      })
       updateVerification(data)
       return data
     },

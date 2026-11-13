@@ -276,6 +276,22 @@ export default function MyTicketsPage() {
                       </div>
                     )}
 
+                    {isBooking && ticket.identityReviewStatus === 'PENDING_REVIEW' && (
+                      <div className="rounded-xl border border-amber-300/35 bg-amber-400/12 px-3 py-2.5 text-xs leading-relaxed text-amber-100">
+                        <b>Təsdiq gözləyir:</b> Bu proses yalnız ilk alınan bilet üçün keçərlidir. Şəxsiyyət və foto məlumatlarınız kassir tərəfindən yoxlanılır və biletiniz ən qısa müddətdə təsdiqlənəcək.
+                      </div>
+                    )}
+
+                    {isBooking && ticket.identityReviewStatus === 'REJECTED' && (
+                      <div className="rounded-xl border border-red-400/35 bg-red-500/12 px-3 py-2.5 text-xs leading-relaxed text-red-100">
+                        <b>Şəxsiyyət təsdiqi rədd edilib:</b>{' '}
+                        {ticket.identityRejectionReason || 'Zəhmət olmasa qaydalara uyğun yeni foto yükləyin.'}{' '}
+                        <Link to="/hesabim" className="underline font-bold">
+                          Hesabım bölməsindən yenidən göndərin
+                        </Link>
+                      </div>
+                    )}
+
                     {isBooking && !ticket.skateHandedOut && (
                       <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3 text-xs">

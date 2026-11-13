@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import TicketCard from './TicketCard'
+import IdentityVerificationFields from './IdentityVerificationFields'
 import { useAuth } from '../../auth/AuthContext'
 import { api } from '../../api/client'
 import { calculatePrice, priceFromQuote } from '../../utils/pricing'
@@ -109,6 +110,8 @@ export default function BookingWizard({ onTicketChange }) {
 
   const [bookingDob, setBookingDob] = useState('')
   const [identityDocumentNumber, setIdentityDocumentNumber] = useState('')
+  const [finCode, setFinCode] = useState('')
+  const [identityPhotoData, setIdentityPhotoData] = useState('')
   const [identityConfirmedCheck, setIdentityConfirmedCheck] = useState(false)
 
   const [ticket, setTicket] = useState(() => loadLastVoucher())
@@ -640,6 +643,15 @@ export default function BookingWizard({ onTicketChange }) {
         setError('Şəxsiyyət vəsiqəsinin seriya və nömrəsini qeyd edin.')
         return
       }
+      const cleanedFin = finCode.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+      if (cleanedFin.length !== 7) {
+        setError('FİN kodu 7 simvoldan ibarət olmalıdır.')
+        return
+      }
+      if (!identityPhotoData) {
+        setError('Şəxsiyyət vəsiqəsini sifətinizin yanına tutaraq foto çəkib yükləyin.')
+        return
+      }
       if (!identityConfirmedCheck) {
         setError('18+ yaş və şəxsiyyət vəsiqəsi təsdiqini işarələyin.')
         return
@@ -649,6 +661,8 @@ export default function BookingWizard({ onTicketChange }) {
       try {
         await verifyIdentity({
           identityDocumentNumber: documentNumber,
+          finCode: cleanedFin,
+          identityPhotoData,
           confirmed: true,
         })
         currentIdentityConfirmed = true
@@ -1588,38 +1602,19 @@ export default function BookingWizard({ onTicketChange }) {
                     )}
 
                     {!user?.identityConfirmed && (
-                      <>
-                        <div className="mt-3">
-                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/60">
-                            Şəxsiyyət vəsiqəsinin seriya və nömrəsi
-                          </label>
-                          <input
-                            type="text"
-                            value={identityDocumentNumber}
-                            onChange={(e) =>
-                              setIdentityDocumentNumber(e.target.value)
-                            }
-                            maxLength={30}
-                            placeholder="AA1234567"
-                            className="w-full rounded-xl border border-white/15 bg-night-900/80 px-4 py-2.5 text-sm uppercase text-white placeholder-frost/30 outline-none transition-colors focus:border-ice-300/60"
-                          />
-                        </div>
-                        <label className="mt-3 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-frost/75">
-                          <input
-                            type="checkbox"
-                            checked={identityConfirmedCheck}
-                            onChange={(e) =>
-                              setIdentityConfirmedCheck(e.target.checked)
-                            }
-                            className="mt-0.5 h-4 w-4 shrink-0 accent-ice-300"
-                          />
-                          <span>
-                            18 yaşımdan böyük olduğumu, şəxsiyyət vəsiqəmi təqdim
-                            edəcəyimi və qeyd etdiyim məlumatların doğru olduğunu
-                            təsdiq edirəm.
-                          </span>
-                        </label>
-                      </>
+                      <div className="mt-3">
+                        <IdentityVerificationFields
+                          documentNumber={identityDocumentNumber}
+                          onDocumentNumberChange={setIdentityDocumentNumber}
+                          finCode={finCode}
+                          onFinCodeChange={setFinCode}
+                          photoData={identityPhotoData}
+                          onPhotoDataChange={setIdentityPhotoData}
+                          confirmed={identityConfirmedCheck}
+                          onConfirmedChange={setIdentityConfirmedCheck}
+                          rejectionReason={user?.identityRejectionReason || ''}
+                        />
+                      </div>
                     )}
                   </div>
                 )}

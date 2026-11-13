@@ -7,6 +7,7 @@ import { api } from '../../api/client'
 import { useAuth } from '../../auth/AuthContext'
 import { formatDateAZ, pad } from '../../utils/datetime'
 import { isValidEmail, validatePhone } from '../../utils/validation'
+import IdentityVerificationFields from '../../components/booking/IdentityVerificationFields'
 
 function formatDateTime(value) {
   if (!value) return '—'
@@ -53,6 +54,8 @@ export default function AccountPage() {
 
   // Şəxsiyyət vəsiqəsi təsdiqi
   const [docNumber, setDocNumber] = useState('')
+  const [finCode, setFinCode] = useState('')
+  const [identityPhotoData, setIdentityPhotoData] = useState('')
   const [docBusy, setDocBusy] = useState(false)
   const [docError, setDocError] = useState('')
   const [docSuccess, setDocSuccess] = useState('')
@@ -199,9 +202,18 @@ export default function AccountPage() {
     e.preventDefault()
     setDocError('')
     setDocSuccess('')
-    const cleaned = docNumber.trim()
+    const cleaned = docNumber.replace(/[^A-Za-z0-9]/g, '')
     if (cleaned.length < 5) {
       setDocError('Şəxsiyyət vəsiqəsinin seriya və nömrəsini düzgün daxil edin.')
+      return
+    }
+    const cleanedFin = finCode.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+    if (cleanedFin.length !== 7) {
+      setDocError('FİN kodu 7 simvoldan ibarət olmalıdır.')
+      return
+    }
+    if (!identityPhotoData) {
+      setDocError('Şəxsiyyət vəsiqəsini sifətinizin yanına tutaraq foto çəkib yükləyin.')
       return
     }
 
@@ -209,6 +221,8 @@ export default function AccountPage() {
     try {
       const vData = await verifyIdentity({
         identityDocumentNumber: cleaned,
+        finCode: cleanedFin,
+        identityPhotoData,
         confirmed: true,
       })
       setProfile((prev) =>
@@ -222,7 +236,9 @@ export default function AccountPage() {
           : prev
       )
       setDocNumber('')
-      setDocSuccess('Şəxsiyyət vəsiqəsi uğurla təsdiqləndi.')
+      setFinCode('')
+      setIdentityPhotoData('')
+      setDocSuccess('Məlumatlarınız göndərildi və kassir tərəfindən ən qısa müddətdə təsdiqlənəcək.')
     } catch (err) {
       setDocError(err?.message || 'Təsdiq alınmadı.')
     } finally {
@@ -792,30 +808,33 @@ export default function AccountPage() {
                           </span>
                         </div>
 
-                        {!profile?.identityConfirmed && profile?.isAdult && (
-                          <form onSubmit={handleIdentitySubmit} className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                        {(!profile?.identityConfirmed || user?.identityReviewStatus === 'REJECTED') && profile?.isAdult && (
+                          <form onSubmit={handleIdentitySubmit} className="mt-3 space-y-3 border-t border-white/10 pt-3">
                             {docError && (
-                              <div className="text-[11px] text-red-300">{docError}</div>
+                              <div className="text-[11px] font-semibold text-red-300">{docError}</div>
                             )}
                             {docSuccess && (
-                              <div className="text-[11px] text-emerald-300">{docSuccess}</div>
+                              <div className="text-[11px] font-semibold text-emerald-300">{docSuccess}</div>
                             )}
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={docNumber}
-                                onChange={(e) => setDocNumber(e.target.value)}
-                                placeholder="Məs: AZE12345678"
-                                className="input-ice flex-1 !py-1.5 text-xs"
-                              />
-                              <button
-                                type="submit"
-                                disabled={docBusy}
-                                className="btn-primary !px-3.5 !py-1.5 text-xs"
-                              >
-                                {docBusy ? '...' : 'Təsdiqlə'}
-                              </button>
-                            </div>
+                            <IdentityVerificationFields
+                              documentNumber={docNumber}
+                              onDocumentNumberChange={setDocNumber}
+                              finCode={finCode}
+                              onFinCodeChange={setFinCode}
+                              photoData={identityPhotoData}
+                              onPhotoDataChange={setIdentityPhotoData}
+                              confirmed
+                              onConfirmedChange={() => {}}
+                              showCheckbox={false}
+                              rejectionReason={user?.identityRejectionReason || ''}
+                            />
+                            <button
+                              type="submit"
+                              disabled={docBusy}
+                              className="btn-primary w-full !py-2 text-xs font-bold"
+                            >
+                              {docBusy ? 'Göndərilir…' : 'Təsdiqə göndər'}
+                            </button>
                           </form>
                         )}
                       </div>

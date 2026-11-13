@@ -22,6 +22,7 @@ function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
       { to: '/volunteer/reservations', label: 'Rezervasiyalar' },
       { to: '/admin/verification', label: 'Turniket' },
       { to: '/admin/cashier-verification', label: 'Kassa QR' },
+      { to: '/admin/identity-verifications', label: 'Bilet təsdiqi' },
       { to: '/admin/active', label: 'Buzdakı müştərilər' },
       { to: '/admin/pos', label: 'POS' },
     ]
@@ -30,6 +31,7 @@ function staffTabs({ isAdmin, isCoordinator, isCashier, isVolunteer }) {
   if (isCashier) {
     return [
       { to: '/admin/pos', label: 'POS' },
+      { to: '/admin/identity-verifications', label: 'Bilet təsdiqi' },
       { to: '/admin/active', label: 'Buzdakı müştərilər' },
     ]
   }

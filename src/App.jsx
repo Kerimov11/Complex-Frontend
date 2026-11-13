@@ -19,6 +19,7 @@ import SkateInventoryPage from './pages/admin/SkateInventoryPage'
 import CashierPosPage from './pages/admin/CashierPosPage'
 import VerificationPage from './pages/admin/VerificationPage'
 import CashierVerificationPage from './pages/admin/CashierVerificationPage'
+import IdentityVerificationsPage from './pages/admin/IdentityVerificationsPage'
 import ActiveGuestsPage from './pages/admin/ActiveGuestsPage'
 import FinancePage from './pages/admin/FinancePage'
 import VolunteerReservationsPage from './pages/volunteer/VolunteerReservationsPage'
@@ -43,6 +44,7 @@ const STAFF = [
 ]
 const VOLUNTEER_STAFF = ['ROLE_ADMIN', 'ROLE_COORDINATOR', 'ROLE_VOLUNTEER']
 const POS = ['ROLE_ADMIN', 'ROLE_CASHIER']
+const IDENTITY_REVIEW = ['ROLE_ADMIN', 'ROLE_COORDINATOR', 'ROLE_CASHIER']
 const VERIFY = ['ROLE_ADMIN', 'ROLE_COORDINATOR', 'ROLE_VOLUNTEER']
 
 function ScrollToTop() {
@@ -202,6 +204,14 @@ export default function App() {
               }
             />
             <Route
+              path="identity-verifications"
+              element={
+                <ProtectedRoute roles={IDENTITY_REVIEW}>
+                  <IdentityVerificationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="active"
               element={
                 <ProtectedRoute roles={STAFF}>
@@ -258,6 +268,14 @@ export default function App() {
               element={
                 <ProtectedRoute roles={VERIFY}>
                   <CashierVerificationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="identity-verifications"
+              element={
+                <ProtectedRoute roles={IDENTITY_REVIEW}>
+                  <IdentityVerificationsPage />
                 </ProtectedRoute>
               }
             />

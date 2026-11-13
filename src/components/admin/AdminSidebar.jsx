@@ -100,6 +100,13 @@ export default function AdminSidebar() {
           icon: '▣',
         },
         {
+          to: '/admin/identity-verifications',
+          label: 'Bilet təsdiqi',
+          hint: 'Şəxsiyyət və foto təsdiqi',
+          show: isAdmin || isCoordinator || isCashier,
+          icon: '✓',
+        },
+        {
           to: '/admin/verification',
           label: 'Turniket',
           hint: 'QR doğrulama',
