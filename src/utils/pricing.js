@@ -169,36 +169,36 @@ export function calculatePrice({
       merits.studentCount == null
         ? quantity
         : Math.max(0, Math.min(quantity, Number(merits.studentCount) || 0))
-    const pct = PRICING.rules.student.percent
+    const studentPercent = PRICING.rules.student.percent
     if (sCount >= quantity) {
       addPercent(
         'STUDENT',
-        `Tələbə endirimi — həftəiçi ${pct}%`,
-        pct
+        `Tələbə endirimi — həftəiçi ${studentPercent}%`,
+        studentPercent
       )
     } else if (sCount > 0) {
-      const studentUnit = roundMoney(unit * (1 - pct / 100))
-      const studentTotal = roundMoney(studentUnit * sCount)
-      const regularTotal = roundMoney(unit * (quantity - sCount))
-      const finalPrice = roundMoney(studentTotal + regularTotal)
+      const studentUnit = pct(unit, studentPercent)
+      const studentTotal = round2(studentUnit * sCount)
+      const regularTotal = round2(unit * (quantity - sCount))
+      const finalPrice = round2(studentTotal + regularTotal)
       candidates.push({
         type: 'STUDENT',
-        label: `Tələbə endirimi — ${sCount}/${quantity} nəfər (${pct}%)`,
+        label: `Tələbə endirimi — ${sCount}/${quantity} nəfər (${studentPercent}%)`,
         unitPrice: unit,
         freeCount: 0,
-        discountAmount: roundMoney(originalPrice - finalPrice),
+        discountAmount: round2(originalPrice - finalPrice),
         finalPrice,
         lines: [
           {
-            label: `Tələbə girişi (${pct}% endirim)`,
-            quantity: sCount,
-            unitPrice: studentUnit,
+            label: `Tələbə girişi (${studentPercent}% endirim)`,
+            qty: sCount,
+            each: studentUnit,
             total: studentTotal,
           },
           {
             label: 'Standart giriş',
-            quantity: quantity - sCount,
-            unitPrice: unit,
+            qty: quantity - sCount,
+            each: unit,
             total: regularTotal,
           },
         ],
