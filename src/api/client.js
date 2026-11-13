@@ -246,6 +246,11 @@ export const api = {
       `/api/customer/verification/push30-check?phone=${encodeURIComponent(phone)}`
     ),
 
+  checkQaziFullName: (fullName) =>
+    request(
+      `/api/customer/verification/qazi-check?fullName=${encodeURIComponent(fullName)}`
+    ),
+
   activateTicket: (ticketCode) =>
     request(ENDPOINTS.activateTicket(ticketCode), { method: 'POST' }),
 

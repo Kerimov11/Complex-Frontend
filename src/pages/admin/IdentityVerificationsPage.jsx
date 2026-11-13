@@ -310,12 +310,20 @@ export default function IdentityVerificationsPage() {
                             )}
                           {(t.familyIdsPhotoData ||
                             t.push30ScreenshotData ||
-                            t.push30Phone) && (
+                            t.push30Phone ||
+                            t.qaziDocumentPhotoData ||
+                            t.qaziFullName ||
+                            t.shaheedDocumentPhotoData) && (
                             <div className="mt-2 w-full space-y-2 border-t border-white/10 pt-2">
                               {t.push30Phone && (
                                 <p className="text-[11px] text-amber-200">
                                   <b>PUSH30 nömrəsi:</b>{' '}
                                   <span className="font-mono">{t.push30Phone}</span>
+                                </p>
+                              )}
+                              {t.qaziFullName && (
+                                <p className="text-[11px] text-ice-200">
+                                  <b>Qazi Ad/Soyad:</b> {t.qaziFullName}
                                 </p>
                               )}
                               <div className="flex flex-wrap gap-2">
@@ -348,6 +356,38 @@ export default function IdentityVerificationsPage() {
                                     />
                                     <span className="mt-0.5 block text-[10px] text-amber-200">
                                       PUSH30 Ekran şəkli
+                                    </span>
+                                  </button>
+                                )}
+                                {t.qaziDocumentPhotoData && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setZoomPhoto(t.qaziDocumentPhotoData)}
+                                    className="overflow-hidden rounded border border-emerald-300/30 bg-night-950 p-1 text-center"
+                                  >
+                                    <img
+                                      src={t.qaziDocumentPhotoData}
+                                      alt="Qazi sənədi"
+                                      className="h-16 w-28 object-cover"
+                                    />
+                                    <span className="mt-0.5 block text-[10px] text-emerald-200">
+                                      Qazi sənədi
+                                    </span>
+                                  </button>
+                                )}
+                                {t.shaheedDocumentPhotoData && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setZoomPhoto(t.shaheedDocumentPhotoData)}
+                                    className="overflow-hidden rounded border border-ice-300/30 bg-night-950 p-1 text-center"
+                                  >
+                                    <img
+                                      src={t.shaheedDocumentPhotoData}
+                                      alt="Şəhid ailəsi sənədi"
+                                      className="h-16 w-28 object-cover"
+                                    />
+                                    <span className="mt-0.5 block text-[10px] text-ice-200">
+                                      Şəhid ailəsi sənədi
                                     </span>
                                   </button>
                                 )}

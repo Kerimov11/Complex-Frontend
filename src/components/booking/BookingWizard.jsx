@@ -106,7 +106,11 @@ export default function BookingWizard({ onTicketChange }) {
     shaheed: false,
   })
   const [qaziVisits, setQaziVisits] = useState('0')
+  const [qaziFullName, setQaziFullName] = useState('')
+  const [qaziDocumentPhotoData, setQaziDocumentPhotoData] = useState('')
   const [shaheedVerified, setShaheedVerified] = useState(false)
+  const [shaheedCount, setShaheedCount] = useState(1)
+  const [shaheedDocumentPhotoData, setShaheedDocumentPhotoData] = useState('')
   const [studentCount, setStudentCount] = useState(1)
   const [participantPhotos, setParticipantPhotos] = useState({})
   const [familyIdsPhotoData, setFamilyIdsPhotoData] = useState('')
@@ -234,6 +238,9 @@ export default function BookingWizard({ onTicketChange }) {
   const effectiveStudentCount = benefits.student
     ? Math.max(1, Math.min(people.length, Number(studentCount) || 1))
     : 0
+  const effectiveShaheedCount = benefits.shaheed
+    ? Math.max(1, Math.min(people.length, Number(shaheedCount) || 1))
+    : 0
 
   // Sosial güzəşt hüquqları. Qrup və 5+1 burada yoxdur — onlar saydan
   // asılı olaraq avtomatik hesablanır.
@@ -246,9 +253,10 @@ export default function BookingWizard({ onTicketChange }) {
       qazi: benefits.qazi,
       qaziVisits: benefits.qazi ? Number(qaziVisits) : null,
       shaheed: benefits.shaheed,
-      shaheedVerified: benefits.shaheed && shaheedVerified,
+      shaheedCount: effectiveShaheedCount,
+      shaheedVerified: benefits.shaheed && (Boolean(shaheedDocumentPhotoData) || shaheedVerified),
     }),
-    [benefits, effectiveStudentCount, qaziVisits, shaheedVerified]
+    [benefits, effectiveStudentCount, effectiveShaheedCount, qaziVisits, shaheedDocumentPhotoData, shaheedVerified]
   )
 
   const merits = useMemo(
@@ -720,6 +728,38 @@ export default function BookingWizard({ onTicketChange }) {
           return
         }
       }
+      if (benefits.qazi) {
+        if (qaziFullName.trim().split(/\s+/).length < 2) {
+          setError('Qazi endirimi üçün ad və soyadı tam daxil edin.')
+          return
+        }
+        if (!qaziDocumentPhotoData) {
+          setError('Qazi sənədinin şəklini yükləyin.')
+          return
+        }
+        try {
+          const qaziCheck = await api.checkQaziFullName(qaziFullName.trim())
+          if ((qaziCheck?.visits ?? 0) >= 2) {
+            setError(
+              'Bu ad və soyadla Qazi endirimindən artıq 2 dəfə istifadə olunub. Qazi endirimi maksimum 2 dəfə keçərlidir.'
+            )
+            return
+          }
+        } catch (err) {
+          setError(err?.message || 'Qazi məlumatı yoxlanıla bilmədi.')
+          return
+        }
+      }
+      if (benefits.shaheed) {
+        if (!shaheedDocumentPhotoData) {
+          setError('Şəhid ailəsi olduğunu təsdiq edən sənədin şəklini yükləyin.')
+          return
+        }
+        if (people.length === 1 && currentIdentityConfirmed && !participantPhotos[0]?.identityPhotoData) {
+          setError('Şəhid ailəsi endirimi üçün şəxsiyyət vəsiqəsi ilə foto təsdiqini yükləyin.')
+          return
+        }
+      }
       if (benefits.student) {
         for (let i = 0; i < effectiveStudentCount; i += 1) {
           if (!participantPhotos[i]?.studentCardPhotoData) {
@@ -818,7 +858,9 @@ export default function BookingWizard({ onTicketChange }) {
           push30Phone: benefits.push30 ? push30Phone.replace(/[^0-9]/g, '') : undefined,
           qazi: eligibility.qazi,
           qaziVisits: eligibility.qaziVisits,
+          qaziFullName: benefits.qazi ? qaziFullName.trim() : undefined,
           shaheed: eligibility.shaheed,
+          shaheedCount: eligibility.shaheedCount,
           shaheedVerified: eligibility.shaheedVerified,
         })
 
@@ -853,7 +895,9 @@ export default function BookingWizard({ onTicketChange }) {
           (p) => p.identityPhotoData || p.studentCardPhotoData
         ) ||
         Boolean(familyIdsPhotoData) ||
-        Boolean(push30ScreenshotData)
+        Boolean(push30ScreenshotData) ||
+        Boolean(qaziDocumentPhotoData) ||
+        Boolean(shaheedDocumentPhotoData)
       if (hasAnyTicketPhoto) {
         await api
           .saveTicketPhotos({
@@ -864,6 +908,12 @@ export default function BookingWizard({ onTicketChange }) {
             push30Phone: benefits.push30
               ? push30Phone.replace(/[^0-9]/g, '')
               : '',
+            qaziDocumentPhotoData: benefits.qazi ? qaziDocumentPhotoData : '',
+            qaziFullName: benefits.qazi ? qaziFullName.trim() : '',
+            shaheedDocumentPhotoData: benefits.shaheed
+              ? shaheedDocumentPhotoData
+              : '',
+            shaheedCount: effectiveShaheedCount,
             participants: photoPayload,
           })
           .catch(() => {})
@@ -1453,41 +1503,104 @@ export default function BookingWizard({ onTicketChange }) {
               </div>
 
               {benefits.shaheed && (
-                <div className="mt-4 flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                  <input
-                    type="checkbox"
-                    id="shaheed"
-                    checked={shaheedVerified}
-                    onChange={(e) => setShaheedVerified(e.target.checked)}
-                    className="mt-1 h-4 w-4 accent-ice-300"
+                <div className="mt-4 space-y-3 rounded-xl border border-ice-300/30 bg-ice-400/[0.08] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold text-white">
+                        Şəhid ailəsi təsdiqi
+                      </p>
+                      <p className="mt-0.5 text-xs text-frost/70">
+                        Əvvəlcə şəhid ailəsi olduğunu təsdiq edən sənədin şəklini yükləyin. Bu endirimdə hər dəfə bütün iştirakçılar üçün şəxsiyyət vəsiqəsi ilə foto təsdiqi tələb olunur.
+                      </p>
+                    </div>
+                    {people.length > 1 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-frost/80">
+                          Neçə nəfər şəhid ailəsindəndir?
+                        </span>
+                        <select
+                          value={effectiveShaheedCount}
+                          onChange={(e) => setShaheedCount(Number(e.target.value))}
+                          className="rounded-xl border border-white/15 bg-night-900 px-3 py-1.5 text-sm font-bold text-white outline-none"
+                        >
+                          {Array.from({ length: people.length }, (_, idx) => idx + 1).map((n) => (
+                            <option key={n} value={n} className="bg-night-900 text-white">
+                              {n} nəfər
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                  <ParticipantPhotoSlot
+                    label="Şəhid ailəsi təsdiq sənədinin şəkli"
+                    value={shaheedDocumentPhotoData}
+                    onChange={(dataUrl) => {
+                      setShaheedDocumentPhotoData(dataUrl)
+                      setShaheedVerified(Boolean(dataUrl))
+                    }}
                   />
-                  <label htmlFor="shaheed" className="text-sm text-frost/75">
-                    Şəhidlik vəsiqəsi qeydiyyatda təsdiq olunub. Bu sənəd
-                    girişdə də tələb olunur.
-                  </label>
+                  {people.length === 1 && user?.identityConfirmed && (
+                    <ParticipantPhotoSlot
+                      label="Şəxsiyyət vəsiqəsi ilə foto təsdiqi (hər sifarişdə tələb olunur)"
+                      value={participantPhotos[0]?.identityPhotoData || ''}
+                      onChange={(dataUrl) =>
+                        setParticipantPhotos((prev) => ({
+                          ...prev,
+                          0: { ...(prev[0] || {}), identityPhotoData: dataUrl },
+                        }))
+                      }
+                    />
+                  )}
                 </div>
               )}
 
               {benefits.qazi && (
-                <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-sm text-frost/75">
-                    Bu sənədki gəlişlər sayı:
-                  </p>
-                  <select
-                    value={qaziVisits}
-                    onChange={(e) => setQaziVisits(e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none"
-                  >
-                    <option value="0" className="text-night-950">
-                      İlk giriş (pulsuz)
-                    </option>
-                    <option value="1" className="text-night-950">
-                      2-ci giriş (50% endirim)
-                    </option>
-                    <option value="2" className="text-night-950">
-                      3+ (standart)
-                    </option>
-                  </select>
+                <div className="mt-4 space-y-3 rounded-xl border border-ice-300/30 bg-ice-400/[0.08] p-4">
+                  <div>
+                    <p className="text-sm font-bold text-white">
+                      Qazi endirimi təsdiqi (maksimum 2 dəfə)
+                    </p>
+                    <p className="mt-0.5 text-xs text-frost/70">
+                      Qazi sənədinin şəklini yükləyin və ad-soyadı daxil edin (bazada yoxlanılır).
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/65">
+                        Ad və Soyad
+                      </label>
+                      <input
+                        type="text"
+                        value={qaziFullName}
+                        onChange={(e) => setQaziFullName(e.target.value)}
+                        placeholder="Məs: Elvin Məmmədov"
+                        className="w-full rounded-xl border border-white/15 bg-night-900/80 px-4 py-2.5 text-sm text-white placeholder-frost/30 outline-none focus:border-ice-300/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/65">
+                        Gəliş statusu
+                      </label>
+                      <select
+                        value={qaziVisits}
+                        onChange={(e) => setQaziVisits(e.target.value)}
+                        className="w-full rounded-xl border border-white/15 bg-night-900/80 px-3 py-2.5 text-sm text-white outline-none"
+                      >
+                        <option value="0" className="text-white bg-night-900">
+                          İlk giriş (pulsuz)
+                        </option>
+                        <option value="1" className="text-white bg-night-900">
+                          2-ci giriş (50% endirim)
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <ParticipantPhotoSlot
+                    label="Qazi sənədinin şəkli"
+                    value={qaziDocumentPhotoData}
+                    onChange={setQaziDocumentPhotoData}
+                  />
                 </div>
               )}
 

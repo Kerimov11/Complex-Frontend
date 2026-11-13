@@ -111,13 +111,17 @@ export function calculatePrice({
     })
   }
 
-  // 1) Şəhid ailəsi — təsdiqlənmiş ailə üçün pulsuz giriş.
+  // 1) Şəhid ailəsi — seçilmiş sayda iştirakçı pulsuz (təsdiq tələb olunur).
   if (merits.shaheed && merits.shaheedVerified) {
-    addFree(
-      'SHAHEED',
-      'Şəhid ailələri — pulsuz giriş',
-      quantity
-    )
+    const sCount =
+      merits.shaheedCount == null
+        ? quantity
+        : Math.max(1, Math.min(quantity, Number(merits.shaheedCount) || 1))
+    const label =
+      sCount === quantity
+        ? 'Şəhid ailələri — pulsuz giriş'
+        : `Şəhid ailələri — ${sCount}/${quantity} nəfər pulsuz`
+    addFree('SHAHEED', label, sCount)
   }
 
   // 2) Qazi — ilk giriş pulsuz, 2-ci giriş 50%.
