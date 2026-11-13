@@ -15,6 +15,14 @@ export default function SkateInventoryPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
 
+  // Stok düzəliş modalı
+  const [editingSkate, setEditingSkate] = useState(null)
+  const [editForm, setEditForm] = useState({
+    totalQuantity: 0,
+    availableQuantity: 0,
+    damagedQuantity: 0,
+  })
+
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     setError('')
@@ -51,7 +59,7 @@ export default function SkateInventoryPage() {
     try {
       const created = await adminApi.createSkate({
         size: Number(form.size),
-        quantity: Number(form.quantity),
+        quantity: Math.max(0, Number(form.quantity) || 0),
       })
       setSkates((prev) =>
         [...prev, created].sort(
@@ -63,6 +71,44 @@ export default function SkateInventoryPage() {
       setShowForm(false)
     } catch (err) {
       setError(err?.message || 'Yeni ölçü yaradılmadı.')
+    } finally {
+      setBusyId('')
+    }
+  }
+
+  function startEdit(skate) {
+    setEditingSkate(skate)
+    setEditForm({
+      totalQuantity: skate.totalQuantity ?? 0,
+      availableQuantity: skate.availableQuantity ?? 0,
+      damagedQuantity: skate.damagedQuantity ?? 0,
+    })
+    setError('')
+    setSuccess('')
+  }
+
+  async function handleSaveEdit(event) {
+    event.preventDefault()
+    if (!editingSkate) return
+
+    const total = Math.max(0, Number(editForm.totalQuantity) || 0)
+    const available = Math.max(0, Number(editForm.availableQuantity) || 0)
+    const damaged = Math.max(0, Number(editForm.damagedQuantity) || 0)
+
+    setBusyId(`edit:${editingSkate.id}`)
+    setError('')
+    setSuccess('')
+    try {
+      const updated = await adminApi.updateSkateStock(editingSkate.id, {
+        totalQuantity: total,
+        availableQuantity: available,
+        damagedQuantity: damaged,
+      })
+      setSkates((prev) => prev.map((item) => (item.id === editingSkate.id ? updated : item)))
+      setSuccess(`${editingSkate.size} ölçünün stoku uğurla yeniləndi.`)
+      setEditingSkate(null)
+    } catch (err) {
+      setError(err?.message || 'Stok düzəlişi saxlanılmadı.')
     } finally {
       setBusyId('')
     }
@@ -168,7 +214,7 @@ export default function SkateInventoryPage() {
                 type="number"
                 min="0"
                 value={form.quantity}
-                onChange={(event) => setForm((prev) => ({ ...prev, quantity: event.target.value }))}
+                onChange={(event) => setForm((prev) => ({ ...prev, quantity: Math.max(0, event.target.value.replace(/\D/g, '')) }))}
                 className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
                 required
               />
@@ -182,6 +228,99 @@ export default function SkateInventoryPage() {
             {busyId === 'create' ? 'Əlavə olunur...' : 'Əlavə et'}
           </button>
         </form>
+      )}
+
+      {/* Düzəliş modalı */}
+      {editingSkate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <form
+            onSubmit={handleSaveEdit}
+            className="w-full max-w-md rounded-2xl border border-white/15 bg-night-950 p-6 shadow-2xl"
+          >
+            <h3 className="font-display text-lg font-bold text-white">
+              {editingSkate.size} ölçü üçün stok düzəlişi
+            </h3>
+            <p className="mt-1 text-xs text-frost/50">
+              Konki sayını birbaşa təyin edin (mənfi rəqəm qadağandır).
+            </p>
+
+            <div className="mt-5 space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/50">
+                  Ümumi say (Total)
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={editForm.totalQuantity}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      totalQuantity: Math.max(0, parseInt(e.target.value, 10) || 0),
+                    }))
+                  }
+                  className="w-full rounded-xl border border-white/10 bg-night-900/80 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
+                  required
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/50">
+                  Boşda olan / Mövcud say (Available)
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={editForm.availableQuantity}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      availableQuantity: Math.max(0, parseInt(e.target.value, 10) || 0),
+                    }))
+                  }
+                  className="w-full rounded-xl border border-white/10 bg-night-900/80 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
+                  required
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/50">
+                  Zədəli say (Damaged)
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={editForm.damagedQuantity}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      damagedQuantity: Math.max(0, parseInt(e.target.value, 10) || 0),
+                    }))
+                  }
+                  className="w-full rounded-xl border border-white/10 bg-night-900/80 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
+                  required
+                />
+              </label>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingSkate(null)}
+                className="btn-ghost !px-4 !py-2 text-xs"
+              >
+                Ləğv et
+              </button>
+              <button
+                type="submit"
+                disabled={Boolean(busyId)}
+                className="btn-primary !px-5 !py-2 text-xs disabled:opacity-50"
+              >
+                {busyId.startsWith('edit:') ? 'Saxlanılır…' : 'Yadda saxla'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -244,6 +383,14 @@ export default function SkateInventoryPage() {
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    disabled={Boolean(busyId)}
+                    onClick={() => startEdit(skate)}
+                    className="rounded-md border border-ice-300/30 bg-ice-400/15 px-3 py-1.5 text-[11px] font-bold text-ice-200 hover:bg-ice-400/25 disabled:opacity-40"
+                  >
+                    ✏️ Düzəliş et
+                  </button>
                   <button
                     type="button"
                     disabled={Boolean(busyId)}

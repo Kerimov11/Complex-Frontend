@@ -51,6 +51,8 @@ export const adminApi = {
   getSkates: () => request('/api/admin/skates'),
   createSkate: (payload) =>
     request('/api/admin/skates', { method: 'POST', body: payload }),
+  updateSkateStock: (id, payload) =>
+    request(`/api/admin/skates/${id}`, { method: 'PUT', body: payload }),
   restockSkate: (id, quantity) =>
     request(`/api/admin/skates/${id}/restock${query({ quantity })}`, {
       method: 'POST',
