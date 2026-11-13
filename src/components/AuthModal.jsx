@@ -214,7 +214,7 @@ export default function AuthModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[120] grid place-items-center overflow-y-auto bg-night-950/85 p-4"
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-night-950/85 p-3 sm:p-4"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) closeAuth()
       }}
@@ -226,9 +226,9 @@ export default function AuthModal() {
         aria-label={
           isForgot ? 'Şifrəni bərpa et' : isLogin ? 'Daxil ol' : 'Qeydiyyat'
         }
-        className="glass-strong my-6 w-full max-w-md overflow-hidden rounded-xl border border-white/15"
+        className="glass-strong flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-hidden rounded-xl border border-white/15 sm:max-h-[calc(100dvh-2rem)]"
       >
-        <div className="relative border-b border-white/10 p-6 pb-5">
+        <div className="relative shrink-0 border-b border-white/10 p-5 pr-14 sm:p-6 sm:pb-5 sm:pr-14">
           <p className="text-[10px] font-bold uppercase tracking-wider text-ice-200">
             Şəxsi kabinet
           </p>
@@ -265,7 +265,7 @@ export default function AuthModal() {
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
           {!isForgot && (
             <div className="mb-5 grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-white/[0.04] p-1">
               <button
