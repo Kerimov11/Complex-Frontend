@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
 import SectionTitle from '../components/SectionTitle'
 
-const IMAGE =
-  'https://images.unsplash.com/photo-1547866241-aa6d5a7be613?q=80&w=1600&auto=format&fit=crop'
+const IMAGE = '/about-arena-img.jpg'
 
 const FACTS = [
   { label: 'İstismara verilmə', value: '1990-cı il, noyabr' },
