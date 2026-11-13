@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { clearVoucher, loadLastVoucherRaw } from '../utils/voucher'
 
@@ -53,6 +54,7 @@ function isStaffRole(role) {
 }
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate()
   const [auth, setAuth] = useState(readAuth)
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState('login')
@@ -224,7 +226,8 @@ export function AuthProvider({ children }) {
     setVerificationLoading(false)
     setOpen(false)
     setError('')
-  }, [])
+    navigate('/', { replace: true })
+  }, [navigate])
 
   const hasRole = useCallback(
     (role) => Boolean(auth?.roles?.includes(role)),
