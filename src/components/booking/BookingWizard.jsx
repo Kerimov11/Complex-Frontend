@@ -914,25 +914,30 @@ export default function BookingWizard({ onTicketChange }) {
         Boolean(push30ScreenshotData) ||
         Boolean(qaziDocumentPhotoData) ||
         Boolean(shaheedDocumentPhotoData)
-      if (hasAnyTicketPhoto) {
-        await api
-          .saveTicketPhotos({
-            voucherCode: next.id,
-            studentCount: effectiveStudentCount,
-            familyIdsPhotoData: benefits.family ? familyIdsPhotoData : '',
-            push30ScreenshotData: benefits.push30 ? push30ScreenshotData : '',
-            push30Phone: benefits.push30
-              ? push30Phone.replace(/[^0-9]/g, '')
-              : '',
-            qaziDocumentPhotoData: benefits.qazi ? qaziDocumentPhotoData : '',
-            qaziFullName: benefits.qazi ? qaziFullName.trim() : '',
-            shaheedDocumentPhotoData: benefits.shaheed
-              ? shaheedDocumentPhotoData
-              : '',
-            shaheedCount: effectiveShaheedCount,
-            participants: photoPayload,
-          })
-          .catch(() => {})
+      const needsCashierReview =
+        hasAnyTicketPhoto ||
+        !user?.identityConfirmed ||
+        user?.identityReviewStatus === 'PENDING_REVIEW' ||
+        ['STUDENT', 'FAMILY', 'PUSH30', 'QAZI', 'SHAHEED'].includes(
+          next.price?.applied?.type
+        )
+      if (hasAnyTicketPhoto || needsCashierReview) {
+        await api.saveTicketPhotos({
+          voucherCode: next.id,
+          studentCount: effectiveStudentCount,
+          familyIdsPhotoData: benefits.family ? familyIdsPhotoData : '',
+          push30ScreenshotData: benefits.push30 ? push30ScreenshotData : '',
+          push30Phone: benefits.push30
+            ? push30Phone.replace(/[^0-9]/g, '')
+            : '',
+          qaziDocumentPhotoData: benefits.qazi ? qaziDocumentPhotoData : '',
+          qaziFullName: benefits.qazi ? qaziFullName.trim() : '',
+          shaheedDocumentPhotoData: benefits.shaheed
+            ? shaheedDocumentPhotoData
+            : '',
+          shaheedCount: effectiveShaheedCount,
+          participants: photoPayload,
+        })
       }
     } catch (err) {
       // Çoxnəfərli sifarişin bir hissəsi yaradılıbsa, konki stokunu
@@ -959,8 +964,28 @@ export default function BookingWizard({ onTicketChange }) {
       return { ok: false, error: message }
     }
 
+    const needsCashierReview =
+      Boolean(
+        benefits.student ||
+          benefits.family ||
+          benefits.push30 ||
+          benefits.qazi ||
+          benefits.shaheed ||
+          identityPhotoData ||
+          familyIdsPhotoData ||
+          push30ScreenshotData ||
+          qaziDocumentPhotoData ||
+          shaheedDocumentPhotoData
+      ) ||
+      !user?.identityConfirmed ||
+      user?.identityReviewStatus === 'PENDING_REVIEW' ||
+      ['STUDENT', 'FAMILY', 'PUSH30', 'QAZI', 'SHAHEED'].includes(
+        next.price?.applied?.type
+      )
+
     const finalTicket = {
       ...next,
+      pendingReview: needsCashierReview,
       userId: user.userId,
       backendSession: {
         id: backendSession.id,

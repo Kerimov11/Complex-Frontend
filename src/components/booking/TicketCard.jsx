@@ -40,7 +40,13 @@ export default function TicketCard({ ticket }) {
           </p>
         </div>
         <div className="text-right">
-          <span className="chip chip-ice uppercase">Təsdiqləndi</span>
+          {ticket.pendingReview ? (
+            <span className="chip border border-amber-300/40 bg-amber-400/15 text-amber-100 uppercase">
+              Təsdiq gözləyir
+            </span>
+          ) : (
+            <span className="chip chip-ice uppercase">Təsdiqləndi</span>
+          )}
           <p className="mt-1.5 text-[11px] font-semibold text-frost/55">
             {validUntil ? `Etibarlıq: ${validLabel}-dək` : 'Etibarlıq: QR skan edilənədək limitsiz'}
           </p>
@@ -128,6 +134,12 @@ export default function TicketCard({ ticket }) {
               </p>
             )}
           </div>
+
+          {ticket.pendingReview && (
+            <div className="rounded-xl border border-amber-300/35 bg-amber-400/12 px-4 py-3 text-xs leading-relaxed text-amber-100">
+              <b>Kassirin təsdiqi gözlənilir:</b> Sənəd və foto məlumatlarınız kassir tərəfindən yoxlanılır. Biletiniz ən qısa müddətdə təsdiqlənəcək.
+            </div>
+          )}
 
           {ticket.discountNote && (
             <p className="flex items-start gap-2 text-xs text-ice-200">
