@@ -56,13 +56,20 @@ export default function IdentityVerificationsPage() {
     load(filter)
   }, [filter, load])
 
-  async function handleApprove(userId) {
-    setBusyId(userId)
+  async function handleApprove(item) {
+    const isTicket = item.itemType === 'TICKET'
+    const key = isTicket ? `ticket-${item.ticketCode}` : `user-${item.userId}`
+    setBusyId(key)
     setError('')
     setNotice('')
     try {
-      await identityReviewApi.approve(userId)
-      setNotice('Müştərinin şəxsiyyət və bilet təsdiqi uğurla təsdiqləndi.')
+      if (isTicket) {
+        await identityReviewApi.approveTicket(item.ticketCode)
+        setNotice(`Bilet (${item.ticketCode}) uğurla təsdiqləndi.`)
+      } else {
+        await identityReviewApi.approve(item.userId)
+        setNotice('Müştərinin hesab şəxsiyyət təsdiqi uğurla təsdiqləndi.')
+      }
       await load(filter)
     } catch (err) {
       setError(err?.message || 'Təsdiqləmə alınmadı.')
@@ -71,13 +78,17 @@ export default function IdentityVerificationsPage() {
     }
   }
 
-  async function handleReject(userId) {
-    setBusyId(userId)
+  async function handleReject(item) {
+    const isTicket = item.itemType === 'TICKET'
+    const key = isTicket ? `ticket-${item.ticketCode}` : `user-${item.userId}`
+    setBusyId(key)
     setError('')
     setNotice('')
     try {
-      const reason = String(rejectReasons[userId] || '').trim()
-      const res = await identityReviewApi.reject(userId, reason)
+      const reason = String(rejectReasons[key] || '').trim()
+      const res = isTicket
+        ? await identityReviewApi.rejectTicket(item.ticketCode, reason)
+        : await identityReviewApi.reject(item.userId, reason)
       setNotice(
         res?.refundedAmount
           ? `Müraciət rədd edildi, bilet ləğv olundu və ${res.refundedAmount} AZN ödəniş müştərinin kartına geri qaytarıldı.`
@@ -147,12 +158,270 @@ export default function IdentityVerificationsPage() {
       ) : (
         <div className="grid gap-5 lg:grid-cols-2">
           {items.map((item) => {
-            const badge =
-              STATUS_BADGE[item.identityReviewStatus] || STATUS_BADGE.PENDING_REVIEW
+            const isTicket = item.itemType === 'TICKET'
+            const itemKey = isTicket ? `ticket-${item.ticketCode}` : `user-${item.userId}`
+            const statusKey = item.reviewStatus || item.identityReviewStatus || 'PENDING_REVIEW'
+            const badge = STATUS_BADGE[statusKey] || STATUS_BADGE.PENDING_REVIEW
+            const t = item.ticket
+            const participantNames = Array.isArray(item.participantNames)
+              ? item.participantNames
+              : []
+
+            if (isTicket && t) {
+              return (
+                <article
+                  key={itemKey}
+                  className="glass-strong flex flex-col gap-4 rounded-xl border border-white/15 p-5"
+                >
+                  <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-3">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-mono text-base font-bold text-white">
+                          {t.ticketCode}
+                        </p>
+                        {item.discountType && item.discountType !== 'NONE' && (
+                          <span className="rounded bg-ice-400/20 px-2 py-0.5 text-[11px] font-bold text-ice-200">
+                            {item.discountType}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-frost/65">
+                        Hesab sahibi: <b className="text-white">{item.fullName}</b> (@{item.username}
+                        {item.phoneNumber ? ` · ${item.phoneNumber}` : ''})
+                      </p>
+                      {participantNames.length > 0 && (
+                        <p className="mt-1 text-xs text-amber-200">
+                          Bilet iştirakçıları: <b>{participantNames.join(', ')}</b>
+                        </p>
+                      )}
+                    </div>
+                    <span className={`chip shrink-0 border ${badge.cls}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5 text-xs">
+                    <div className="rounded-lg bg-white/[0.04] px-3 py-2">
+                      <span className="text-frost/45">Seans / Müddət</span>
+                      <p className="mt-0.5 font-semibold text-white">
+                        {t.sessionDate ? formatDate(t.sessionDate) : 'Sərbəst'} · {t.durationMinutes || 60} dəq
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/[0.04] px-3 py-2">
+                      <span className="text-frost/45">Nəfər / Konki</span>
+                      <p className="mt-0.5 font-semibold text-white">
+                        {t.participantCount || 1} nəfər
+                        {t.skateSizes?.length ? ` · ${t.skateSizes.join(', ')}` : ''}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/[0.04] px-3 py-2">
+                      <span className="text-frost/45">Alınma tarixi</span>
+                      <p className="mt-0.5 font-semibold text-white">
+                        {t.purchaseDate ? formatDateTime(t.purchaseDate) : '—'}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/[0.04] px-3 py-2">
+                      <span className="text-frost/45">Bilet statusu</span>
+                      <p className="mt-0.5 font-semibold text-white">
+                        {t.status || 'CONFIRMED'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {(t.familyIdsPhotoData ||
+                    t.push30ScreenshotData ||
+                    t.push30Phone ||
+                    t.qaziDocumentPhotoData ||
+                    t.qaziFullName ||
+                    t.shaheedDocumentPhotoData) && (
+                    <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                      {t.push30Phone && (
+                        <p className="text-xs text-amber-200">
+                          <b>PUSH30 nömrəsi:</b>{' '}
+                          <span className="font-mono">{t.push30Phone}</span>
+                        </p>
+                      )}
+                      {t.qaziFullName && (
+                        <p className="text-xs text-ice-200">
+                          <b>Qazi Ad/Soyad:</b> {t.qaziFullName}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {t.familyIdsPhotoData && (
+                          <button
+                            type="button"
+                            onClick={() => setZoomPhoto(t.familyIdsPhotoData)}
+                            className="overflow-hidden rounded border border-ice-300/30 bg-night-950 p-1 text-center"
+                          >
+                            <img
+                              src={t.familyIdsPhotoData}
+                              alt="Ailə 3 şəxsiyyət vəsiqəsi"
+                              className="h-24 w-36 object-cover"
+                            />
+                            <span className="mt-0.5 block text-[10px] text-ice-200">
+                              Ailə (3 vəsiqə)
+                            </span>
+                          </button>
+                        )}
+                        {t.push30ScreenshotData && (
+                          <button
+                            type="button"
+                            onClick={() => setZoomPhoto(t.push30ScreenshotData)}
+                            className="overflow-hidden rounded border border-amber-300/30 bg-night-950 p-1 text-center"
+                          >
+                            <img
+                              src={t.push30ScreenshotData}
+                              alt="PUSH30 Premium"
+                              className="h-24 w-36 object-cover"
+                            />
+                            <span className="mt-0.5 block text-[10px] text-amber-200">
+                              PUSH30 Ekran şəkli
+                            </span>
+                          </button>
+                        )}
+                        {t.qaziDocumentPhotoData && (
+                          <button
+                            type="button"
+                            onClick={() => setZoomPhoto(t.qaziDocumentPhotoData)}
+                            className="overflow-hidden rounded border border-emerald-300/30 bg-night-950 p-1 text-center"
+                          >
+                            <img
+                              src={t.qaziDocumentPhotoData}
+                              alt="Qazi sənədi"
+                              className="h-24 w-36 object-cover"
+                            />
+                            <span className="mt-0.5 block text-[10px] text-emerald-200">
+                              Qazi sənədi
+                            </span>
+                          </button>
+                        )}
+                        {t.shaheedDocumentPhotoData && (
+                          <button
+                            type="button"
+                            onClick={() => setZoomPhoto(t.shaheedDocumentPhotoData)}
+                            className="overflow-hidden rounded border border-ice-300/30 bg-night-950 p-1 text-center"
+                          >
+                            <img
+                              src={t.shaheedDocumentPhotoData}
+                              alt="Şəhid ailəsi sənədi"
+                              className="h-24 w-36 object-cover"
+                            />
+                            <span className="mt-0.5 block text-[10px] text-ice-200">
+                              Şəhid ailəsi sənədi
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {Array.isArray(t.participantPhotos) &&
+                    t.participantPhotos.some(
+                      (p) => p.identityPhotoData || p.studentCardPhotoData
+                    ) && (
+                      <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                        {t.participantPhotos.map((p, idx) => (
+                          <div
+                            key={p.reservationId || idx}
+                            className="rounded-lg bg-night-900/60 p-2"
+                          >
+                            <p className="text-[11px] font-semibold text-white">
+                              {p.participantName || `İştirakçı #${idx + 1}`}
+                              {p.participantAge ? ` (${p.participantAge} yaş)` : ''}
+                              {p.skateSize ? ` · Konki ${p.skateSize}` : ''}
+                              {p.studentDiscountApplied && (
+                                <span className="ml-2 rounded bg-ice-400/20 px-1.5 py-0.5 text-[10px] text-ice-200">
+                                  Tələbə
+                                </span>
+                              )}
+                            </p>
+                            <div className="mt-1.5 flex flex-wrap gap-2">
+                              {p.identityPhotoData && (
+                                <button
+                                  type="button"
+                                  onClick={() => setZoomPhoto(p.identityPhotoData)}
+                                  className="overflow-hidden rounded border border-white/15 bg-night-950 p-1 text-center"
+                                >
+                                  <img
+                                    src={p.identityPhotoData}
+                                    alt="Şəxsiyyət fotosu"
+                                    className="h-20 w-28 object-cover"
+                                  />
+                                  <span className="mt-0.5 block text-[10px] text-ice-200">
+                                    Şəxsiyyət
+                                  </span>
+                                </button>
+                              )}
+                              {p.studentCardPhotoData && (
+                                <button
+                                  type="button"
+                                  onClick={() => setZoomPhoto(p.studentCardPhotoData)}
+                                  className="overflow-hidden rounded border border-ice-300/30 bg-night-950 p-1 text-center"
+                                >
+                                  <img
+                                    src={p.studentCardPhotoData}
+                                    alt="Tələbə kartı fotosu"
+                                    className="h-20 w-28 object-cover"
+                                  />
+                                  <span className="mt-0.5 block text-[10px] text-ice-200">
+                                    Tələbə kartı
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                  {item.reviewedBy && (
+                    <p className="text-[11px] text-frost/55">
+                      Yoxlayan: <b>{item.reviewedBy}</b>{' '}
+                      {item.reviewedAt ? `(${formatDateTime(item.reviewedAt)})` : ''}
+                      {item.reviewReason ? ` · Səbəb: ${item.reviewReason}` : ''}
+                    </p>
+                  )}
+
+                  <div className="mt-auto space-y-2.5 border-t border-white/10 pt-3">
+                    <input
+                      type="text"
+                      value={rejectReasons[itemKey] || ''}
+                      onChange={(e) =>
+                        setRejectReasons((prev) => ({
+                          ...prev,
+                          [itemKey]: e.target.value,
+                        }))
+                      }
+                      placeholder="Rədd səbəbi (istəyə bağlı, məs: sənəd uyğun deyil)"
+                      className="w-full rounded-lg border border-white/15 bg-night-900/80 px-3 py-2 text-xs text-white placeholder-frost/35 outline-none focus:border-ice-300/50"
+                    />
+                    <div className="flex gap-2.5">
+                      <button
+                        type="button"
+                        disabled={busyId === itemKey}
+                        onClick={() => handleApprove(item)}
+                        className="btn-primary flex-1 !py-2.5 text-xs font-bold disabled:opacity-50"
+                      >
+                        {busyId === itemKey ? 'Gözləyin…' : '✓ Bileti təsdiqlə'}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busyId === itemKey}
+                        onClick={() => handleReject(item)}
+                        className="rounded-xl border border-red-400/40 bg-red-500/15 px-4 py-2.5 text-xs font-bold text-red-100 transition-colors hover:bg-red-500/25 disabled:opacity-50"
+                      >
+                        ✕ Bileti rədd et
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              )
+            }
+
             const tickets = Array.isArray(item.tickets) ? item.tickets : []
             return (
               <article
-                key={item.userId}
+                key={itemKey}
                 className="glass-strong flex flex-col gap-4 rounded-xl border border-white/15 p-5"
               >
                 <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-3">
@@ -161,7 +430,7 @@ export default function IdentityVerificationsPage() {
                       {item.fullName}
                     </p>
                     <p className="text-xs text-frost/60">
-                      @{item.username}
+                      Hesab şəxsiyyət təsdiqi · @{item.username}
                       {item.phoneNumber ? ` · ${item.phoneNumber}` : ''}
                     </p>
                   </div>
@@ -415,11 +684,11 @@ export default function IdentityVerificationsPage() {
                 <div className="mt-auto space-y-2.5 border-t border-white/10 pt-3">
                   <input
                     type="text"
-                    value={rejectReasons[item.userId] || ''}
+                    value={rejectReasons[itemKey] || ''}
                     onChange={(e) =>
                       setRejectReasons((prev) => ({
                         ...prev,
-                        [item.userId]: e.target.value,
+                        [itemKey]: e.target.value,
                       }))
                     }
                     placeholder="Rədd səbəbi (istəyə bağlı, məs: şəkil bulanıqdır)"
@@ -428,19 +697,19 @@ export default function IdentityVerificationsPage() {
                   <div className="flex gap-2.5">
                     <button
                       type="button"
-                      disabled={busyId === item.userId}
-                      onClick={() => handleApprove(item.userId)}
+                      disabled={busyId === itemKey}
+                      onClick={() => handleApprove(item)}
                       className="btn-primary flex-1 !py-2.5 text-xs font-bold disabled:opacity-50"
                     >
-                      {busyId === item.userId ? 'Gözləyin…' : '✓ Təsdiqlə'}
+                      {busyId === itemKey ? 'Gözləyin…' : '✓ Hesabı təsdiqlə'}
                     </button>
                     <button
                       type="button"
-                      disabled={busyId === item.userId}
-                      onClick={() => handleReject(item.userId)}
+                      disabled={busyId === itemKey}
+                      onClick={() => handleReject(item)}
                       className="rounded-xl border border-red-400/40 bg-red-500/15 px-4 py-2.5 text-xs font-bold text-red-100 transition-colors hover:bg-red-500/25 disabled:opacity-50"
                     >
-                      ✕ Rədd et
+                      ✕ Hesabı rədd et
                     </button>
                   </div>
                 </div>

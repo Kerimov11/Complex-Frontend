@@ -16,4 +16,19 @@ export const identityReviewApi = {
       body: { reason },
     })
   },
+  approveTicket(ticketCode) {
+    return request(
+      `/api/admin/identity-verifications/tickets/${encodeURIComponent(ticketCode)}/approve`,
+      { method: 'POST' }
+    )
+  },
+  rejectTicket(ticketCode, reason) {
+    return request(
+      `/api/admin/identity-verifications/tickets/${encodeURIComponent(ticketCode)}/reject`,
+      {
+        method: 'POST',
+        body: { reason },
+      }
+    )
+  },
 }

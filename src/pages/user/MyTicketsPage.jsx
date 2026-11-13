@@ -278,7 +278,7 @@ export default function MyTicketsPage() {
 
                     {isBooking && ticket.identityReviewStatus === 'PENDING_REVIEW' && (
                       <div className="rounded-xl border border-amber-300/35 bg-amber-400/12 px-3 py-2.5 text-xs leading-relaxed text-amber-100">
-                        <b>Təsdiq gözləyir:</b> Bu proses yalnız ilk alınan bilet üçün keçərlidir. Şəxsiyyət və foto məlumatlarınız kassir tərəfindən yoxlanılır və biletiniz ən qısa müddətdə təsdiqlənəcək.
+                        <b>Təsdiq gözləyir:</b> Bilet və təqdim olunan sənəd/foto məlumatlarınız kassir tərəfindən yoxlanılır və biletiniz ən qısa müddətdə təsdiqlənəcək.
                       </div>
                     )}
 

@@ -712,10 +712,22 @@ export default function BookingWizard({ onTicketChange }) {
         return
       }
       if (benefits.push30) {
-        const cleanedPushPhone = push30Phone.replace(/[^0-9]/g, '')
-        if (cleanedPushPhone.length < 9) {
+        let cleanedPushPhone = push30Phone.replace(/[^0-9]/g, '')
+        if (cleanedPushPhone.length === 10 && cleanedPushPhone.startsWith('0')) {
+          cleanedPushPhone = `994${cleanedPushPhone.slice(1)}`
+        } else if (cleanedPushPhone.length === 9) {
+          cleanedPushPhone = `994${cleanedPushPhone}`
+        }
+        const azMobilePattern = /^994(10|50|51|55|60|70|77|99)\d{7}$/
+        const subscriber = cleanedPushPhone.slice(5)
+        const isDummy =
+          /^(\d)\1{6}$/.test(subscriber) ||
+          subscriber === '1234567' ||
+          subscriber === '0123456' ||
+          subscriber === '7654321'
+        if (!azMobilePattern.test(cleanedPushPhone) || isDummy) {
           setError(
-            'PUSH30-da qeydiyyatdan keçdiyiniz telefon nömrəsini düzgün daxil edin.'
+            'PUSH30 nömrəsi düzgün Azərbaycan mobil nömrəsi olmalıdır (məs: +994 50 123 45 67).'
           )
           return
         }
