@@ -241,6 +241,11 @@ export const api = {
       body: payload,
     }),
 
+  checkPush30Phone: (phone) =>
+    request(
+      `/api/customer/verification/push30-check?phone=${encodeURIComponent(phone)}`
+    ),
+
   activateTicket: (ticketCode) =>
     request(ENDPOINTS.activateTicket(ticketCode), { method: 'POST' }),
 

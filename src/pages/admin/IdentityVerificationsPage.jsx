@@ -308,6 +308,52 @@ export default function IdentityVerificationsPage() {
                                 ))}
                               </div>
                             )}
+                          {(t.familyIdsPhotoData ||
+                            t.push30ScreenshotData ||
+                            t.push30Phone) && (
+                            <div className="mt-2 w-full space-y-2 border-t border-white/10 pt-2">
+                              {t.push30Phone && (
+                                <p className="text-[11px] text-amber-200">
+                                  <b>PUSH30 nömrəsi:</b>{' '}
+                                  <span className="font-mono">{t.push30Phone}</span>
+                                </p>
+                              )}
+                              <div className="flex flex-wrap gap-2">
+                                {t.familyIdsPhotoData && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setZoomPhoto(t.familyIdsPhotoData)}
+                                    className="overflow-hidden rounded border border-ice-300/30 bg-night-950 p-1 text-center"
+                                  >
+                                    <img
+                                      src={t.familyIdsPhotoData}
+                                      alt="Ailə 3 şəxsiyyət vəsiqəsi"
+                                      className="h-16 w-28 object-cover"
+                                    />
+                                    <span className="mt-0.5 block text-[10px] text-ice-200">
+                                      Ailə (3 vəsiqə)
+                                    </span>
+                                  </button>
+                                )}
+                                {t.push30ScreenshotData && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setZoomPhoto(t.push30ScreenshotData)}
+                                    className="overflow-hidden rounded border border-amber-300/30 bg-night-950 p-1 text-center"
+                                  >
+                                    <img
+                                      src={t.push30ScreenshotData}
+                                      alt="PUSH30 Premium"
+                                      className="h-16 w-28 object-cover"
+                                    />
+                                    <span className="mt-0.5 block text-[10px] text-amber-200">
+                                      PUSH30 Ekran şəkli
+                                    </span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

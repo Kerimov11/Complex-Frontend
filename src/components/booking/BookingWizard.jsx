@@ -109,6 +109,9 @@ export default function BookingWizard({ onTicketChange }) {
   const [shaheedVerified, setShaheedVerified] = useState(false)
   const [studentCount, setStudentCount] = useState(1)
   const [participantPhotos, setParticipantPhotos] = useState({})
+  const [familyIdsPhotoData, setFamilyIdsPhotoData] = useState('')
+  const [push30ScreenshotData, setPush30ScreenshotData] = useState('')
+  const [push30Phone, setPush30Phone] = useState('')
   const [agree, setAgree] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
 
@@ -684,6 +687,39 @@ export default function BookingWizard({ onTicketChange }) {
     }
 
     if (isAuthenticated && isCustomer) {
+      if (benefits.family && !familyIdsPhotoData) {
+        setError(
+          'Ailə endirimi üçün 3 şəxsiyyət vəsiqəsinin yan-yana şəklini yükləyin.'
+        )
+        return
+      }
+      if (benefits.push30) {
+        const cleanedPushPhone = push30Phone.replace(/[^0-9]/g, '')
+        if (cleanedPushPhone.length < 9) {
+          setError(
+            'PUSH30-da qeydiyyatdan keçdiyiniz telefon nömrəsini düzgün daxil edin.'
+          )
+          return
+        }
+        if (!push30ScreenshotData) {
+          setError(
+            'PUSH30 Premium paketini təsdiq edən ekran şəklini (screenshot) yükləyin.'
+          )
+          return
+        }
+        try {
+          const check = await api.checkPush30Phone(cleanedPushPhone)
+          if (check?.used) {
+            setError(
+              'Bu nömrə ilə PUSH30 endirimindən artıq istifadə olunub. PUSH30 endirimi yalnız 1 gedişlikdir.'
+            )
+            return
+          }
+        } catch (err) {
+          setError(err?.message || 'PUSH30 nömrəsi yoxlanıla bilmədi.')
+          return
+        }
+      }
       if (benefits.student) {
         for (let i = 0; i < effectiveStudentCount; i += 1) {
           if (!participantPhotos[i]?.studentCardPhotoData) {
@@ -779,6 +815,7 @@ export default function BookingWizard({ onTicketChange }) {
           studentCount: eligibility.studentCount,
           family: eligibility.family,
           push30: eligibility.push30,
+          push30Phone: benefits.push30 ? push30Phone.replace(/[^0-9]/g, '') : undefined,
           qazi: eligibility.qazi,
           qaziVisits: eligibility.qaziVisits,
           shaheed: eligibility.shaheed,
@@ -811,14 +848,22 @@ export default function BookingWizard({ onTicketChange }) {
           benefits.student && idx < effectiveStudentCount
         ),
       }))
-      const hasAnyTicketPhoto = photoPayload.some(
-        (p) => p.identityPhotoData || p.studentCardPhotoData
-      )
+      const hasAnyTicketPhoto =
+        photoPayload.some(
+          (p) => p.identityPhotoData || p.studentCardPhotoData
+        ) ||
+        Boolean(familyIdsPhotoData) ||
+        Boolean(push30ScreenshotData)
       if (hasAnyTicketPhoto) {
         await api
           .saveTicketPhotos({
             voucherCode: next.id,
             studentCount: effectiveStudentCount,
+            familyIdsPhotoData: benefits.family ? familyIdsPhotoData : '',
+            push30ScreenshotData: benefits.push30 ? push30ScreenshotData : '',
+            push30Phone: benefits.push30
+              ? push30Phone.replace(/[^0-9]/g, '')
+              : '',
             participants: photoPayload,
           })
           .catch(() => {})
@@ -1501,6 +1546,49 @@ export default function BookingWizard({ onTicketChange }) {
                       />
                     ))}
                   </div>
+                </div>
+              )}
+
+              {benefits.family && (
+                <div className="mt-4 space-y-3 rounded-xl border border-ice-300/30 bg-ice-400/[0.08] p-4">
+                  <div>
+                    <p className="text-sm font-bold text-white">
+                      Ailə endirimi — 3 şəxsiyyət vəsiqəsinin fotosu
+                    </p>
+                    <p className="mt-0.5 text-xs text-frost/70">
+                      2+ nəfər olduqda 1 nəfər pulsuzdur. Qayda olaraq 3 şəxsiyyət vəsiqəsini yan-yana qoyub aydın şəklini çəkin və yükləyin. Müraciət kassir təsdiqinə göndəriləcək.
+                    </p>
+                  </div>
+                  <ParticipantPhotoSlot
+                    label="3 şəxsiyyət vəsiqəsinin yan-yana şəkli"
+                    value={familyIdsPhotoData}
+                    onChange={setFamilyIdsPhotoData}
+                  />
+                </div>
+              )}
+
+              {benefits.push30 && (
+                <div className="mt-4 space-y-3 rounded-xl border border-amber-300/35 bg-amber-400/[0.08] p-4">
+                  <div className="rounded-lg border border-amber-300/35 bg-amber-500/15 px-3 py-2 text-xs font-semibold text-amber-100">
+                    Diqqət: PUSH30 endirimi yalnız 1 gedişlikdir (tək səfərlikdir). Eyni telefon nömrəsi ilə təkrar istifadə etmək mümkün deyil.
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/65">
+                      PUSH30-da qeydiyyatdan keçdiyiniz telefon nömrəsi
+                    </label>
+                    <input
+                      type="tel"
+                      value={push30Phone}
+                      onChange={(e) => setPush30Phone(e.target.value)}
+                      placeholder="+994 50 000 00 00"
+                      className="w-full rounded-xl border border-white/15 bg-night-900/80 px-4 py-2.5 text-sm text-white placeholder-frost/30 outline-none focus:border-ice-300/60"
+                    />
+                  </div>
+                  <ParticipantPhotoSlot
+                    label="PUSH30 Premium paket ekran şəkli (screenshot — paket və nömrə görünsün)"
+                    value={push30ScreenshotData}
+                    onChange={setPush30ScreenshotData}
+                  />
                 </div>
               )}
 
