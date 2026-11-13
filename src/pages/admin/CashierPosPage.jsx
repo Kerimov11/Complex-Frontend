@@ -35,8 +35,8 @@ export default function CashierPosPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     setError('')
     try {
       const [sessionData, reportData] = await Promise.all([
@@ -54,14 +54,26 @@ export default function CashierPosPage() {
         return firstOpen ? String(firstOpen.id) : (list[0]?.id ? String(list[0].id) : '')
       })
     } catch (err) {
-      setError(err?.message || 'POS məlumatları yüklənmədi.')
+      if (!silent) setError(err?.message || 'POS məlumatları yüklənmədi.')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [date])
 
   useEffect(() => {
     load()
+    const timer = setInterval(() => load(true), 10000)
+    const onFocus = () => load(true)
+    const onVisibility = () => {
+      if (!document.hidden) load(true)
+    }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [load])
 
   function syncGuestNames(qty) {
@@ -398,7 +410,16 @@ export default function CashierPosPage() {
           <div className="glass overflow-hidden rounded-xl">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
               <h3 className="font-display text-lg font-bold text-white">Gün sonu hesabatı</h3>
-              <span className="chip">{formatNumber(report?.ticketCount)} bilet</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => load()}
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-bold text-frost/75 transition-colors hover:border-ice-300/40 hover:text-white"
+                >
+                  Yenilə
+                </button>
+                <span className="chip">{formatNumber(report?.ticketCount)} bilet</span>
+              </div>
             </div>
             <div className="max-h-[28rem] divide-y divide-white/[0.06] overflow-y-auto">
               {(report?.sales || []).length === 0 && (
