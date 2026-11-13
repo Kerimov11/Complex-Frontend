@@ -73,8 +73,8 @@ export default function AccountPage() {
     setDateOfBirth(data.dateOfBirth || '')
   }, [])
 
-  const loadAccountData = useCallback(async () => {
-    setLoading(true)
+  const loadAccountData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     setLoadError('')
     try {
       const [profileData, ticketList] = await Promise.all([
@@ -82,20 +82,29 @@ export default function AccountPage() {
         api.getMyTickets().catch(() => []),
       ])
       setProfile(profileData)
-      populateForm(profileData)
+      if (!silent) {
+        populateForm(profileData)
+      }
       setTickets(Array.isArray(ticketList) ? ticketList : [])
       if (profileData) {
         updateVerification(profileData)
       }
     } catch (err) {
-      setLoadError(err?.message || 'Hesab məlumatları yüklənmədi.')
+      if (!silent) setLoadError(err?.message || 'Hesab məlumatları yüklənmədi.')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [populateForm, updateVerification])
 
   useEffect(() => {
     loadAccountData()
+  }, [loadAccountData])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadAccountData(true)
+    }, 10000)
+    return () => clearInterval(timer)
   }, [loadAccountData])
 
   function handleSnowToggle() {
@@ -247,9 +256,11 @@ export default function AccountPage() {
   }
 
   const activeTicketCount = tickets.filter(
-    (t) => t.ticketStatus === 'ACTIVE'
+    (t) => (t.status || t.ticketStatus) === 'ACTIVE'
   ).length
-  const usedTicketCount = tickets.filter((t) => t.ticketStatus === 'USED').length
+  const usedTicketCount = tickets.filter(
+    (t) => (t.status || t.ticketStatus) === 'USED'
+  ).length
   const totalTicketCount = tickets.length
 
   const displayUsername = profile?.username || user?.username || '—'
