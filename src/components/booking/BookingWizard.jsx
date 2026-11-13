@@ -458,7 +458,17 @@ export default function BookingWizard({ onTicketChange }) {
     setPeople((prev) => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)))
 
   const toggleBenefit = (key) =>
-    setBenefits((prev) => ({ ...prev, [key]: !prev[key] }))
+    setBenefits((prev) => {
+      const nextVal = !prev[key]
+      return {
+        student: false,
+        family: false,
+        push30: false,
+        qazi: false,
+        shaheed: false,
+        [key]: nextVal,
+      }
+    })
 
   const ageValid = people.every((p) => Number(p.age) >= 4)
   const sizesValid = people.every((p) => String(p.skateSize).trim() !== '')
@@ -1467,7 +1477,7 @@ export default function BookingWizard({ onTicketChange }) {
                 Sosial güzəşt hüququnuz var?
               </p>
               <p className="mt-1 text-xs text-frost/55">
-                Yalnız sizə aid olan güzəştləri qeyd edin. Təsdiq sənədləri
+                Eyni anda yalnız bir sosial güzəşt seçilə bilər. Təsdiq sənədləri
                 girişdə tələb oluna bilər.
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
