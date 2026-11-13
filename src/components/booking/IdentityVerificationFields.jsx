@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function compressImageFile(file) {
+export function compressImageFile(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('Şəkil oxuna bilmədi.'))

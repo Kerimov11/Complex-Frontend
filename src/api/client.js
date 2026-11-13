@@ -235,6 +235,12 @@ export const api = {
       body: { identityDocumentNumber, finCode, identityPhotoData, confirmed },
     }),
 
+  saveTicketPhotos: (payload) =>
+    request('/api/customer/verification/ticket-photos', {
+      method: 'POST',
+      body: payload,
+    }),
+
   activateTicket: (ticketCode) =>
     request(ENDPOINTS.activateTicket(ticketCode), { method: 'POST' }),
 

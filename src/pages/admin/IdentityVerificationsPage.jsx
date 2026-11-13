@@ -77,8 +77,12 @@ export default function IdentityVerificationsPage() {
     setNotice('')
     try {
       const reason = String(rejectReasons[userId] || '').trim()
-      await identityReviewApi.reject(userId, reason)
-      setNotice('Müraciət rədd edildi və müştəriyə yenidən yükləmək üçün bildirildi.')
+      const res = await identityReviewApi.reject(userId, reason)
+      setNotice(
+        res?.refundedAmount
+          ? `Müraciət rədd edildi, bilet ləğv olundu və ${res.refundedAmount} AZN ödəniş müştərinin kartına geri qaytarıldı.`
+          : 'Müraciət rədd edildi və müştəriyə yenidən yükləmək üçün bildirildi.'
+      )
       await load(filter)
     } catch (err) {
       setError(err?.message || 'Rədd etmə alınmadı.')
@@ -246,6 +250,64 @@ export default function IdentityVerificationsPage() {
                           <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] font-bold text-frost/80">
                             {t.status || 'CONFIRMED'}
                           </span>
+                          {Array.isArray(t.participantPhotos) &&
+                            t.participantPhotos.some(
+                              (p) => p.identityPhotoData || p.studentCardPhotoData
+                            ) && (
+                              <div className="mt-2 w-full space-y-2 border-t border-white/10 pt-2">
+                                {t.participantPhotos.map((p, idx) => (
+                                  <div
+                                    key={p.reservationId || idx}
+                                    className="rounded-lg bg-white/[0.03] p-2"
+                                  >
+                                    <p className="text-[11px] font-semibold text-white">
+                                      {p.participantName || `İştirakçı #${idx + 1}`}
+                                      {p.participantAge ? ` (${p.participantAge} yaş)` : ''}
+                                      {p.skateSize ? ` · Konki ${p.skateSize}` : ''}
+                                      {p.studentDiscountApplied && (
+                                        <span className="ml-2 rounded bg-ice-400/20 px-1.5 py-0.5 text-[10px] text-ice-200">
+                                          Tələbə
+                                        </span>
+                                      )}
+                                    </p>
+                                    <div className="mt-1.5 flex flex-wrap gap-2">
+                                      {p.identityPhotoData && (
+                                        <button
+                                          type="button"
+                                          onClick={() => setZoomPhoto(p.identityPhotoData)}
+                                          className="overflow-hidden rounded border border-white/15 bg-night-950 p-1 text-center"
+                                        >
+                                          <img
+                                            src={p.identityPhotoData}
+                                            alt="Şəxsiyyət fotosu"
+                                            className="h-16 w-24 object-cover"
+                                          />
+                                          <span className="mt-0.5 block text-[10px] text-ice-200">
+                                            Şəxsiyyət
+                                          </span>
+                                        </button>
+                                      )}
+                                      {p.studentCardPhotoData && (
+                                        <button
+                                          type="button"
+                                          onClick={() => setZoomPhoto(p.studentCardPhotoData)}
+                                          className="overflow-hidden rounded border border-ice-300/30 bg-night-950 p-1 text-center"
+                                        >
+                                          <img
+                                            src={p.studentCardPhotoData}
+                                            alt="Tələbə kartı fotosu"
+                                            className="h-16 w-24 object-cover"
+                                          />
+                                          <span className="mt-0.5 block text-[10px] text-ice-200">
+                                            Tələbə kartı
+                                          </span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                         </div>
                       ))}
                     </div>

@@ -284,9 +284,14 @@ export default function MyTicketsPage() {
 
                     {isBooking && ticket.identityReviewStatus === 'REJECTED' && (
                       <div className="rounded-xl border border-red-400/35 bg-red-500/12 px-3 py-2.5 text-xs leading-relaxed text-red-100">
-                        <b>Şəxsiyyət təsdiqi rədd edilib:</b>{' '}
+                        <b>Şəxsiyyət / bilet təsdiqi rədd edilib:</b>{' '}
                         {ticket.identityRejectionReason || 'Zəhmət olmasa qaydalara uyğun yeni foto yükləyin.'}{' '}
-                        <Link to="/hesabim" className="underline font-bold">
+                        {ticket.status === 'CANCELLED' && (
+                          <span className="block mt-1 font-semibold text-emerald-200">
+                            Bilet ləğv olundu və ödəniş kartınıza geri qaytarıldı.
+                          </span>
+                        )}
+                        <Link to="/hesabim" className="mt-1 inline-block underline font-bold">
                           Hesabım bölməsindən yenidən göndərin
                         </Link>
                       </div>

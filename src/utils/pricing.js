@@ -161,11 +161,45 @@ export function calculatePrice({
 
   // 7) Tələbə — yalnız həftəiçi və 1 saatlıq bilet.
   if (merits.student && isHour && dayType === WEEKDAY) {
-    addPercent(
-      'STUDENT',
-      `Tələbə endirimi — həftəiçi ${PRICING.rules.student.percent}%`,
-      PRICING.rules.student.percent
-    )
+    const sCount =
+      merits.studentCount == null
+        ? quantity
+        : Math.max(0, Math.min(quantity, Number(merits.studentCount) || 0))
+    const pct = PRICING.rules.student.percent
+    if (sCount >= quantity) {
+      addPercent(
+        'STUDENT',
+        `Tələbə endirimi — həftəiçi ${pct}%`,
+        pct
+      )
+    } else if (sCount > 0) {
+      const studentUnit = roundMoney(unit * (1 - pct / 100))
+      const studentTotal = roundMoney(studentUnit * sCount)
+      const regularTotal = roundMoney(unit * (quantity - sCount))
+      const finalPrice = roundMoney(studentTotal + regularTotal)
+      candidates.push({
+        type: 'STUDENT',
+        label: `Tələbə endirimi — ${sCount}/${quantity} nəfər (${pct}%)`,
+        unitPrice: unit,
+        freeCount: 0,
+        discountAmount: roundMoney(originalPrice - finalPrice),
+        finalPrice,
+        lines: [
+          {
+            label: `Tələbə girişi (${pct}% endirim)`,
+            quantity: sCount,
+            unitPrice: studentUnit,
+            total: studentTotal,
+          },
+          {
+            label: 'Standart giriş',
+            quantity: quantity - sCount,
+            unitPrice: unit,
+            total: regularTotal,
+          },
+        ],
+      })
+    }
   }
 
   // 8) Bazar günü 10:00–12:00 arası 1 saatlıq biletə endirim.

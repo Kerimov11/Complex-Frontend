@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import TicketCard from './TicketCard'
-import IdentityVerificationFields from './IdentityVerificationFields'
+import IdentityVerificationFields, {
+  compressImageFile,
+} from './IdentityVerificationFields'
 import { useAuth } from '../../auth/AuthContext'
 import { api } from '../../api/client'
 import { calculatePrice, priceFromQuote } from '../../utils/pricing'
@@ -105,6 +107,8 @@ export default function BookingWizard({ onTicketChange }) {
   })
   const [qaziVisits, setQaziVisits] = useState('0')
   const [shaheedVerified, setShaheedVerified] = useState(false)
+  const [studentCount, setStudentCount] = useState(1)
+  const [participantPhotos, setParticipantPhotos] = useState({})
   const [agree, setAgree] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
 
@@ -224,11 +228,16 @@ export default function BookingWizard({ onTicketChange }) {
   const backendReady =
     !sessionsLoading && !sessionsError && Boolean(backendSession)
 
+  const effectiveStudentCount = benefits.student
+    ? Math.max(1, Math.min(people.length, Number(studentCount) || 1))
+    : 0
+
   // Sosial güzəşt hüquqları. Qrup və 5+1 burada yoxdur — onlar saydan
   // asılı olaraq avtomatik hesablanır.
   const eligibility = useMemo(
     () => ({
       student: benefits.student,
+      studentCount: effectiveStudentCount,
       family: benefits.family,
       push30: benefits.push30,
       qazi: benefits.qazi,
@@ -236,7 +245,7 @@ export default function BookingWizard({ onTicketChange }) {
       shaheed: benefits.shaheed,
       shaheedVerified: benefits.shaheed && shaheedVerified,
     }),
-    [benefits, qaziVisits, shaheedVerified]
+    [benefits, effectiveStudentCount, qaziVisits, shaheedVerified]
   )
 
   const merits = useMemo(
@@ -674,6 +683,33 @@ export default function BookingWizard({ onTicketChange }) {
       setSubmitting(false)
     }
 
+    if (isAuthenticated && isCustomer) {
+      if (benefits.student) {
+        for (let i = 0; i < effectiveStudentCount; i += 1) {
+          if (!participantPhotos[i]?.studentCardPhotoData) {
+            setError(
+              `Tələbə endirimi üçün ${effectiveStudentCount} nəfərin hamısının tələbə kartı ilə fotosunu yükləyin (Tələbə #${i + 1}).`
+            )
+            return
+          }
+        }
+      }
+      if (people.length > 1) {
+        for (let i = 0; i < people.length; i += 1) {
+          const hasIdPhoto =
+            i === 0 && !currentIdentityConfirmed
+              ? Boolean(identityPhotoData)
+              : Boolean(participantPhotos[i]?.identityPhotoData)
+          if (!hasIdPhoto) {
+            setError(
+              `Qrup bileti üçün bütün iştirakçıların şəxsiyyət vəsiqəsi ilə fotosunu yükləyin (İştirakçı #${i + 1}).`
+            )
+            return
+          }
+        }
+      }
+    }
+
     const order = buildOrder({
       ageVerifiedOverride: currentAgeVerified,
       isAdultOverride: currentIsAdult,
@@ -740,6 +776,7 @@ export default function BookingWizard({ onTicketChange }) {
           startTime: next.session.time,
           durationMinutes: next.session.durationMinutes,
           student: eligibility.student,
+          studentCount: eligibility.studentCount,
           family: eligibility.family,
           push30: eligibility.push30,
           qazi: eligibility.qazi,
@@ -757,6 +794,34 @@ export default function BookingWizard({ onTicketChange }) {
           throw new Error('Ödəniş təsdiqlənmədi')
         }
         paymentRecord = paid
+      }
+
+      const photoPayload = created.map((res, idx) => ({
+        reservationId: res.id,
+        participantName: next.people[idx]?.name || '',
+        identityPhotoData:
+          idx === 0 && !user?.identityConfirmed
+            ? identityPhotoData || ''
+            : participantPhotos[idx]?.identityPhotoData || '',
+        studentCardPhotoData:
+          benefits.student && idx < effectiveStudentCount
+            ? participantPhotos[idx]?.studentCardPhotoData || ''
+            : '',
+        studentDiscountApplied: Boolean(
+          benefits.student && idx < effectiveStudentCount
+        ),
+      }))
+      const hasAnyTicketPhoto = photoPayload.some(
+        (p) => p.identityPhotoData || p.studentCardPhotoData
+      )
+      if (hasAnyTicketPhoto) {
+        await api
+          .saveTicketPhotos({
+            voucherCode: next.id,
+            studentCount: effectiveStudentCount,
+            participants: photoPayload,
+          })
+          .catch(() => {})
       }
     } catch (err) {
       // Çoxnəfərli sifarişin bir hissəsi yaradılıbsa, konki stokunu
@@ -1381,6 +1446,115 @@ export default function BookingWizard({ onTicketChange }) {
                 </div>
               )}
 
+              {benefits.student && (
+                <div className="mt-4 space-y-3 rounded-xl border border-ice-300/30 bg-ice-400/[0.08] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold text-white">
+                        Tələbə kartı ilə foto təsdiqi
+                      </p>
+                      <p className="mt-0.5 text-xs text-frost/70">
+                        Tələbə kartını görünür şəkildə sifətinizin yanına tutaraq foto çəkin və yükləyin.
+                      </p>
+                    </div>
+                    {people.length > 1 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-frost/80">
+                          Neçə nəfər tələbədir?
+                        </span>
+                        <select
+                          value={effectiveStudentCount}
+                          onChange={(e) => setStudentCount(Number(e.target.value))}
+                          className="rounded-xl border border-white/15 bg-night-900 px-3 py-1.5 text-sm font-bold text-white outline-none"
+                        >
+                          {Array.from({ length: people.length }, (_, idx) => idx + 1).map((n) => (
+                            <option key={n} value={n} className="text-white bg-night-900">
+                              {n} nəfər
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  <ul className="list-disc space-y-1 pl-4 text-[11px] text-frost/65">
+                    <li>Şəkil aydın, işıqlı və bulanıqsız olsun</li>
+                    <li>Sifətdə heç bir aksesuar olmasın (eynək, papaq, maska, şarf və s.)</li>
+                    <li>Tələbə kartı üzün yanında aydın və oxunaqlı görünsün</li>
+                  </ul>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {Array.from({ length: effectiveStudentCount }, (_, idx) => (
+                      <ParticipantPhotoSlot
+                        key={`student-${idx}`}
+                        label={`Tələbə #${idx + 1}${people[idx]?.name ? ` — ${people[idx].name}` : ''}`}
+                        value={participantPhotos[idx]?.studentCardPhotoData || ''}
+                        onChange={(dataUrl) =>
+                          setParticipantPhotos((prev) => ({
+                            ...prev,
+                            [idx]: {
+                              ...(prev[idx] || {}),
+                              studentCardPhotoData: dataUrl,
+                            },
+                          }))
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {people.length > 1 && (
+                <div className="mt-4 space-y-3 rounded-xl border border-white/15 bg-white/[0.03] p-4">
+                  <div>
+                    <p className="text-sm font-bold text-white">
+                      Bütün iştirakçıların şəxsiyyət vəsiqəsi ilə foto təsdiqi ({people.length} nəfər)
+                    </p>
+                    <p className="mt-0.5 text-xs text-frost/65">
+                      Hər bir iştirakçı şəxsiyyət vəsiqəsini sifətinin yanına tutaraq foto çəkib göndərməlidir (eyni qaydalar: aydın görüntü, aksesuar yox).
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {people.map((person, idx) => {
+                      const isFirstUnverified = idx === 0 && !user?.identityConfirmed
+                      if (isFirstUnverified) {
+                        return (
+                          <div
+                            key={`id-${idx}`}
+                            className="rounded-xl border border-emerald-300/25 bg-emerald-400/10 p-3 text-xs text-emerald-100"
+                          >
+                            <p className="font-bold">
+                              İştirakçı #1{person.name ? ` — ${person.name}` : ''}
+                            </p>
+                            <p className="mt-1 opacity-85">
+                              {identityPhotoData
+                                ? '✓ Sağdakı əsas şəxsiyyət təsdiqi fotosu istifadə olunacaq.'
+                                : 'Sağ tərəfdəki əsas şəxsiyyət təsdiqi bölməsindən foto yükləyin.'}
+                            </p>
+                          </div>
+                        )
+                      }
+                      return (
+                        <ParticipantPhotoSlot
+                          key={`id-${idx}`}
+                          label={`İştirakçı #${idx + 1}${person.name ? ` — ${person.name}` : ''}`}
+                          value={participantPhotos[idx]?.identityPhotoData || ''}
+                          onChange={(dataUrl) =>
+                            setParticipantPhotos((prev) => ({
+                              ...prev,
+                              [idx]: {
+                                ...(prev[idx] || {}),
+                                identityPhotoData: dataUrl,
+                              },
+                            }))
+                          }
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
               {discountHint && (
                 <p className="mt-4 text-sm font-semibold text-amber-200">
                   {discountHint}
@@ -1641,6 +1815,66 @@ export default function BookingWizard({ onTicketChange }) {
         onClose={closePayment}
         onPay={handlePayment}
       />
+    </div>
+  )
+}
+
+function ParticipantPhotoSlot({ label, value, onChange }) {
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+
+  async function handleFile(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setErr('Yalnız şəkil faylı seçin.')
+      return
+    }
+    setErr('')
+    setBusy(true)
+    try {
+      const compressed = await compressImageFile(file)
+      onChange(compressed)
+    } catch (error) {
+      setErr(error?.message || 'Şəkil oxuna bilmədi.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-white/12 bg-night-900/70 p-3">
+      <p className="text-xs font-bold text-white">{label}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <label className="btn-ghost cursor-pointer !px-3 !py-1.5 text-[11px]">
+          {busy ? 'Hazırlanır…' : value ? 'Dəyişdir' : 'Kamera / Şəkil seç'}
+          <input
+            type="file"
+            accept="image/*"
+            capture="user"
+            onChange={handleFile}
+            className="hidden"
+          />
+        </label>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="text-[11px] font-semibold text-red-200 hover:text-red-100"
+          >
+            Sil
+          </button>
+        )}
+      </div>
+      {err && <p className="mt-1 text-[11px] text-red-200">{err}</p>}
+      {value && (
+        <img
+          src={value}
+          alt={label}
+          className="mt-2 max-h-32 w-full rounded-lg border border-white/10 object-contain"
+        />
+      )}
     </div>
   )
 }
