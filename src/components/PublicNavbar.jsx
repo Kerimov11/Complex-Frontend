@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 const PUBLIC_LINKS = [
   { to: '/', label: 'Ana səhifə', end: true },
   { to: '/qiymetler', label: 'Qiymətlər' },
-  { to: '/fealiyyetler', label: 'Fəaliyyətlər' },
+  { to: '/haqqimizda', label: 'Haqqımızda' },
   { to: '/qaydalar', label: 'Qaydalar' },
   { to: '/elaqe', label: 'Əlaqə' },
 ]
