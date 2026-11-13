@@ -144,7 +144,7 @@ export function AuthProvider({ children }) {
         if (!data?.token) throw new Error('Token alınmadı')
         persist(data)
         setOpen(false)
-        return true
+        return data
       } catch (err) {
         const msg = err?.message || ''
         if (/bad\s+credentials/i.test(msg)) {
@@ -169,7 +169,7 @@ export function AuthProvider({ children }) {
         if (!data?.token) throw new Error('Token alınmadı')
         persist(data)
         setOpen(false)
-        return true
+        return data
       } catch (err) {
         setError(err?.message || 'Qeydiyyat alınmadı.')
         return false

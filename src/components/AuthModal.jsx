@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { api } from '../api/client'
+import { staffHomePath } from '../utils/staffRoutes'
 
 const inputCls =
   'mt-1 w-full rounded-xl border border-white/15 bg-white/[0.05] px-4 py-2.5 text-sm text-white placeholder-frost/30 outline-none transition-colors focus:border-ice-300/60'
@@ -9,6 +11,7 @@ const labelCls =
   'text-[10px] font-bold uppercase tracking-wider text-frost/45'
 
 export default function AuthModal() {
+  const navigate = useNavigate()
   const {
     open,
     mode,
@@ -78,7 +81,19 @@ export default function AuthModal() {
 
   async function submitLogin(e) {
     e.preventDefault()
-    await login(loginForm.username.trim(), loginForm.password)
+    const data = await login(loginForm.username.trim(), loginForm.password)
+    if (data && Array.isArray(data.roles)) {
+      const roles = data.roles
+      const isAdmin = roles.includes('ROLE_ADMIN')
+      const isCoordinator = roles.includes('ROLE_COORDINATOR')
+      const isCashier = roles.includes('ROLE_CASHIER')
+      const isVolunteer = roles.includes('ROLE_VOLUNTEER')
+      if (isAdmin || isCoordinator || isCashier || isVolunteer) {
+        navigate(staffHomePath({ isAdmin, isCoordinator, isCashier, isVolunteer }), {
+          replace: true,
+        })
+      }
+    }
   }
 
   async function submitRegister(e) {
