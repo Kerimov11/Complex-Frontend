@@ -6,7 +6,7 @@ import { isSnowfallEnabled, setSnowfallEnabled } from '../../components/Snowfall
 import { api } from '../../api/client'
 import { useAuth } from '../../auth/AuthContext'
 import { formatDateAZ, pad } from '../../utils/datetime'
-import { isValidEmail } from '../../utils/validation'
+import { isValidEmail, validatePhone } from '../../utils/validation'
 
 function formatDateTime(value) {
   if (!value) return '—'
@@ -130,8 +130,9 @@ export default function AccountPage() {
       setProfileError('E-poçt ünvanı düzgün formatda deyil (məs: ad@gmail.com).')
       return
     }
-    if (!phoneNumber.trim()) {
-      setProfileError('Telefon nömrəsi boş ola bilməz.')
+    const phoneErr = validatePhone(phoneNumber)
+    if (phoneErr) {
+      setProfileError(phoneErr)
       return
     }
 

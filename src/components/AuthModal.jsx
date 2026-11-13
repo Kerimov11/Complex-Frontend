@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { api } from '../api/client'
 import { staffHomePath } from '../utils/staffRoutes'
-import { isValidEmail } from '../utils/validation'
+import { isValidEmail, validatePhone } from '../utils/validation'
 
 const inputCls =
   'mt-1 w-full rounded-xl border border-white/15 bg-white/[0.05] px-4 py-2.5 text-sm text-white placeholder-frost/30 outline-none transition-colors focus:border-ice-300/60'
@@ -122,6 +122,11 @@ export default function AuthModal() {
     setLocalError('')
     if (!isValidEmail(registerForm.email)) {
       setLocalError('E-poçt ünvanı düzgün formatda deyil (məs: ad@gmail.com).')
+      return
+    }
+    const phoneErr = validatePhone(registerForm.phoneNumber)
+    if (phoneErr) {
+      setLocalError(phoneErr)
       return
     }
     const data = await register({

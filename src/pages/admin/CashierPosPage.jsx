@@ -5,37 +5,7 @@ import StatCard from '../../components/admin/StatCard'
 import { formatDateTime, formatMoney, formatNumber, todayISO } from '../../components/admin/formatters'
 import { api } from '../../api/client'
 import { cashierApi } from '../../services/api/cashierApi'
-
-function validatePhone(phone) {
-  if (!phone || !phone.trim()) {
-    return 'Mobil nömrə daxil edilməlidir.'
-  }
-  const cleaned = phone.trim()
-  const digits = cleaned.replace(/\D/g, '')
-
-  if (digits.length === 12 && digits.startsWith('994')) {
-    if (!/^994(10|50|51|55|60|70|71|77|99)\d{7}$/.test(digits)) {
-      return 'Mobil nömrə prefiksi yanlışdır (məs: +994 50 123 45 67).'
-    }
-    return ''
-  }
-  if (digits.length === 10 && digits.startsWith('0')) {
-    if (!/^0(10|50|51|55|60|70|71|77|99)\d{7}$/.test(digits)) {
-      return 'Mobil nömrə prefiksi yanlışdır (məs: 050 123 45 67).'
-    }
-    return ''
-  }
-  if (digits.length === 9) {
-    if (!/^(10|50|51|55|60|70|71|77|99)\d{7}$/.test(digits)) {
-      return 'Mobil nömrə prefiksi yanlışdır (məs: 50 123 45 67).'
-    }
-    return ''
-  }
-  if (cleaned.startsWith('+') && digits.length >= 10 && digits.length <= 15) {
-    return ''
-  }
-  return 'Mobil nömrə düzgün formatda deyil (məs: +994 50 123 45 67).'
-}
+import { validatePhone } from '../../utils/validation'
 
 function validateFullName(name) {
   if (!name || !name.trim()) {
