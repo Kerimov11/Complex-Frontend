@@ -68,12 +68,32 @@ export default function MyTicketsPage() {
 
   useEffect(() => {
     load()
+    const onFocus = () => load(true)
+    const onVisibility = () => {
+      if (!document.hidden) load(true)
+    }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [load])
 
   useEffect(() => {
     const tick = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(tick)
   }, [])
+
+  // Təsdiq gözləyən biletlər olduqda kassir təsdiq edən kimi avtomatik yenilə
+  const hasPendingReview = tickets.some(
+    (ticket) => ticket.identityReviewStatus === 'PENDING_REVIEW'
+  )
+  useEffect(() => {
+    if (!hasPendingReview) return undefined
+    const timer = setInterval(() => load(true), 5000)
+    return () => clearInterval(timer)
+  }, [hasPendingReview, load])
 
   const hasActiveTimer = tickets.some((ticket) => ticket.reservationActive)
   useEffect(() => {
