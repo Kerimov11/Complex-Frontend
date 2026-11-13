@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AdminNotice from '../../components/admin/AdminNotice'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import QrCameraScanner from '../../components/admin/QrCameraScanner'
@@ -63,6 +63,7 @@ const STATUS_META = {
   ALREADY_USED: { tone: 'error', label: 'Bu QR bilet artıq istifadə olunub' },
   ALREADY_CASHIER_VERIFIED: { tone: 'warning', label: 'Bilet artıq kassada təsdiqlənib' },
   ALREADY_HANDED_OUT: { tone: 'warning', label: 'Konki artıq təhvil verilib' },
+  NOT_CASHIER_VERIFIED: { tone: 'warning', label: 'Öncə Kassa QR-da skan olunmalıdır' },
   NOT_CHECKED_IN: { tone: 'warning', label: 'Əvvəlcə Kassa QR və ya Turniketdə skan edin' },
   PAYMENT_PENDING: { tone: 'warning', label: 'Ödəniş gözləyir' },
   CANCELLED: { tone: 'error', label: 'Ləğv edilib' },
@@ -75,17 +76,67 @@ function timeLabel(value) {
   return value ? String(value).slice(0, 5) : '—'
 }
 
+const KASSA_RESULT_STORAGE_KEY = 'ice_arena_kassa_qr_result'
+const KASSA_HISTORY_STORAGE_KEY = 'ice_arena_kassa_qr_history'
+
+function readStoredJson(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch {
+    return fallback
+  }
+}
+
 export default function VerificationPage({ mode = 'turnstile' }) {
   const { isAdmin, isCoordinator, isCashier, isVolunteer } = useAuth()
+  const isCashierMode = mode === 'cashier'
   const [code, setCode] = useState('')
-  const [result, setResult] = useState(null)
-  const [history, setHistory] = useState([])
+  const [result, setResult] = useState(() =>
+    isCashierMode ? readStoredJson(KASSA_RESULT_STORAGE_KEY, null) : null
+  )
+  const [history, setHistory] = useState(() =>
+    isCashierMode ? readStoredJson(KASSA_HISTORY_STORAGE_KEY, []) : []
+  )
   const [loading, setLoading] = useState(false)
   const [handoverBusy, setHandoverBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const inputRef = useRef(null)
-  const isCashierMode = mode === 'cashier'
+
+  useEffect(() => {
+    if (isCashierMode) {
+      setResult(readStoredJson(KASSA_RESULT_STORAGE_KEY, null))
+      setHistory(readStoredJson(KASSA_HISTORY_STORAGE_KEY, []))
+    } else {
+      setResult(null)
+      setHistory([])
+    }
+    setError('')
+    setNotice('')
+  }, [isCashierMode])
+
+  useEffect(() => {
+    if (!isCashierMode) return
+    try {
+      if (result) {
+        window.localStorage.setItem(KASSA_RESULT_STORAGE_KEY, JSON.stringify(result))
+      } else {
+        window.localStorage.removeItem(KASSA_RESULT_STORAGE_KEY)
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [isCashierMode, result])
+
+  useEffect(() => {
+    if (!isCashierMode) return
+    try {
+      window.localStorage.setItem(KASSA_HISTORY_STORAGE_KEY, JSON.stringify(history))
+    } catch {
+      // ignore storage errors
+    }
+  }, [isCashierMode, history])
 
   const canHandover = isAdmin || isCoordinator || isCashier || isVolunteer
 
@@ -395,8 +446,30 @@ function ScannedTicket({ result, mode = 'turnstile', canHandover, busy, onHandov
         </div>
       )}
 
+      {/* Turniketdə skan edilibsə amma öncə Kassa QR-da skan edilməyibsə */}
+      {!isCashierMode && result.status === 'NOT_CASHIER_VERIFIED' && (
+        <div className="rounded-xl border-2 border-amber-400/50 bg-amber-500/15 p-5 shadow-lg">
+          <div className="flex items-start gap-3.5">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-amber-500/25 text-xl font-bold text-amber-100">
+              !
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-amber-200">
+                Turniket xəbərdarlığı
+              </p>
+              <h3 className="mt-0.5 font-display text-2xl font-bold text-white">
+                Bilet öncə Kassa QR-da skan olunmalıdır
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-amber-100/85">
+                {result.message || 'Bu bilet hələ Kassa QR bölməsində skan edilməyib. Müştərini əvvəlcə Kassa QR-a yönləndirin.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Kassa QR-da bilet hələ təsdiqlənməyibsə və ya konki təhvil verilibsə */}
-      {isCashierMode && (isUnconfirmedValid || handedOut) && (
+      {isCashierMode && (isUnconfirmedValid || handedOut || showHandover) && (
         <div className="rounded-xl border border-emerald-300/35 bg-emerald-400/10 px-4 py-3.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
