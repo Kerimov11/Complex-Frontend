@@ -771,14 +771,15 @@ export default function BookingWizard({ onTicketChange }) {
         }
       }
       if (people.length > 1) {
-        for (let i = 0; i < people.length; i += 1) {
+        const startIdx = benefits.student ? effectiveStudentCount : 0
+        for (let i = startIdx; i < people.length; i += 1) {
           const hasIdPhoto =
             i === 0 && !currentIdentityConfirmed
               ? Boolean(identityPhotoData)
               : Boolean(participantPhotos[i]?.identityPhotoData)
           if (!hasIdPhoto) {
             setError(
-              `Qrup bileti üçün bütün iştirakçıların şəxsiyyət vəsiqəsi ilə fotosunu yükləyin (İştirakçı #${i + 1}).`
+              `Qrup bileti üçün iştirakçıların şəxsiyyət vəsiqəsi ilə fotosunu yükləyin (İştirakçı #${i + 1}).`
             )
             return
           }
@@ -1705,18 +1706,26 @@ export default function BookingWizard({ onTicketChange }) {
                 </div>
               )}
 
-              {people.length > 1 && (
+              {people.length > 1 &&
+                (!benefits.student || effectiveStudentCount < people.length) && (
                 <div className="mt-4 space-y-3 rounded-xl border border-white/15 bg-white/[0.03] p-4">
                   <div>
                     <p className="text-sm font-bold text-white">
-                      Bütün iştirakçıların şəxsiyyət vəsiqəsi ilə foto təsdiqi ({people.length} nəfər)
+                      {benefits.student
+                        ? `Digər iştirakçıların şəxsiyyət vəsiqəsi ilə foto təsdiqi (${people.length - effectiveStudentCount} nəfər)`
+                        : `Bütün iştirakçıların şəxsiyyət vəsiqəsi ilə foto təsdiqi (${people.length} nəfər)`}
                     </p>
                     <p className="mt-0.5 text-xs text-frost/65">
-                      Hər bir iştirakçı şəxsiyyət vəsiqəsini sifətinin yanına tutaraq foto çəkib göndərməlidir (eyni qaydalar: aydın görüntü, aksesuar yox).
+                      {benefits.student
+                        ? 'Tələbə olmayan iştirakçılar şəxsiyyət vəsiqəsini sifətinin yanına tutaraq foto çəkib göndərməlidir (eyni qaydalar: aydın görüntü, aksesuar yox).'
+                        : 'Hər bir iştirakçı şəxsiyyət vəsiqəsini sifətinin yanına tutaraq foto çəkib göndərməlidir (eyni qaydalar: aydın görüntü, aksesuar yox).'}
                     </p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {people.map((person, idx) => {
+                      if (benefits.student && idx < effectiveStudentCount) {
+                        return null
+                      }
                       const isFirstUnverified = idx === 0 && !user?.identityConfirmed
                       if (isFirstUnverified) {
                         return (
