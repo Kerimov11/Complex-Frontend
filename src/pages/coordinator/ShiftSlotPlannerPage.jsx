@@ -12,48 +12,42 @@ const EMPTY_FORM = {
   active: true,
 }
 
-const HOURS_24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
-const MINUTES_60 = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+const TIME_24_RE = /^([01]\d|2[0-3]):[0-5]\d$/
 
 function clock(value) {
   return value ? String(value).slice(0, 5) : ''
 }
 
-function Time24Select({ value, onChange, label }) {
-  const [hour = '09', minute = '00'] = clock(value).split(':')
+function formatTime24Input(raw, prev) {
+  const cleaned = String(raw || '').replace(/[^\d:]/g, '')
+  if (cleaned.includes(':')) {
+    const [h = '', m = ''] = cleaned.split(':')
+    return `${h.slice(0, 2)}:${m.slice(0, 2)}`
+  }
+  const digits = cleaned.slice(0, 4)
+  if (digits.length > 2 && cleaned.length >= String(prev || '').length) {
+    return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`
+  }
+  return digits
+}
+
+function Time24Input({ value, onChange, label, placeholder }) {
   return (
-    <div className="block">
+    <label className="block">
       <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
         {label}
       </span>
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 rounded-xl border border-white/10 bg-night-900/60 px-2.5 py-2 focus-within:border-ice-300/50">
-        <select
-          aria-label={`${label} saat`}
-          value={HOURS_24.includes(hour) ? hour : '09'}
-          onChange={(e) => onChange(`${e.target.value}:${minute}`)}
-          className="w-full bg-transparent text-center text-sm font-semibold text-white outline-none [&>option]:bg-night-900 [&>option]:text-white"
-        >
-          {HOURS_24.map((h) => (
-            <option key={h} value={h}>
-              {h}
-            </option>
-          ))}
-        </select>
-        <span className="font-bold text-frost/45">:</span>
-        <select
-          aria-label={`${label} dəqiqə`}
-          value={MINUTES_60.includes(minute) ? minute : '00'}
-          onChange={(e) => onChange(`${hour}:${e.target.value}`)}
-          className="w-full bg-transparent text-center text-sm font-semibold text-white outline-none [&>option]:bg-night-900 [&>option]:text-white"
-        >
-          {MINUTES_60.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
+      <input
+        type="text"
+        inputMode="numeric"
+        maxLength={5}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(formatTime24Input(e.target.value, value))}
+        className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm font-semibold tabular-nums text-white outline-none placeholder:text-frost/30 focus:border-ice-300/50"
+        required
+      />
+    </label>
   )
 }
 
@@ -106,9 +100,13 @@ export default function ShiftSlotPlannerPage() {
 
   async function submit(event) {
     event.preventDefault()
-    setBusy(true)
     setError('')
     setSuccess('')
+    if (!TIME_24_RE.test(form.startTime) || !TIME_24_RE.test(form.endTime)) {
+      setError('Başlama və bitmə saatı 24 saatlıq formatda olmalıdır (məs: 09:00, 18:45).')
+      return
+    }
+    setBusy(true)
     try {
       const payload = {
         shiftDate: date,
@@ -212,15 +210,17 @@ export default function ShiftSlotPlannerPage() {
           <p className="mt-1 text-xs text-frost/45">{formatShiftDate(date)}</p>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <Time24Select
+            <Time24Input
               label="Başlama"
+              placeholder="09:00"
               value={form.startTime}
               onChange={(startTime) =>
                 setForm((prev) => ({ ...prev, startTime }))
               }
             />
-            <Time24Select
+            <Time24Input
               label="Bitmə"
+              placeholder="18:45"
               value={form.endTime}
               onChange={(endTime) =>
                 setForm((prev) => ({ ...prev, endTime }))
