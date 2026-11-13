@@ -350,7 +350,11 @@ export default function MyTicketsPage() {
                             : `Konki rezervasiyasını aktivləşdir (${attemptsLeft} cəhd qalıb)`}
                         </button>
                       </div>
-                    ) : isBooking && ticket.status === 'ACTIVE' ? (
+                    ) : isBooking && ticket.identityReviewStatus === 'PENDING_REVIEW' ? (
+                      <p className="rounded-xl border border-amber-300/25 bg-amber-400/10 px-3 py-2.5 text-xs text-amber-100">
+                        Biletiniz kassir tərəfindən təsdiqləndikdən sonra konki rezervasiyası aktivləşdirilə bilər.
+                      </p>
+                    ) : isBooking && ticket.identityReviewStatus === 'REJECTED' ? null : isBooking && ticket.status === 'ACTIVE' ? (
                       <p className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-xs text-frost/55">
                         {attemptsLeft > 0
                           ? 'Rezervasiyanı aktivləşdirmək üçün arenaya yaxınlaşdıqda düyməni basın.'
