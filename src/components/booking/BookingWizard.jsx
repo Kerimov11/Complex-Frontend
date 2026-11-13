@@ -1757,13 +1757,13 @@ export default function BookingWizard({ onTicketChange }) {
                 <div className="flex justify-between text-frost/70">
                   <span>Tarix</span>
                   <span className="font-semibold text-white">
-                    {formatDateAZ(date)}
+                    {formatDateAZ(todayISO)}
                   </span>
                 </div>
                 <div className="flex justify-between text-frost/70">
-                  <span>Vaxt</span>
+                  <span>Saat</span>
                   <span className="font-semibold text-white">
-                    {backendTime(time)} - {time ? sessionEndTime(time, duration) : ''}
+                    {`${String(new Date(now).getHours()).padStart(2, '0')}:${String(new Date(now).getMinutes()).padStart(2, '0')}`}
                   </span>
                 </div>
                 <div className="flex justify-between text-frost/70">
