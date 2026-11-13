@@ -34,6 +34,12 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
 
+  useEffect(() => {
+    if (isStaff && activeTab === 'feedback') {
+      setActiveTab('profile')
+    }
+  }, [isStaff, activeTab])
+
   // Şəxsi məlumatlar forması
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -483,7 +489,11 @@ export default function AccountPage() {
           <SectionTitle
             eyebrow="Şəxsi kabinet"
             title="Hesabım"
-            subtitle="İstifadəçi məlumatlarınızı, bildirişlərinizi və arena rəylərinizi (geri dönüş) buradan idarə edin."
+            subtitle={
+              isStaff
+                ? 'İstifadəçi məlumatlarınızı və bildirişlərinizi buradan idarə edin.'
+                : 'İstifadəçi məlumatlarınızı, bildirişlərinizi və arena rəylərinizi (geri dönüş) buradan idarə edin.'
+            }
             align="left"
           />
           <div className="flex flex-wrap items-center gap-2">
@@ -639,17 +649,19 @@ export default function AccountPage() {
                 )}
               </button>
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('feedback')}
-                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${
-                  activeTab === 'feedback'
-                    ? 'bg-ice-400 text-night-950 shadow-md shadow-ice-400/20'
-                    : 'text-frost/70 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                💬 Geri dönüş (Feedback)
-              </button>
+              {!isStaff && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('feedback')}
+                  className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${
+                    activeTab === 'feedback'
+                      ? 'bg-ice-400 text-night-950 shadow-md shadow-ice-400/20'
+                      : 'text-frost/70 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  💬 Geri dönüş (Feedback)
+                </button>
+              )}
             </div>
 
             {/* TAB 1: BİLDİRİŞLƏR BÖLMƏSİ */}
@@ -783,8 +795,8 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* TAB 2: GERİ DÖNÜŞ (FEEDBACK) BÖLMƏSİ */}
-            {activeTab === 'feedback' && (
+            {/* TAB 2: GERİ DÖNÜŞ (FEEDBACK) BÖLMƏSİ (Yalnız müştəri hesablarında) */}
+            {!isStaff && activeTab === 'feedback' && (
               <div className="mt-6 space-y-6">
                 <div className="glass rounded-2xl border border-white/10 p-6 sm:p-7">
                   <div className="border-b border-white/10 pb-4">
