@@ -413,7 +413,7 @@ export default function AccountPage() {
           id: `entry-${code}`,
           type: 'ice',
           icon: '🚪',
-          title: 'Arenaya giriş qeydə alındı',
+          title: 'Buza giriş qeydə alındı',
           message: `${code} biletiniz ilə buza giriş qeydə alındı. ${ticket.durationMinutes || 60} dəqiqəlik seansınız başladı.`,
           date: ticket.checkedInAt || time,
           badge: 'Giriş edildi',
@@ -656,7 +656,7 @@ export default function AccountPage() {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-frost/70">
-                          Bildirişləri al:
+                          Bildirişlər:
                         </span>
                         <button
                           type="button"
