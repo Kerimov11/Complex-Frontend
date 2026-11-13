@@ -121,8 +121,16 @@ export default function IdentityVerificationsPage() {
         </button>
       </div>
 
-      <AdminNotice tone="error" message={error} />
-      <AdminNotice tone="success" message={notice} />
+      {error && (
+        <div className="mb-4">
+          <AdminNotice tone="error">{error}</AdminNotice>
+        </div>
+      )}
+      {notice && (
+        <div className="mb-4">
+          <AdminNotice tone="success">{notice}</AdminNotice>
+        </div>
+      )}
 
       {loading ? (
         <div className="glass rounded-xl p-8 text-center text-sm text-frost/60">
