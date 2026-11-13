@@ -62,16 +62,31 @@ function AnimatedCounter({ value }) {
 
 export default function LiveStream() {
   const { count, open, loading, offline } = useLiveStatus()
+  const [videoFailed, setVideoFailed] = useState(false)
 
   return (
     <div className="glass group relative overflow-hidden rounded-xl">
       <div className="relative aspect-video overflow-hidden bg-night-900">
-        <img
-          src={STREAM_POSTER}
-          alt="Buz arenası"
-          className="h-full w-full object-cover opacity-70"
-          loading="lazy"
-        />
+        {!videoFailed ? (
+          <video
+            src="/live.mp4"
+            poster={STREAM_POSTER}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            onError={() => setVideoFailed(true)}
+            className="h-full w-full object-cover opacity-80"
+          />
+        ) : (
+          <img
+            src={STREAM_POSTER}
+            alt="Buz arenası"
+            className="h-full w-full object-cover opacity-70"
+            loading="lazy"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-night-950 via-night-950/30 to-transparent" />
 
         <div className="absolute left-4 top-4 flex items-center gap-2">
