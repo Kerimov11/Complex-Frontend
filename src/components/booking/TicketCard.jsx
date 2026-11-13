@@ -7,6 +7,7 @@ import {
   pad,
 } from '../../utils/datetime'
 import { formatPrice, ticketValidUntil } from '../../utils/ticket'
+import { iceEntryWarning } from '../../utils/schedule'
 
 function shortTime(value) {
   return value ? String(value).slice(0, 5) : ''
@@ -17,6 +18,9 @@ export default function TicketCard({ ticket }) {
   const backendReservations = Array.isArray(ticket.backendReservations)
     ? ticket.backendReservations
     : []
+
+  const entryWarning = iceEntryWarning()
+  const purchaseTimeStr = `${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`
 
   // Biletin etibarlılıq tarixi (QR skan edilənədək limitsiz)
   const validUntil = ticketValidUntil(ticket)
@@ -61,9 +65,9 @@ export default function TicketCard({ ticket }) {
         <div className="min-w-0 flex-1 space-y-4">
           <div className="grid gap-4 text-sm sm:grid-cols-3">
             <div>
-              <p className="text-xs text-frost/50">Tarix</p>
+              <p className="text-xs text-frost/50">Tarix və Saat</p>
               <p className="mt-0.5 font-semibold text-white">
-                {dayNameAZ(session.date)}, {formatDateAZ(session.date)}
+                {dayNameAZ(session.date)}, {formatDateAZ(session.date)} ({purchaseTimeStr})
               </p>
               <p className="text-ice-200">Giriş: İş saatları içində istənilən vaxt</p>
             </div>
@@ -134,6 +138,12 @@ export default function TicketCard({ ticket }) {
               </p>
             )}
           </div>
+
+          {entryWarning && (
+            <div className="rounded-xl border border-amber-300/40 bg-amber-500/15 px-4 py-3 text-xs leading-relaxed text-amber-100">
+              <span className="font-bold text-amber-200">ℹ️ İş saatı bildirişi:</span> {entryWarning.message} Biletiniz limitsiz etibarlıdır, buz açıldıqda istifadə edə bilərsiniz.
+            </div>
+          )}
 
           {ticket.pendingReview && (
             <div className="rounded-xl border border-amber-300/35 bg-amber-400/12 px-4 py-3 text-xs leading-relaxed text-amber-100">

@@ -285,38 +285,11 @@ export default function BookingWizard({ onTicketChange }) {
     [quote, duration, localPrice]
   )
 
-  // Seçilmiş slot üçün backend-in dinamik mövcudluq cavabı.
+  // Müştəri istədiyi vaxt sərbəst bilet ala bilər.
   useEffect(() => {
-    let active = true
-    if (!backendSession?.id || !time) {
-      setAvailability(null)
-      setAvailabilityLoading(false)
-      setAvailabilityError('')
-      return undefined
-    }
-
-    setAvailabilityLoading(true)
+    setAvailability(null)
+    setAvailabilityLoading(false)
     setAvailabilityError('')
-    api
-      .getSessionAvailability(backendSession.id, {
-        startTime: time,
-        durationMinutes,
-      })
-      .then((data) => {
-        if (!active) return
-        setAvailability(data)
-        setAvailabilityLoading(false)
-      })
-      .catch((err) => {
-        if (!active) return
-        setAvailability(null)
-        setAvailabilityError(err?.message || 'Sessiya mövcudluğu yoxlanmadı.')
-        setAvailabilityLoading(false)
-      })
-
-    return () => {
-      active = false
-    }
   }, [backendSession?.id, time, durationMinutes])
 
   // Backend qiymət mühərriki. O, qrup/5+1 endirimlərini avtomatik seçir.
@@ -547,24 +520,6 @@ export default function BookingWizard({ onTicketChange }) {
     }
     if (!backendSession) {
       setError('Seçilmiş tarix və müddət üçün aktiv sessiya tapılmadı. Başqa gün və ya müddət seçin.')
-      return null
-    }
-    if (availabilityLoading) {
-      setError('Sessiya vaxtı yoxlanılır. Bir neçə saniyə sonra yenidən cəhd edin.')
-      return null
-    }
-    if (availability?.salesOpen === false) {
-      setError(
-        availability.message ||
-          'Sessiyanın bağlanmasına 30 dəqiqədən az qalıb; bilet satışı dayandırılıb.'
-      )
-      return null
-    }
-    if (availability?.requestedDurationAvailable === false) {
-      setError(
-        availability.message ||
-          'Seçilmiş müddət üçün kifayət qədər vaxt yoxdur.'
-      )
       return null
     }
     if (!skatesReady) {
