@@ -10,10 +10,41 @@ const labelCls =
 
 const onlyDigits = (value) => value.replace(/\D/g, '')
 
+function detectCardBrand(digits) {
+  if (/^4\d*$/.test(digits)) return 'VISA'
+  if (/^(5[1-5]|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)\d*$/.test(digits)) {
+    return 'MASTERCARD'
+  }
+  if (/^3[47]\d*$/.test(digits)) return 'AMEX'
+  return ''
+}
+
+function luhnValid(digits) {
+  let sum = 0
+  let doubleIt = false
+  for (let i = digits.length - 1; i >= 0; i -= 1) {
+    let d = Number(digits[i])
+    if (doubleIt) {
+      d *= 2
+      if (d > 9) d -= 9
+    }
+    sum += d
+    doubleIt = !doubleIt
+  }
+  return sum % 10 === 0
+}
+
 function formatCardNumber(value) {
-  return onlyDigits(value)
-    .slice(0, 16)
-    .replace(/(\d{4})(?=\d)/g, '$1 ')
+  const digits = onlyDigits(value)
+  const brand = detectCardBrand(digits)
+  const maxLen = brand === 'AMEX' ? 15 : 16
+  const sliced = digits.slice(0, maxLen)
+  if (brand === 'AMEX') {
+    return sliced.replace(/^(\d{4})(\d{0,6})(\d{0,5}).*/, (_, a, b, c) =>
+      [a, b, c].filter(Boolean).join(' ')
+    )
+  }
+  return sliced.replace(/(\d{4})(?=\d)/g, '$1 ')
 }
 
 function formatExpiry(value) {
@@ -23,27 +54,53 @@ function formatExpiry(value) {
 }
 
 function validateCard({ number, holder, expiry, cvv }) {
-  if (onlyDigits(number).length !== 16) {
-    return 'Kart nömrəsi 16 rəqəm olmalıdır.'
+  const digits = onlyDigits(number)
+  const brand = detectCardBrand(digits)
+  if (!brand) {
+    return 'Yalnız Visa, Mastercard və ya American Express kartları qəbul olunur.'
   }
-  if (holder.trim().length < 3) {
-    return 'Kart sahibinin adını daxil edin.'
+  const expectedLen = brand === 'AMEX' ? 15 : 16
+  if (digits.length !== expectedLen) {
+    return `Kart nömrəsi ${expectedLen} rəqəm olmalıdır.`
   }
+  if (/^(\d)\1+$/.test(digits) || digits === '1234567890123456') {
+    return 'Saxta və ya etibarsız kart nömrəsi daxil etmək olmaz.'
+  }
+  if (!luhnValid(digits)) {
+    return 'Kart nömrəsi bank standartına (Luhn yoxlaması) uyğun deyil.'
+  }
+
+  const trimmedHolder = holder.trim()
+  const holderParts = trimmedHolder.split(/\s+/).filter(Boolean)
+  if (
+    holderParts.length < 2 ||
+    !/^[\p{L}\s'-]{4,60}$/u.test(trimmedHolder)
+  ) {
+    return 'Kart sahibinin ad və soyadını düzgün daxil edin (yalnız hərflər).'
+  }
+
   const match = /^(\d{2})\/(\d{2})$/.exec(expiry.trim())
   if (!match) {
     return 'Son istifadə tarixi AA/İİ formatında olmalıdır.'
   }
   const month = Number(match[1])
   const year = 2000 + Number(match[2])
+  const currentYear = new Date().getFullYear()
   if (month < 1 || month > 12) {
-    return 'Son istifadə ayı düzgün deyil.'
+    return 'Son istifadə ayı 01–12 aralığında olmalıdır.'
+  }
+  if (year > currentYear + 15) {
+    return 'Son istifadə ili düzgün deyil.'
   }
   const expiresAt = new Date(year, month, 0, 23, 59, 59)
   if (expiresAt.getTime() < Date.now()) {
-    return 'Kartın vaxtı bitib.'
+    return 'Kartın istifadə müddəti bitib.'
   }
-  if (onlyDigits(cvv).length < 3) {
-    return 'CVV ən azı 3 rəqəm olmalıdır.'
+
+  const cvvDigits = onlyDigits(cvv)
+  const expectedCvv = brand === 'AMEX' ? 4 : 3
+  if (cvvDigits.length !== expectedCvv || /^0+$/.test(cvvDigits)) {
+    return `CVV/CVC kodu ${expectedCvv} rəqəm olmalıdır.`
   }
   return ''
 }
@@ -178,7 +235,7 @@ export default function PaymentModal({
                 Ice Arena
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-frost/45">
-                Demo card
+                {detectCardBrand(onlyDigits(card.number)) || 'VISA / MC / AMEX'}
               </span>
             </div>
             <p className="mt-6 font-mono text-lg font-semibold tracking-wider text-white">
@@ -235,7 +292,10 @@ export default function PaymentModal({
                 id="pay-holder"
                 value={card.holder}
                 onChange={(event) =>
-                  setCard((prev) => ({ ...prev, holder: event.target.value }))
+                  setCard((prev) => ({
+                    ...prev,
+                    holder: event.target.value.replace(/[^\p{L}\s'-]/gu, ''),
+                  }))
                 }
                 className={inputCls}
                 placeholder="DEMO USER"
