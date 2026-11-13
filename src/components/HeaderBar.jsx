@@ -27,11 +27,11 @@ export default function HeaderBar({
 
   function desktopLinkClass({ isActive }, item) {
     if (item.tone === 'accent') {
-      return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors xl:px-2.5 ${
+      return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors ${
         isActive ? 'text-amber-200' : 'text-amber-200/70 hover:text-amber-100'
       }`
     }
-    return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors xl:px-2.5 ${
+    return `whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-semibold transition-colors ${
       isActive ? 'text-ice-200' : 'text-frost/75 hover:text-white'
     }`
   }
@@ -55,7 +55,7 @@ export default function HeaderBar({
           : 'border-b border-white/5 bg-transparent py-4'
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
         <Logo to={logoTo} />
 
         <nav className="hidden min-w-0 items-center gap-0.5 lg:flex xl:gap-1" aria-label="Əsas naviqasiya">
@@ -77,7 +77,7 @@ export default function HeaderBar({
               <Link
                 to="/hesabim"
                 title={user?.username || 'Hesabım'}
-                className="max-w-[5.5rem] truncate whitespace-nowrap text-xs font-bold text-ice-200 transition-colors hover:text-white xl:max-w-[7rem]"
+                className="max-w-[4.5rem] truncate whitespace-nowrap text-xs font-bold text-ice-200 transition-colors hover:text-white"
               >
                 {user?.username || 'Hesabım'}
               </Link>
