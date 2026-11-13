@@ -12,7 +12,8 @@ function query(params = {}) {
 }
 
 export const adminApi = {
-  getDashboard: () => request('/api/admin/dashboard'),
+  getDashboard: (date) =>
+    request(`/api/admin/dashboard${query({ date })}`),
 
   getStaff: (search) => request(`/api/admin/staff${query({ q: search })}`),
   createStaffMember: (payload) =>
