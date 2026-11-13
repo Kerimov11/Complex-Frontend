@@ -79,10 +79,10 @@ export default function IdentityVerificationFields({
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid items-end gap-3 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/60">
-            Şəxsiyyət vəsiqəsinin seriya və nömrəsi
+            Seriya nömrəsi
           </label>
           <input
             type="text"
@@ -95,7 +95,7 @@ export default function IdentityVerificationFields({
         </div>
         <div>
           <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-frost/60">
-            FİN kod (7 simvol)
+            FİN kod
           </label>
           <input
             type="text"
