@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { api } from '../api/client'
 import { staffHomePath } from '../utils/staffRoutes'
@@ -12,6 +12,7 @@ const labelCls =
 
 export default function AuthModal() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const {
     open,
     mode,
@@ -79,26 +80,43 @@ export default function AuthModal() {
   const isRegister = mode === 'register'
   const isForgot = mode === 'forgot'
 
+  function redirectAfterAuth(data) {
+    if (!data || !Array.isArray(data.roles)) return
+    const roles = data.roles
+    const isAdmin = roles.includes('ROLE_ADMIN')
+    const isCoordinator = roles.includes('ROLE_COORDINATOR')
+    const isCashier = roles.includes('ROLE_CASHIER')
+    const isVolunteer = roles.includes('ROLE_VOLUNTEER')
+    if (isAdmin || isCoordinator || isCashier || isVolunteer) {
+      navigate(staffHomePath({ isAdmin, isCoordinator, isCashier, isVolunteer }), {
+        replace: true,
+      })
+      return
+    }
+    if (
+      pathname === '/admin' ||
+      pathname.startsWith('/admin/') ||
+      pathname === '/volunteer' ||
+      pathname.startsWith('/volunteer/')
+    ) {
+      navigate('/', { replace: true })
+    }
+  }
+
   async function submitLogin(e) {
     e.preventDefault()
     const data = await login(loginForm.username.trim(), loginForm.password)
-    if (data && Array.isArray(data.roles)) {
-      const roles = data.roles
-      const isAdmin = roles.includes('ROLE_ADMIN')
-      const isCoordinator = roles.includes('ROLE_COORDINATOR')
-      const isCashier = roles.includes('ROLE_CASHIER')
-      const isVolunteer = roles.includes('ROLE_VOLUNTEER')
-      if (isAdmin || isCoordinator || isCashier || isVolunteer) {
-        navigate(staffHomePath({ isAdmin, isCoordinator, isCashier, isVolunteer }), {
-          replace: true,
-        })
-      }
-    }
+    redirectAfterAuth(data)
+  }
+
+  async function submitDemoLogin() {
+    const data = await login('demo', 'demo123')
+    redirectAfterAuth(data)
   }
 
   async function submitRegister(e) {
     e.preventDefault()
-    await register({
+    const data = await register({
       username: registerForm.username.trim(),
       email: registerForm.email.trim(),
       password: registerForm.password,
@@ -107,6 +125,7 @@ export default function AuthModal() {
       dateOfBirth: registerForm.dateOfBirth || null,
       phoneNumber: registerForm.phoneNumber.trim(),
     })
+    redirectAfterAuth(data)
   }
 
   async function submitForgotRequest(e) {
@@ -685,7 +704,7 @@ export default function AuthModal() {
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => login('demo', 'demo123')}
+                onClick={submitDemoLogin}
                 className="mt-2 text-xs font-bold uppercase tracking-wider text-ice-200 transition-colors hover:text-white disabled:opacity-50"
               >
                 Demo ilə daxil ol →
