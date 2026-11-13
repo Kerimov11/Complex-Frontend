@@ -1475,6 +1475,11 @@ const PATTERNS = [
     ru: (_, m) => `Вход: в любое время в часы работы · ${m} мин катания`,
   },
   {
+    re: /^Buza giriş:\s*(.+?)\s*·\s*Çıxış:\s*(.+?)\s*\((\d+)\s*dəq\)$/,
+    en: (_, entry, exit, m) => `Ice entry: ${entry} · Exit: ${exit} (${m} min)`,
+    ru: (_, entry, exit, m) => `Вход на лёд: ${entry} · Выход: ${exit} (${m} мин)`,
+  },
+  {
     re: /^Giriş edilib:\s*(.+?)\s*·\s*(\d+)\s*dəq$/,
     en: (_, t, m) => `Checked in: ${t} · ${m} min`,
     ru: (_, t, m) => `Вход выполнен: ${t} · ${m} мин`,

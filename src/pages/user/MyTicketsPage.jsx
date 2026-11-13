@@ -255,8 +255,8 @@ export default function MyTicketsPage() {
                         {ticket.sessionDate ? formatDateAZ(ticket.sessionDate) : 'Sərbəst tarix'}
                       </p>
                       <p className="text-xs text-frost/60">
-                        {ticket.checkedInAt
-                          ? `Giriş edilib: ${timeLabel(ticket.checkedInAt)} · ${ticket.durationMinutes || 60} dəq`
+                        {ticket.checkedInAt || ticket.iceEntryTime
+                          ? `Buza giriş: ${ticket.iceEntryTime || timeLabel(ticket.checkedInAt)} · Çıxış: ${ticket.iceExitTime || timeLabel(ticket.checkedOutAt)} (${ticket.durationMinutes || 60} dəq)`
                           : `Giriş: İş saatları içində istənilən vaxt · ${ticket.durationMinutes || 60} dəqiqəlik sürüş`}
                       </p>
                     </div>
