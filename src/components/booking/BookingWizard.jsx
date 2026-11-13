@@ -755,9 +755,17 @@ export default function BookingWizard({ onTicketChange }) {
           setError('Şəhid ailəsi olduğunu təsdiq edən sənədin şəklini yükləyin.')
           return
         }
-        if (people.length === 1 && currentIdentityConfirmed && !participantPhotos[0]?.identityPhotoData) {
-          setError('Şəhid ailəsi endirimi üçün şəxsiyyət vəsiqəsi ilə foto təsdiqini yükləyin.')
-          return
+        for (let i = 0; i < effectiveShaheedCount; i += 1) {
+          const hasIdPhoto =
+            i === 0 && !currentIdentityConfirmed
+              ? Boolean(identityPhotoData)
+              : Boolean(participantPhotos[i]?.identityPhotoData)
+          if (!hasIdPhoto) {
+            setError(
+              `Şəhid ailəsi endirimi üçün şəxsiyyət vəsiqəsi ilə foto təsdiqini yükləyin (İştirakçı #${i + 1}).`
+            )
+            return
+          }
         }
       }
       if (benefits.student) {
@@ -765,21 +773,6 @@ export default function BookingWizard({ onTicketChange }) {
           if (!participantPhotos[i]?.studentCardPhotoData) {
             setError(
               `Tələbə endirimi üçün ${effectiveStudentCount} nəfərin hamısının tələbə kartı ilə fotosunu yükləyin (Tələbə #${i + 1}).`
-            )
-            return
-          }
-        }
-      }
-      if (people.length > 1) {
-        const startIdx = benefits.student ? effectiveStudentCount : 0
-        for (let i = startIdx; i < people.length; i += 1) {
-          const hasIdPhoto =
-            i === 0 && !currentIdentityConfirmed
-              ? Boolean(identityPhotoData)
-              : Boolean(participantPhotos[i]?.identityPhotoData)
-          if (!hasIdPhoto) {
-            setError(
-              `Qrup bileti üçün iştirakçıların şəxsiyyət vəsiqəsi ilə fotosunu yükləyin (İştirakçı #${i + 1}).`
             )
             return
           }
@@ -1541,18 +1534,41 @@ export default function BookingWizard({ onTicketChange }) {
                       setShaheedVerified(Boolean(dataUrl))
                     }}
                   />
-                  {people.length === 1 && user?.identityConfirmed && (
-                    <ParticipantPhotoSlot
-                      label="Şəxsiyyət vəsiqəsi ilə foto təsdiqi (hər sifarişdə tələb olunur)"
-                      value={participantPhotos[0]?.identityPhotoData || ''}
-                      onChange={(dataUrl) =>
-                        setParticipantPhotos((prev) => ({
-                          ...prev,
-                          0: { ...(prev[0] || {}), identityPhotoData: dataUrl },
-                        }))
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {Array.from({ length: effectiveShaheedCount }, (_, idx) => {
+                      const isFirstUnverified = idx === 0 && !user?.identityConfirmed
+                      if (isFirstUnverified) {
+                        return (
+                          <div
+                            key={`shaheed-id-${idx}`}
+                            className="rounded-xl border border-emerald-300/25 bg-emerald-400/10 p-3 text-xs text-emerald-100"
+                          >
+                            <p className="font-bold">
+                              Şəhid ailəsi üzvü #1{people[idx]?.name ? ` — ${people[idx].name}` : ''}
+                            </p>
+                            <p className="mt-1 opacity-85">
+                              {identityPhotoData
+                                ? '✓ Sağdakı əsas şəxsiyyət təsdiqi fotosu istifadə olunacaq.'
+                                : 'Sağ tərəfdəki əsas şəxsiyyət təsdiqi bölməsindən foto yükləyin.'}
+                            </p>
+                          </div>
+                        )
                       }
-                    />
-                  )}
+                      return (
+                        <ParticipantPhotoSlot
+                          key={`shaheed-id-${idx}`}
+                          label={`Şəxsiyyət vəsiqəsi ilə foto #${idx + 1}${people[idx]?.name ? ` — ${people[idx].name}` : ''}`}
+                          value={participantPhotos[idx]?.identityPhotoData || ''}
+                          onChange={(dataUrl) =>
+                            setParticipantPhotos((prev) => ({
+                              ...prev,
+                              [idx]: { ...(prev[idx] || {}), identityPhotoData: dataUrl },
+                            }))
+                          }
+                        />
+                      )
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -1703,65 +1719,6 @@ export default function BookingWizard({ onTicketChange }) {
                     value={push30ScreenshotData}
                     onChange={setPush30ScreenshotData}
                   />
-                </div>
-              )}
-
-              {people.length > 1 &&
-                (!benefits.student || effectiveStudentCount < people.length) && (
-                <div className="mt-4 space-y-3 rounded-xl border border-white/15 bg-white/[0.03] p-4">
-                  <div>
-                    <p className="text-sm font-bold text-white">
-                      {benefits.student
-                        ? `Digər iştirakçıların şəxsiyyət vəsiqəsi ilə foto təsdiqi (${people.length - effectiveStudentCount} nəfər)`
-                        : `Bütün iştirakçıların şəxsiyyət vəsiqəsi ilə foto təsdiqi (${people.length} nəfər)`}
-                    </p>
-                    <p className="mt-0.5 text-xs text-frost/65">
-                      {benefits.student
-                        ? 'Tələbə olmayan iştirakçılar şəxsiyyət vəsiqəsini sifətinin yanına tutaraq foto çəkib göndərməlidir (eyni qaydalar: aydın görüntü, aksesuar yox).'
-                        : 'Hər bir iştirakçı şəxsiyyət vəsiqəsini sifətinin yanına tutaraq foto çəkib göndərməlidir (eyni qaydalar: aydın görüntü, aksesuar yox).'}
-                    </p>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {people.map((person, idx) => {
-                      if (benefits.student && idx < effectiveStudentCount) {
-                        return null
-                      }
-                      const isFirstUnverified = idx === 0 && !user?.identityConfirmed
-                      if (isFirstUnverified) {
-                        return (
-                          <div
-                            key={`id-${idx}`}
-                            className="rounded-xl border border-emerald-300/25 bg-emerald-400/10 p-3 text-xs text-emerald-100"
-                          >
-                            <p className="font-bold">
-                              İştirakçı #1{person.name ? ` — ${person.name}` : ''}
-                            </p>
-                            <p className="mt-1 opacity-85">
-                              {identityPhotoData
-                                ? '✓ Sağdakı əsas şəxsiyyət təsdiqi fotosu istifadə olunacaq.'
-                                : 'Sağ tərəfdəki əsas şəxsiyyət təsdiqi bölməsindən foto yükləyin.'}
-                            </p>
-                          </div>
-                        )
-                      }
-                      return (
-                        <ParticipantPhotoSlot
-                          key={`id-${idx}`}
-                          label={`İştirakçı #${idx + 1}${person.name ? ` — ${person.name}` : ''}`}
-                          value={participantPhotos[idx]?.identityPhotoData || ''}
-                          onChange={(dataUrl) =>
-                            setParticipantPhotos((prev) => ({
-                              ...prev,
-                              [idx]: {
-                                ...(prev[idx] || {}),
-                                identityPhotoData: dataUrl,
-                              },
-                            }))
-                          }
-                        />
-                      )
-                    })}
-                  </div>
                 </div>
               )}
 
