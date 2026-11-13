@@ -1358,17 +1358,28 @@ export default function BookingWizard({ onTicketChange }) {
                         </option>
                         {skatesSorted.map((skate) => {
                           const available = Number(skate.availableQuantity) || 0
+                          const isFinished = available <= 0
+                          const isLow = !isFinished && available <= 10
+
                           return (
                             <option
                               key={skate.id}
                               value={skate.size}
-                              disabled={available <= 0}
-                              className="text-night-950"
+                              disabled={isFinished}
+                              className={
+                                isFinished
+                                  ? 'text-gray-400 bg-night-900'
+                                  : isLow
+                                    ? 'text-red-500 font-bold bg-night-900'
+                                    : 'text-white bg-night-900'
+                              }
                             >
                               {skate.size}
-                              {available <= 0
-                                ? ' — bitib'
-                                : ` — ${available} ədəd`}
+                              {isFinished
+                                ? ' (bitib)'
+                                : isLow
+                                  ? ' (az qalıb)'
+                                  : ''}
                             </option>
                           )
                         })}
