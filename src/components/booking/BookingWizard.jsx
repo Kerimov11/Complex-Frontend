@@ -443,7 +443,12 @@ export default function BookingWizard({ onTicketChange }) {
       }
     })
 
-  const ageValid = people.every((p) => Number(p.age) >= 4)
+  const ageValid =
+    people.length > 0 &&
+    people.every((p) => {
+      const n = Number(p.age)
+      return Number.isFinite(n) && n >= 4 && n <= 100
+    })
   const sizesValid = people.every((p) => String(p.skateSize).trim() !== '')
 
   const discountHint = useMemo(() => {
@@ -1210,7 +1215,7 @@ export default function BookingWizard({ onTicketChange }) {
                     <div className="mt-2 flex items-center gap-3">
                       <button
                         type="button"
-                        onClick={() => setQty((v) => Math.max(1, v - 1))}
+                        onClick={() => setQty((v) => Math.max(1, (Number(v) || 1) - 1))}
                         className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
                       >
                         -
@@ -1218,15 +1223,23 @@ export default function BookingWizard({ onTicketChange }) {
                       <input
                         type="number"
                         min="1"
+                        max="50"
                         value={qty}
-                        onChange={(e) =>
-                          setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
-                        }
+                        onKeyDown={(e) => {
+                          if (['-', '+', 'e', 'E', '.'].includes(e.key)) {
+                            e.preventDefault()
+                          }
+                        }}
+                        onChange={(e) => {
+                          const digitsOnly = e.target.value.replace(/\D/g, '')
+                          const val = parseInt(digitsOnly, 10)
+                          setQty(!digitsOnly || isNaN(val) || val < 1 ? 1 : Math.min(50, val))
+                        }}
                         className="w-16 rounded-lg bg-white/[0.06] py-1 text-center font-display text-2xl font-bold text-white outline-none focus:ring-1 focus:ring-ice-300"
                       />
                       <button
                         type="button"
-                        onClick={() => setQty((v) => v + 1)}
+                        onClick={() => setQty((v) => Math.min(50, (Number(v) || 1) + 1))}
                         className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] font-bold text-white hover:bg-white/10"
                       >
                         +
@@ -1327,7 +1340,16 @@ export default function BookingWizard({ onTicketChange }) {
                         type="number"
                         value={p.age}
                         min="4"
-                        onChange={(e) => setPerson(i, { age: e.target.value })}
+                        max="100"
+                        onKeyDown={(e) => {
+                          if (['-', '+', 'e', 'E', '.'].includes(e.key)) {
+                            e.preventDefault()
+                          }
+                        }}
+                        onChange={(e) => {
+                          const digitsOnly = e.target.value.replace(/\D/g, '')
+                          setPerson(i, { age: digitsOnly })
+                        }}
                         placeholder="4+"
                         className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2.5 text-xs text-white placeholder-frost/30 outline-none focus:border-ice-300/60 sm:px-3 sm:text-sm"
                       />
