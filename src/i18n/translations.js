@@ -867,6 +867,7 @@ export const EXACT_MAP = {
     'The volunteer team is preparing your skates. If the timer expires, stock is automatically returned.',
     'Команда волонтёров готовит ваши коньки. Если таймер истечёт, запас автоматически вернётся на склад.',
   ],
+  'Konki təhvil alındı': ['Skates Received', 'Коньки получены'],
   'Konki təhvil verilib. Bu bilet üçün aktivləşdirmə artıq bağlıdır.': [
     'Skates have been handed over. Activation is now closed for this ticket.',
     'Коньки выданы. Активация для этого билета закрыта.',
