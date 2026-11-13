@@ -12,8 +12,49 @@ const EMPTY_FORM = {
   active: true,
 }
 
+const HOURS_24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const MINUTES_60 = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+
 function clock(value) {
   return value ? String(value).slice(0, 5) : ''
+}
+
+function Time24Select({ value, onChange, label }) {
+  const [hour = '09', minute = '00'] = clock(value).split(':')
+  return (
+    <div className="block">
+      <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
+        {label}
+      </span>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 rounded-xl border border-white/10 bg-night-900/60 px-2.5 py-2 focus-within:border-ice-300/50">
+        <select
+          aria-label={`${label} saat`}
+          value={HOURS_24.includes(hour) ? hour : '09'}
+          onChange={(e) => onChange(`${e.target.value}:${minute}`)}
+          className="w-full bg-transparent text-center text-sm font-semibold text-white outline-none [&>option]:bg-night-900 [&>option]:text-white"
+        >
+          {HOURS_24.map((h) => (
+            <option key={h} value={h}>
+              {h}
+            </option>
+          ))}
+        </select>
+        <span className="font-bold text-frost/45">:</span>
+        <select
+          aria-label={`${label} dəqiqə`}
+          value={MINUTES_60.includes(minute) ? minute : '00'}
+          onChange={(e) => onChange(`${hour}:${e.target.value}`)}
+          className="w-full bg-transparent text-center text-sm font-semibold text-white outline-none [&>option]:bg-night-900 [&>option]:text-white"
+        >
+          {MINUTES_60.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  )
 }
 
 export default function ShiftSlotPlannerPage() {
@@ -171,34 +212,20 @@ export default function ShiftSlotPlannerPage() {
           <p className="mt-1 text-xs text-frost/45">{formatShiftDate(date)}</p>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
-                Başlama
-              </span>
-              <input
-                type="time"
-                value={form.startTime}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, startTime: event.target.value }))
-                }
-                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
-                required
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-frost/45">
-                Bitmə
-              </span>
-              <input
-                type="time"
-                value={form.endTime}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, endTime: event.target.value }))
-                }
-                className="w-full rounded-xl border border-white/10 bg-night-900/60 px-3 py-2.5 text-sm text-white outline-none focus:border-ice-300/50"
-                required
-              />
-            </label>
+            <Time24Select
+              label="Başlama"
+              value={form.startTime}
+              onChange={(startTime) =>
+                setForm((prev) => ({ ...prev, startTime }))
+              }
+            />
+            <Time24Select
+              label="Bitmə"
+              value={form.endTime}
+              onChange={(endTime) =>
+                setForm((prev) => ({ ...prev, endTime }))
+              }
+            />
           </div>
 
           <label className="mt-3 flex items-center gap-2 text-sm text-frost/65">
