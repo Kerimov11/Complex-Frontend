@@ -15,20 +15,32 @@ export default function SkateInventoryPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     setError('')
     try {
       setSkates(await adminApi.getSkates())
     } catch (err) {
-      setError(err?.message || 'Konki stoku yüklənmədi.')
+      if (!silent) setError(err?.message || 'Konki stoku yüklənmədi.')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
     load()
+    const timer = setInterval(() => load(true), 10000)
+    const onFocus = () => load(true)
+    const onVisibility = () => {
+      if (!document.hidden) load(true)
+    }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [load])
 
   async function createSkate(event) {
@@ -108,13 +120,22 @@ export default function SkateInventoryPage() {
         title="İnventar idarəetməsi"
         description="Razmerlər üzrə canlı stok, yeni partiya və zədələnmiş konkilərin inventardan çıxarılması."
         actions={
-          <button
-            type="button"
-            onClick={() => setShowForm((value) => !value)}
-            className="btn-primary !px-5 !py-2.5 text-sm"
-          >
-            {showForm ? 'Formanı bağla' : '+ Yeni ölçü'}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => load()}
+              className="btn-ghost !px-4 !py-2.5 text-sm"
+            >
+              Yenilə
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowForm((value) => !value)}
+              className="btn-primary !px-5 !py-2.5 text-sm"
+            >
+              {showForm ? 'Formanı bağla' : '+ Yeni ölçü'}
+            </button>
+          </div>
         }
       />
 
