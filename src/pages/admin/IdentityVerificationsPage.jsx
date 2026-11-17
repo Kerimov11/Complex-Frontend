@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminNotice from '../../components/admin/AdminNotice'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import { formatDate, formatDateTime } from '../../components/admin/formatters'
 import { identityReviewApi } from '../../services/api/identityReviewApi'
+import { formatDateAZ } from '../../utils/datetime'
 
 const FILTERS = [
   { key: 'PENDING_REVIEW', label: 'Təsdiq gözləyənlər' },
@@ -10,6 +11,42 @@ const FILTERS = [
   { key: 'REJECTED', label: 'Rədd edilənlər' },
   { key: 'ALL', label: 'Hamısı' },
 ]
+
+function getTodayString() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getYesterdayString() {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function toLocalDateISO(value) {
+  if (!value) return ''
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return ''
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getItemDateISO(item) {
+  const primary =
+    item.reviewedAt ||
+    item.identityReviewedAt ||
+    item.ticket?.purchaseDate ||
+    item.identityConfirmedAt
+  return toLocalDateISO(primary)
+}
 
 const STATUS_BADGE = {
   PENDING_REVIEW: {
@@ -27,7 +64,10 @@ const STATUS_BADGE = {
 }
 
 export default function IdentityVerificationsPage() {
+  const todayStr = useMemo(() => getTodayString(), [])
+  const yesterdayStr = useMemo(() => getYesterdayString(), [])
   const [filter, setFilter] = useState('PENDING_REVIEW')
+  const [selectedDate, setSelectedDate] = useState(() => getTodayString())
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState(null)
@@ -35,6 +75,22 @@ export default function IdentityVerificationsPage() {
   const [notice, setNotice] = useState('')
   const [rejectReasons, setRejectReasons] = useState({})
   const [zoomPhoto, setZoomPhoto] = useState('')
+
+  const showDateFilter = filter !== 'PENDING_REVIEW'
+
+  const filteredItems = useMemo(() => {
+    if (!showDateFilter || !selectedDate || selectedDate === 'ALL_DATES') {
+      return items
+    }
+    return items.filter((item) => getItemDateISO(item) === selectedDate)
+  }, [items, showDateFilter, selectedDate])
+
+  const selectedDateLabel = useMemo(() => {
+    if (!selectedDate || selectedDate === 'ALL_DATES') return 'Bütün tarixlər'
+    if (selectedDate === todayStr) return `Bu gün (${formatDateAZ(todayStr)})`
+    if (selectedDate === yesterdayStr) return `Dünən (${formatDateAZ(yesterdayStr)})`
+    return formatDateAZ(selectedDate)
+  }, [selectedDate, todayStr, yesterdayStr])
 
   const load = useCallback(
     async (statusKey = filter) => {
@@ -127,14 +183,90 @@ export default function IdentityVerificationsPage() {
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => load(filter)}
-          className="btn-ghost !px-4 !py-2 text-xs"
-        >
-          Yenilə
-        </button>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {showDateFilter && (
+            <>
+              <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-night-900/80 p-1">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDate(todayStr)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                    selectedDate === todayStr
+                      ? 'bg-ice-400 text-night-950 shadow-sm'
+                      : 'text-frost/65 hover:text-white'
+                  }`}
+                >
+                  Bu gün
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDate(yesterdayStr)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                    selectedDate === yesterdayStr
+                      ? 'bg-ice-400 text-night-950 shadow-sm'
+                      : 'text-frost/65 hover:text-white'
+                  }`}
+                >
+                  Dünən
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDate('ALL_DATES')}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                    selectedDate === 'ALL_DATES'
+                      ? 'bg-ice-400 text-night-950 shadow-sm'
+                      : 'text-frost/65 hover:text-white'
+                  }`}
+                >
+                  Bütün tarixlər
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-night-900/80 px-2.5 py-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-frost/45">
+                  Tarix:
+                </span>
+                <input
+                  type="date"
+                  value={selectedDate === 'ALL_DATES' ? '' : selectedDate}
+                  max={todayStr}
+                  onChange={(e) => {
+                    if (e.target.value) setSelectedDate(e.target.value)
+                  }}
+                  className="bg-transparent text-xs font-bold text-white outline-none [color-scheme:dark]"
+                />
+              </div>
+            </>
+          )}
+
+          <button
+            type="button"
+            onClick={() => load(filter)}
+            className="btn-ghost !px-4 !py-2 text-xs"
+          >
+            Yenilə
+          </button>
+        </div>
       </div>
+
+      {showDateFilter && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-ice-300/25 bg-ice-400/10 px-4 py-2.5 text-xs text-ice-100">
+          <div>
+            <span className="font-bold text-ice-200">📅 Tarix filtri:</span>{' '}
+            <b>{selectedDateLabel}</b> üzrə nəticələr göstərilir ({filteredItems.length} müraciət).
+          </div>
+          {selectedDate !== 'ALL_DATES' && (
+            <button
+              type="button"
+              onClick={() => setSelectedDate('ALL_DATES')}
+              className="font-bold text-white underline hover:text-ice-200"
+            >
+              Bütün tarixləri göstər ({items.length})
+            </button>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="mb-4">
@@ -151,13 +283,26 @@ export default function IdentityVerificationsPage() {
         <div className="glass rounded-xl p-8 text-center text-sm text-frost/60">
           Yüklənir…
         </div>
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <div className="glass-strong rounded-xl p-10 text-center text-sm text-frost/60">
-          Bu kateqoriyada müraciət yoxdur.
+          <p>
+            {showDateFilter && selectedDate !== 'ALL_DATES'
+              ? `Seçilmiş tarix (${selectedDateLabel}) üzrə bu kateqoriyada müraciət tapılmadı.`
+              : 'Bu kateqoriyada müraciət yoxdur.'}
+          </p>
+          {showDateFilter && selectedDate !== 'ALL_DATES' && items.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSelectedDate('ALL_DATES')}
+              className="btn-ghost mt-4 !px-4 !py-2 text-xs"
+            >
+              Bütün tarixlərdəki müraciətlərə bax ({items.length})
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid gap-5 lg:grid-cols-2">
-          {items.map((item) => {
+          {filteredItems.map((item) => {
             const isTicket = item.itemType === 'TICKET'
             const itemKey = isTicket ? `ticket-${item.ticketCode}` : `user-${item.userId}`
             const statusKey = item.reviewStatus || item.identityReviewStatus || 'PENDING_REVIEW'
