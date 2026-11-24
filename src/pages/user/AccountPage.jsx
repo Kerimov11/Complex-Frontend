@@ -1311,7 +1311,7 @@ export default function AccountPage() {
                               </div>
                               <div className="mt-0.5 text-[11px] text-frost/60">
                                 {profile?.identityConfirmed
-                                  ? `Təsdiqlənib (••••${profile.identityDocumentLast4 || ''})`
+                                  ? `Təsdiqlənib (••••${profile.identityDocumentLast4 || ''}${user?.finCode ? ` · FİN: ${user.finCode}` : ''})`
                                   : 'Onlayn bilet alışı üçün vəsiqə təsdiqi'}
                               </div>
                             </div>

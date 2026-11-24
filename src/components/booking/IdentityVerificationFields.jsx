@@ -1,7 +1,19 @@
 import { useState } from 'react'
 
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024 // 2 MB
+
+function estimateBase64Bytes(dataUrl) {
+  const idx = dataUrl.indexOf(';base64,')
+  const payload = idx >= 0 ? dataUrl.slice(idx + 8) : dataUrl
+  return Math.floor((payload.length * 3) / 4)
+}
+
 export function compressImageFile(file) {
   return new Promise((resolve, reject) => {
+    if (file.size > 15 * 1024 * 1024) {
+      reject(new Error('Yüklənən fayl çox böyükdür (maksimum 2 MB).'))
+      return
+    }
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('Şəkil oxuna bilmədi.'))
     reader.onload = () => {
@@ -24,7 +36,15 @@ export function compressImageFile(file) {
         canvas.height = height
         const ctx = canvas.getContext('2d')
         ctx.drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL('image/jpeg', 0.82))
+        let dataUrl = canvas.toDataURL('image/jpeg', 0.82)
+        if (estimateBase64Bytes(dataUrl) > MAX_IMAGE_BYTES) {
+          dataUrl = canvas.toDataURL('image/jpeg', 0.6)
+        }
+        if (estimateBase64Bytes(dataUrl) > MAX_IMAGE_BYTES) {
+          reject(new Error('Yüklənən şəkil 2 MB limitini aşır (maksimum 2 MB).'))
+          return
+        }
+        resolve(dataUrl)
       }
       img.src = String(reader.result || '')
     }
