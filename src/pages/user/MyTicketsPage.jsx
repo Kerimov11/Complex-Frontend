@@ -146,7 +146,9 @@ export default function MyTicketsPage() {
     return paidTickets.filter(
       (ticket) =>
         ticket.status === 'ACTIVE' ||
-        (ticket.checkedInAt && !ticket.skateReturned)
+        (ticket.checkedInAt &&
+          (ticket.skateStockDeducted || ticket.skateHandedOut) &&
+          !ticket.skateReturned)
     )
   }, [tickets, filter])
 
@@ -445,7 +447,9 @@ export default function MyTicketsPage() {
                             : 'Konki uğurla təhvil verildi və anbar stokuna əlavə olundu.'}
                         </p>
                       </div>
-                    ) : ticket.checkedInAt && isSessionDurationFinished(ticket, now) ? (
+                    ) : ticket.checkedInAt &&
+                      (ticket.skateStockDeducted || ticket.skateHandedOut) &&
+                      isSessionDurationFinished(ticket, now) ? (
                       <div className="space-y-2">
                         {ticketErrors[ticket.ticketCode] && (
                           <p className="rounded-lg border border-red-400/35 bg-red-500/12 px-3 py-2 text-xs font-semibold text-red-100">
